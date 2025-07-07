@@ -135,18 +135,34 @@ class _UserPageState extends State<UserPage> {
                         //   );
                         // },
 
-                        onTap: () {
+                       onTap: () {
+  final TextEditingController roleController = TextEditingController();
+  final Map<String, bool> permissions = {
+    "Dashboard": false,
+    "Patients": false,
+    "Pos": false,
+    "Inventory": false,
+    "User Management": false,
+    "Appointment": false,
+    "Reputation": false,
+    "Stock Panel": false,
+    "Web Content": false,
+    "Email Broadcast": false,
+    "Promo Codes": false,
+    "Sales Report": false,
+    "Warehouse": false,
+    "control": false,
+    "Roles": false,
+    "transactions": false,
+  };
+
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    shape: RoundedRectangleBorder(
+    shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
     builder: (context) {
-      final TextEditingController nameController = TextEditingController();
-      final TextEditingController genderController = TextEditingController();
-      final TextEditingController emailController = TextEditingController();
-
       return Padding(
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -154,68 +170,82 @@ class _UserPageState extends State<UserPage> {
           right: 16,
           top: 24,
         ),
-        child: Wrap(
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 10,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade400,
-                  borderRadius: BorderRadius.circular(8),
-                ),
+        child: StatefulBuilder(
+          builder: (context, setState) {
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[400],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  Text(
+                    "Add New Role",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 16),
+                  TextField(
+                    controller: roleController,
+                    decoration: InputDecoration(
+                      labelText: "User roles",
+                      hintText: "Enter user role",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    "Permissions",
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                  ),
+                  SizedBox(height: 8),
+                  Column(
+                    children: permissions.keys.map((key) {
+                      return SwitchListTile(
+                        title: Text(key),
+                        value: permissions[key]!,
+                        onChanged: (val) {
+                          setState(() {
+                            permissions[key] = val;
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                  SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // 👉 You can now save roleController.text and permissions map to your backend
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: Text("Add Role"),
+                    ),
+                  ),
+                  SizedBox(height: 12),
+                ],
               ),
-            ),
-            SizedBox(height: 20),
-            Text(
-              "Add New Role",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 16),
-            Padding(
-  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-  child: Column(children: [
-
- 
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(
-                labelText: "Category",
-                hintText: "Enter Category",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 12),
-           
-            SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                 
-
-                  // TODO: Save or use the inputs here
-
-                  Navigator.pop(context); // close the sheet
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(vertical: 14),
-                ),
-                child: Text("Add Role"),
-              ),
-            ),
-            SizedBox(height: 12),
-             ],))
-          ],
+            );
+          },
         ),
       );
     },
   );
 },
-
-                        
+   
                         child: Column(
                           children: [
                             Icon(Icons.person_4_outlined, color: Colors.blue),
@@ -302,7 +332,29 @@ class _UserPageState extends State<UserPage> {
                         //       );
                         //     },
                        
-                       onTap: () {
+                    
+
+                    onTap: () {
+  final TextEditingController usernameController =
+      TextEditingController(text: "Admin#987");
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController locationController = TextEditingController();
+
+  final List<String> roles = [
+    "super admin",
+    "sales person",
+    "Setting",
+    "POS",
+    "manager",
+    "Appoinment mang",
+    "Patients",
+    "Pos",
+    "Inventory",
+  ];
+
+  String? selectedRole;
+
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -310,82 +362,130 @@ class _UserPageState extends State<UserPage> {
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
     builder: (context) {
-      final TextEditingController nameController = TextEditingController();
-      final TextEditingController genderController = TextEditingController();
-      final TextEditingController emailController = TextEditingController();
-
       return Padding(
         padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
           left: 16,
           right: 16,
-          top: 24,
+          top: 20,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
         ),
-        child: Wrap(
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 10,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade400,
-                  borderRadius: BorderRadius.circular(8),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Top bar drag handle
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[400],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
               ),
-            ),
-            SizedBox(height: 20),
-            Text(
-              "Add New User",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 16),
-            Padding(
-  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-  child: Column(
-    children: [
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(
-                labelText: "Name",
-                hintText: "Enter Username",
-                border: OutlineInputBorder(),
-              ),
-            ),
-           
-            
-            SizedBox(height: 12),
-            TextField(
-              controller: emailController,
-              decoration: InputDecoration(
-                labelText: "Email",
-                hintText: "Enter email address",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  String name = nameController.text;
-                  String gender = genderController.text;
-                  String email = emailController.text;
+              SizedBox(height: 16),
 
-                 
+              Text(
+                "Add New User",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 16),
 
-                  Navigator.pop(context); // close the sheet
+              // Username
+              TextField(
+                controller: usernameController,
+                readOnly: true,
+                decoration: InputDecoration(
+                  hintText: "Username",
+                  filled: true,
+                  fillColor: Colors.grey.shade100,
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 12),
+
+              // Role Dropdown
+              DropdownButtonFormField<String>(
+                value: selectedRole,
+                decoration: InputDecoration(
+                  hintText: "Select Role",
+                  border: OutlineInputBorder(),
+                ),
+                items: roles
+                    .map((role) => DropdownMenuItem<String>(
+                          value: role,
+                          child: Text(role),
+                        ))
+                    .toList(),
+                onChanged: (value) {
+                  selectedRole = value;
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(vertical: 14),
-                ),
-                child: Text("Add User"),
               ),
-            ),
-            SizedBox(height: 12),
-          ],
-  ))]
+              SizedBox(height: 12),
+
+              // Email
+              TextField(
+                controller: emailController,
+                decoration: InputDecoration(
+                  hintText: "Email",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 12),
+
+              // Password
+              TextField(
+                controller: passwordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  hintText: "Password",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 12),
+
+              // Location (readonly or dropdown can be implemented)
+              TextField(
+                controller: locationController,
+                decoration: InputDecoration(
+                  hintText: "Select Locations",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 24),
+
+              // Buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text("Cancel"),
+                  ),
+                  SizedBox(width: 10),
+                  ElevatedButton(
+                    onPressed: () {
+                      // You can save all data here
+                      print("Username: ${usernameController.text}");
+                      print("Role: $selectedRole");
+                      print("Email: ${emailController.text}");
+                      print("Password: ${passwordController.text}");
+                      print("Location: ${locationController.text}");
+
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                    ),
+                    child: Text("Add User"),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       );
     },

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:medicineapp/dashboard.dart';
 import 'package:medicineapp/main.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -11,7 +12,7 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-bool _obscure = true;
+  bool _obscure = true;
   @override
   void dispose() {
     _emailController.dispose();
@@ -25,22 +26,28 @@ bool _obscure = true;
       backgroundColor: Colors.white,
       appBar: AppBar(
         leading: BackButton(
-          onPressed: () {  Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute( builder: (context) => MyHomePage(), )
-                );
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => MyHomePage()),
+            );
           },
         ),
       ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
+          child: Form( // ✅ Wrap everything in Form
+      key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-                Container(
-              child: Image.asset('assets/images/medicineicon.png',height: 100,),
-            ),
+              Container(
+                child: Image.asset(
+                  'assets/images/medicineicon.png',
+                  height: 100,
+                ),
+              ),
               const SizedBox(height: 80),
               // Welcome back text
               const Text(
@@ -80,30 +87,30 @@ bool _obscure = true;
               const SizedBox(height: 20),
 
               TextFormField(
-  controller: _passwordController,
-  obscureText: _obscure,
-  decoration: InputDecoration(
-    labelText: 'Enter your password',
-    border: OutlineInputBorder(),
-    prefixIcon: Icon(Icons.lock),
-    suffixIcon: IconButton(
-      icon: Icon(
-        _obscure ? Icons.visibility_off : Icons.visibility,
-      ),
-      onPressed: () {
-        setState(() {
-          _obscure = !_obscure; // Toggle visibility
-        });
-      },
-    ),
-  ),
-  validator: (value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter your password';
-    }
-    return null;
-  },
-),
+                controller: _passwordController,
+                obscureText: _obscure,
+                decoration: InputDecoration(
+                  labelText: 'Enter your password',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.lock),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscure ? Icons.visibility_off : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscure = !_obscure; // Toggle visibility
+                      });
+                    },
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your password';
+                  }
+                  return null;
+                },
+              ),
               // Forgot password
               // Align(
               //   alignment: Alignment.centerRight,
@@ -120,15 +127,48 @@ bool _obscure = true;
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    // if (_formKey.currentState!.validate()) {
-                    //   // Add login logic
-                    // }
-                  Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute( builder: (context) => DashboardPage(), )
-                );
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
+                      final email = _emailController.text.trim();
+                      final password = _passwordController.text.trim();
+                      print(email);
+                      print(password);
+
+                      try {
+                        final response = await Supabase.instance.client.auth
+                            .signInWithPassword(
+                              email: email,
+                              password: password,
+                            );
+
+                        if (response.user != null) {
+                          // ✅ Successfully signed in
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DashboardPage(),
+                            ),
+                          );
+                        } else {
+                          // ❌ Sign-in failed (user is null)
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                "Sign-in failed. Please check your credentials.",
+                              ),
+                            ),
+                          );
+                        }
+                      } catch (error) {
+                        // ❌ Error during sign-in
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Error: User Not found ${error.toString()}")),
+                        );
+                      }
+                    }
+                   
                   },
+
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
                     padding: const EdgeInsets.symmetric(vertical: 16),
@@ -159,7 +199,7 @@ bool _obscure = true;
               // ),
             ],
           ),
-        ),
+        )),
       ),
     );
   }

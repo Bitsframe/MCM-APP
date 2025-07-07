@@ -48,16 +48,21 @@ class _PatientsPageState extends State<PatientsPage> {
                   children: [
                     const Text(
                       "Add New Patient",
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     IconButton(
                       icon: const Icon(Icons.close),
                       onPressed: () => Navigator.pop(context),
-                    )
+                    ),
                   ],
                 ),
                 const SizedBox(height: 4),
-                const Text("Enter the patient's information below. Click save when you're done."),
+                const Text(
+                  "Enter the patient's information below. Click save when you're done.",
+                ),
                 const SizedBox(height: 16),
 
                 /// LOCATION
@@ -65,7 +70,10 @@ class _PatientsPageState extends State<PatientsPage> {
                   children: const [
                     Icon(Icons.location_on_outlined, size: 20),
                     SizedBox(width: 4),
-                    Text("Location", style: TextStyle(fontWeight: FontWeight.w600)),
+                    Text(
+                      "Location",
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
                   ],
                 ),
                 const Padding(
@@ -81,11 +89,19 @@ class _PatientsPageState extends State<PatientsPage> {
                 Row(
                   children: [
                     Expanded(
-                      child: _buildInputField(controller: firstNameController, label: "First Name", hint: "Enter firstname"),
+                      child: _buildInputField(
+                        controller: firstNameController,
+                        label: "First Name",
+                        hint: "Enter firstname",
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: _buildInputField(controller: lastNameController, label: "Last Name", hint: "Enter lastname"),
+                      child: _buildInputField(
+                        controller: lastNameController,
+                        label: "Last Name",
+                        hint: "Enter lastname",
+                      ),
                     ),
                   ],
                 ),
@@ -95,11 +111,19 @@ class _PatientsPageState extends State<PatientsPage> {
                 Row(
                   children: [
                     Expanded(
-                      child: _buildInputField(controller: phoneController, label: "Phone", hint: "Enter phone"),
+                      child: _buildInputField(
+                        controller: phoneController,
+                        label: "Phone",
+                        hint: "Enter phone",
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: _buildInputField(controller: emailController, label: "Email", hint: "Enter Email"),
+                      child: _buildInputField(
+                        controller: emailController,
+                        label: "Email",
+                        hint: "Enter Email",
+                      ),
                     ),
                   ],
                 ),
@@ -117,28 +141,58 @@ class _PatientsPageState extends State<PatientsPage> {
                   ),
                   value: selectedTreatment,
                   items: ['Checkup', 'X-ray', 'Therapy', 'Consultation']
-                      .map((type) => DropdownMenuItem(value: type, child: Text(type)))
+                      .map(
+                        (type) =>
+                            DropdownMenuItem(value: type, child: Text(type)),
+                      )
                       .toList(),
                   onChanged: (value) => selectedTreatment = value,
                 ),
                 const SizedBox(height: 12),
 
                 /// Gender & Location
-                LayoutBuilder(builder: (context, constraints) {
-                  return constraints.maxWidth < 360
-                      ? Column(
-                          children: [_buildRadioGroup("Gender", ["Male", "Female", "Other"], selectedGender, (val) => selectedGender = val),
-                            const SizedBox(height: 10),
-                            _buildRadioGroup("Location", ["On site", "Off site"], selectedVisitType, (val) => selectedVisitType = val),
-                          ],
-                        )
-                      : Row(
-                          children: [
-                            Expanded(child: _buildRadioGroup("Gender", ["Male", "Female", "Other"], selectedGender, (val) => selectedGender = val)),
-                            Expanded(child: _buildRadioGroup("Location", ["On site", "Off site"], selectedVisitType, (val) => selectedVisitType = val)),
-                          ],
-                        );
-                }),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    return constraints.maxWidth < 360
+                        ? Column(
+                            children: [
+                              _buildRadioGroup(
+                                "Gender",
+                                ["Male", "Female", "Other"],
+                                selectedGender,
+                                (val) => selectedGender = val,
+                              ),
+                              const SizedBox(height: 10),
+                              _buildRadioGroup(
+                                "Location",
+                                ["On site", "Off site"],
+                                selectedVisitType,
+                                (val) => selectedVisitType = val,
+                              ),
+                            ],
+                          )
+                        : Row(
+                            children: [
+                              Expanded(
+                                child: _buildRadioGroup(
+                                  "Gender",
+                                  ["Male", "Female", "Other"],
+                                  selectedGender,
+                                  (val) => selectedGender = val,
+                                ),
+                              ),
+                              Expanded(
+                                child: _buildRadioGroup(
+                                  "Location",
+                                  ["On site", "Off site"],
+                                  selectedVisitType,
+                                  (val) => selectedVisitType = val,
+                                ),
+                              ),
+                            ],
+                          );
+                  },
+                ),
 
                 const SizedBox(height: 12),
 
@@ -156,7 +210,10 @@ class _PatientsPageState extends State<PatientsPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("Cancel"),
+                    ),
                     const SizedBox(width: 10),
                     ElevatedButton(
                       onPressed: () => Navigator.pop(context),
@@ -201,7 +258,12 @@ class _PatientsPageState extends State<PatientsPage> {
     );
   }
 
-  static Widget _buildRadioGroup(String title, List<String> options, String? selected, Function(String?) onChanged) {
+  static Widget _buildRadioGroup(
+    String title,
+    List<String> options,
+    String? selected,
+    Function(String?) onChanged,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -246,7 +308,9 @@ class _PatientsPageState extends State<PatientsPage> {
                     children: [
                       Text(
                         selectedLocation,
-                        style: const TextStyle(decoration: TextDecoration.underline),
+                        style: const TextStyle(
+                          decoration: TextDecoration.underline,
+                        ),
                       ),
                       const SizedBox(width: 10),
                       GestureDetector(
@@ -269,8 +333,16 @@ class _PatientsPageState extends State<PatientsPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Icon(Icons.arrow_back, size: 28),
-                  const Text("Patients", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  IconButton(
+                    icon: Icon(Icons.arrow_back, size: 28),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                  const Text(
+                    "Patients",
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
                   Row(
                     children: [
                       GestureDetector(
@@ -279,7 +351,10 @@ class _PatientsPageState extends State<PatientsPage> {
                           children: const [
                             Icon(Icons.add_circle_outline, color: Colors.blue),
                             SizedBox(width: 4),
-                            Text("Add New", style: TextStyle(color: Colors.blue)),
+                            Text(
+                              "Add New",
+                              style: TextStyle(color: Colors.blue),
+                            ),
                           ],
                         ),
                       ),
@@ -316,24 +391,49 @@ class _PatientsPageState extends State<PatientsPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text("P6345", style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),
+                              const Text(
+                                "P6345",
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.blue.shade100,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: const Text("on-site", style: TextStyle(color: Colors.blue, fontWeight: FontWeight.w600, fontSize: 12)),
+                                child: const Text(
+                                  "on-site",
+                                  style: TextStyle(
+                                    color: Colors.blue,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
                           const SizedBox(height: 10),
-                          const Text("Mr. Jack Sparrow", style: TextStyle(fontWeight: FontWeight.w500)),
-                          const Text("Male", style: TextStyle(color: Colors.blue)),
+                          const Text(
+                            "Mr. Jack Sparrow",
+                            style: TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                          const Text(
+                            "Male",
+                            style: TextStyle(color: Colors.blue),
+                          ),
                           const Spacer(),
                           const Align(
                             alignment: Alignment.bottomRight,
-                            child: Icon(Icons.arrow_forward, color: Colors.blue),
+                            child: Icon(
+                              Icons.arrow_forward,
+                              color: Colors.blue,
+                            ),
                           ),
                         ],
                       ),

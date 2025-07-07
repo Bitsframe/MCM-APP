@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:medicineapp/loginpage.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: 'https://vsvueqtgulraaczqnnvh.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzdnVlcXRndWxyYWFjenFubnZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDAwNDQ5OTMsImV4cCI6MjAxNTYyMDk5M30.umGVRqypGULFtZUXemNtANCGns-a2o4E8zSbnrZbldg',
+  );
+
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
