@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
+import 'package:medicineapp/appointments.dart';
 import 'package:medicineapp/dashboard.dart';
 import 'package:medicineapp/patientpage.dart';
 import 'package:medicineapp/userspage.dart';
