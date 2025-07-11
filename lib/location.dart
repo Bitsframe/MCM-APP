@@ -1,9 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-Future<String?> showLocationBottomSheet(BuildContext context) {
+Future<String?> showLocationBottomSheet(BuildContext context) async {
+  final supabase = Supabase.instance.client;
+
+  final response = await supabase.from('Locations').select('title');
+
+  if (response == null || response.isEmpty) {
+    return null;
+  }
+
+  List<String> locationTitles = response
+      .map<String>((item) => item['title'] as String)
+      .toList();
+
+  // Step 2: Show bottom sheet
   return showModalBottomSheet<String>(
     context: context,
-    isScrollControlled: true, // Allow scrolling on small screens
+    isScrollControlled: true,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -18,7 +32,7 @@ Future<String?> showLocationBottomSheet(BuildContext context) {
           ),
           child: SingleChildScrollView(
             child: Column(
-              mainAxisSize: MainAxisSize.min, // Wrap content height
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
@@ -27,17 +41,16 @@ Future<String?> showLocationBottomSheet(BuildContext context) {
                 ),
                 const Divider(),
 
-                ListTile(
-                  title: const Text("Clinica San Miguel Fondren"),
-                  onTap: () => Navigator.pop(context, "Clinica San Miguel Fondren"),
-                ),
-                ListTile(
-                  title: const Text("Houston Central"),
-                  onTap: () => Navigator.pop(context, "Houston Central"),
-                ),
-                ListTile(
-                  title: const Text("Pasadena"),
-                  onTap: () => Navigator.pop(context, "Pasadena"),
+                // Step 3: Dynamically build list of locations
+                ...locationTitles.map(
+                  (title) => ListTile(
+                    title: Text(title),
+                    onTap: () async {
+                      await AppData.setLocation(title);
+                      AppData.selectedLocation = title;
+                      Navigator.pop(context, title);
+                    },
+                  ),
                 ),
               ],
             ),
@@ -46,4 +59,21 @@ Future<String?> showLocationBottomSheet(BuildContext context) {
       );
     },
   );
+}
+
+// app_data.dart
+class AppData {
+  static int? selectedLocationId;
+  static String? selectedLocation;
+  static Future<void> setLocation(String title) async {
+    final supabase = Supabase.instance.client;
+    final response = await supabase
+        .from('Locations')
+        .select('id')
+        .eq('title', title)
+        .maybeSingle();
+
+    selectedLocationId = response?['id'] as int?;
+    print(selectedLocationId);
+  }
 }

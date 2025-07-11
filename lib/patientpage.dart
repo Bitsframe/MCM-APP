@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:medicineapp/location.dart';
 import 'package:medicineapp/navigationbar.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class PatientsPage extends StatefulWidget {
   const PatientsPage({super.key});
@@ -11,7 +12,23 @@ class PatientsPage extends StatefulWidget {
 
 class _PatientsPageState extends State<PatientsPage> {
   int _selectedIndex = 1;
-  String selectedLocation = "Pasadena";
+
+  List<Map<String, dynamic>> patients = [];
+  List<String> services = [];
+  String? selectedTreatment;
+  Future<void> fetchServices() async {
+    final supabase = Supabase.instance.client;
+
+    final response = await supabase.from('services').select('title');
+
+    if (response != null) {
+      setState(() {
+        services = response
+            .map<String>((item) => item['title'] as String)
+            .toList();
+      });
+    }
+  }
 
   void _showAddPatientBottomSheet(BuildContext context) {
     final firstNameController = TextEditingController();
@@ -20,8 +37,8 @@ class _PatientsPageState extends State<PatientsPage> {
     final emailController = TextEditingController();
     final noteController = TextEditingController();
 
-    String? selectedGender = "Male";
-    String? selectedVisitType = "On site";
+    String? selectedGender;
+    String? selectedVisitType;
     String? selectedTreatment;
 
     showModalBottomSheet(
@@ -76,11 +93,11 @@ class _PatientsPageState extends State<PatientsPage> {
                     ),
                   ],
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 4),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
                   child: Text(
-                    "Clinica San Miguel Fondren",
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    AppData.selectedLocation ?? 'No location selected',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -140,7 +157,7 @@ class _PatientsPageState extends State<PatientsPage> {
                     filled: true,
                   ),
                   value: selectedTreatment,
-                  items: ['Checkup', 'X-ray', 'Therapy', 'Consultation']
+                  items: services
                       .map(
                         (type) =>
                             DropdownMenuItem(value: type, child: Text(type)),
@@ -160,14 +177,22 @@ class _PatientsPageState extends State<PatientsPage> {
                                 "Gender",
                                 ["Male", "Female", "Other"],
                                 selectedGender,
-                                (val) => selectedGender = val,
+                                (val) {
+                                  setState(() {
+                                    selectedGender = val;
+                                  });
+                                },
                               ),
                               const SizedBox(height: 10),
                               _buildRadioGroup(
                                 "Location",
                                 ["On site", "Off site"],
                                 selectedVisitType,
-                                (val) => selectedVisitType = val,
+                                (val) {
+                                  setState(() {
+                                    selectedVisitType = val;
+                                  });
+                                },
                               ),
                             ],
                           )
@@ -178,7 +203,11 @@ class _PatientsPageState extends State<PatientsPage> {
                                   "Gender",
                                   ["Male", "Female", "Other"],
                                   selectedGender,
-                                  (val) => selectedGender = val,
+                                  (val) {
+                                    setState(() {
+                                      selectedGender = val;
+                                    });
+                                  },
                                 ),
                               ),
                               Expanded(
@@ -186,7 +215,11 @@ class _PatientsPageState extends State<PatientsPage> {
                                   "Location",
                                   ["On site", "Off site"],
                                   selectedVisitType,
-                                  (val) => selectedVisitType = val,
+                                  (val) {
+                                    setState(() {
+                                      selectedVisitType = val;
+                                    });
+                                  },
                                 ),
                               ),
                             ],
@@ -216,7 +249,68 @@ class _PatientsPageState extends State<PatientsPage> {
                     ),
                     const SizedBox(width: 10),
                     ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () async {
+                        final supabase = Supabase.instance.client;
+
+                        // Basic validation
+                        if (firstNameController.text.isEmpty ||
+                            lastNameController.text.isEmpty ||
+                            phoneController.text.isEmpty ||
+                            emailController.text.isEmpty ||
+                            selectedTreatment == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("Please fill all required fields."),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                          return;
+                        }
+
+                        try {
+                          final insertData = {
+                            'firstname': firstNameController.text.trim(),
+                            'lastname': lastNameController.text.trim(),
+                            'phone': phoneController.text.trim(),
+                            'email': emailController.text.trim(),
+                            'treatmenttype': selectedTreatment,
+                            'gender': selectedGender,
+                            'locationid':
+                                15, // Replace with dynamic location if needed
+                            'onsite': selectedVisitType == 'On site',
+                            'text_opt': true,
+                            'email_opt': true,
+                            'note': noteController.text.trim().isNotEmpty
+                                ? noteController.text.trim()
+                                : null,
+                            'lastvisit': DateTime.now()
+                                .toIso8601String(), // Or allow user to pick
+                          };
+                          print(insertData);
+
+                          final response = await supabase
+                              .from('allpatients')
+                              .insert(insertData);
+                          print(response);
+                          Navigator.pop(context);
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("Patient added successfully."),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        } catch (e) {
+                          print("Insert error: $e");
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("Failed to add patient."),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      },
+
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue.shade300,
                         foregroundColor: Colors.white,
@@ -288,6 +382,38 @@ class _PatientsPageState extends State<PatientsPage> {
     );
   }
 
+  Future<void> fetchPatients() async {
+    final supabase = Supabase.instance.client;
+
+    try {
+      final response = await supabase
+          .from('allpatients') // change this to your actual table name
+          .select('id, firstname, lastname, gender, treatmenttype, onsite')
+          .eq('locationid', AppData.selectedLocationId!);
+
+      if (response != null) {
+        setState(() {
+          patients = List<Map<String, dynamic>>.from(response);
+          patients = response;
+          if (patients.isEmpty) {
+            patients = [
+              {'message': 'No patients found for ${AppData.selectedLocation}.'},
+            ];
+          }
+        });
+      }
+    } catch (e) {
+      print('Error fetching patients: $e');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchPatients();
+    fetchServices();
+  }
+
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
@@ -307,7 +433,7 @@ class _PatientsPageState extends State<PatientsPage> {
                   Row(
                     children: [
                       Text(
-                        selectedLocation,
+                        AppData.selectedLocation ?? 'No location selected',
                         style: const TextStyle(
                           decoration: TextDecoration.underline,
                         ),
@@ -317,8 +443,9 @@ class _PatientsPageState extends State<PatientsPage> {
                         onTap: () async {
                           final result = await showLocationBottomSheet(context);
                           if (result != null) {
-                            setState(() => selectedLocation = result);
+                            setState(() => AppData.selectedLocation!);
                           }
+                          fetchPatients();
                         },
                         child: const Icon(Icons.location_pin, size: 30),
                       ),
@@ -370,7 +497,7 @@ class _PatientsPageState extends State<PatientsPage> {
               /// Patient Grid
               Expanded(
                 child: GridView.builder(
-                  itemCount: 10,
+                  itemCount: patients.length,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: width < 400 ? 1 : 2,
                     childAspectRatio: 3 / 2,
@@ -378,6 +505,11 @@ class _PatientsPageState extends State<PatientsPage> {
                     mainAxisSpacing: 12,
                   ),
                   itemBuilder: (context, index) {
+                    final patient = patients[index];
+                    final fullName =
+                        "${patient['firstname'] ?? ''} ${patient['lastname'] ?? ''}";
+                    final isOnsite = patient['onsite'] == true;
+
                     return Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
@@ -391,9 +523,9 @@ class _PatientsPageState extends State<PatientsPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
-                                "P6345",
-                                style: TextStyle(
+                              Text(
+                                "P${patient['id'] ?? ''}", // patient ID
+                                style: const TextStyle(
                                   color: Colors.blue,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -407,9 +539,9 @@ class _PatientsPageState extends State<PatientsPage> {
                                   color: Colors.blue.shade100,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: const Text(
-                                  "on-site",
-                                  style: TextStyle(
+                                child: Text(
+                                  isOnsite ? "On-site" : "Off-site",
+                                  style: const TextStyle(
                                     color: Colors.blue,
                                     fontWeight: FontWeight.w600,
                                     fontSize: 12,
@@ -419,15 +551,28 @@ class _PatientsPageState extends State<PatientsPage> {
                             ],
                           ),
                           const SizedBox(height: 10),
-                          const Text(
-                            "Mr. Jack Sparrow",
-                            style: TextStyle(fontWeight: FontWeight.w500),
+
+                          // Name
+                          Text(
+                            fullName,
+                            style: const TextStyle(fontWeight: FontWeight.w500),
                           ),
-                          const Text(
-                            "Male",
-                            style: TextStyle(color: Colors.blue),
+
+                          // Gender
+                          Text(
+                            patient['gender'] ?? '',
+                            style: const TextStyle(color: Colors.blue),
                           ),
+
+                          // Treatment
+                          Text(
+                            patient['treatmenttype'] ?? '',
+                            style: const TextStyle(color: Colors.black54),
+                          ),
+
                           const Spacer(),
+
+                          // Bottom arrow
                           const Align(
                             alignment: Alignment.bottomRight,
                             child: Icon(

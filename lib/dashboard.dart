@@ -10,7 +10,7 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   int _selectedIndex = 2;
-   String selectedLocation = "Pasadena";
+  String selectedLocation = "Pasadena";
 
   // void _onBottomNavTapped(int index) {
   //   setState(() {
@@ -69,34 +69,43 @@ class _DashboardPageState extends State<DashboardPage> {
                         ),
                         Row(
                           children: [
-                          GestureDetector(
-      onTap: () async {
-        final result = await showLocationBottomSheet(context);
-        if (result != null) {
-          setState(() {
-            selectedLocation = result;
-          });
-        }
-      },
-      child: Row(
-        children: [
-          Text(
-            selectedLocation,
-            style: TextStyle(
-              decoration: TextDecoration.underline,
-              fontSize: 16,
-              color: Colors.black87,
-            ),
-          ),
-          SizedBox(width: 8),
-          Icon(Icons.location_pin, size: 24, color: Colors.black),
-        ],
-      ),
-    ),
-                          ]
-  
-                        )
-                            
+                            GestureDetector(
+                              onTap: () async {
+                                final result = await showLocationBottomSheet(
+                                  context,
+                                );
+                                if (result != null) {
+                                  setState(() {
+                                    selectedLocation =
+                                        AppData.selectedLocation!;
+                                  });
+                                  // Text(
+                                  //   AppData.selectedLocation ??
+                                  //       'No location selected',
+                                  // );
+                                }
+                              },
+                              child: Row(
+                                children: [
+                                  Text(
+                                    AppData.selectedLocation ?? 'No location selected',
+                                    style: TextStyle(
+                                      decoration: TextDecoration.underline,
+                                      fontSize: 16,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                  SizedBox(width: 8),
+                                  Icon(
+                                    Icons.location_pin,
+                                    size: 24,
+                                    color: Colors.black,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                     SizedBox(height: 24),
