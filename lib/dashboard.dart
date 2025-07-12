@@ -89,6 +89,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                 children: [
                                   Text(
                                     AppData.selectedLocation ?? 'No location selected',
+                                    overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                       decoration: TextDecoration.underline,
                                       fontSize: 16,
@@ -108,6 +109,8 @@ class _DashboardPageState extends State<DashboardPage> {
                         ),
                       ],
                     ),
+                   
+                    
                     SizedBox(height: 24),
                     Text("Hello,", style: TextStyle(fontSize: 24)),
                     Text(

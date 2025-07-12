@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:medicineapp/appointments.dart';
 import 'package:medicineapp/dashboard.dart';
+import 'package:medicineapp/emailbroadcast.dart';
 import 'package:medicineapp/patientpage.dart';
 import 'package:medicineapp/userspage.dart';
 
@@ -51,7 +52,9 @@ class NavigatorBar extends StatelessWidget {
           Navigator.push(context, MaterialPageRoute(builder: (_) => PatientsPage()));
         } else if (index == 2) {
           Navigator.push(context, MaterialPageRoute(builder: (_) => DashboardPage()));
-        } else if (index == 4) {
+        } else if (index == 3) {
+          Navigator.push(context, MaterialPageRoute(builder: (_) =>EmailTemplateScreen() ));
+        }  else if (index == 4) {
           Navigator.push(context, MaterialPageRoute(builder: (_) => UserPage()));
         }
         onTap(index);

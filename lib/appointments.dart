@@ -94,9 +94,10 @@ class _AppointmentPageState extends State<AppointmentPage> {
                       AppData.selectedLocation ?? 'No location selected',
                       style: TextStyle(
                         decoration: TextDecoration.underline,
-                        fontSize: 16,
+                        fontSize: 12,
                         color: Colors.black87,
                       ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                     SizedBox(width: 8),
                     Icon(Icons.location_pin, size: 24, color: Colors.black),

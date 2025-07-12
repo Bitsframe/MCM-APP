@@ -74,7 +74,9 @@ class _UserPageState extends State<UserPage> {
                         AppData.selectedLocation ?? 'No location selected',
                         style: const TextStyle(
                           decoration: TextDecoration.underline,
+                          fontSize: 12,
                         ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(width: 10),
                       GestureDetector(
@@ -125,74 +127,6 @@ class _UserPageState extends State<UserPage> {
                     child: Row(
                       children: [
                         GestureDetector(
-                          // onTap: () {
-                          //   showDialog(
-                          //     context: context,
-                          //     builder: (BuildContext context) {
-                          //       final TextEditingController nameController =
-                          //           TextEditingController();
-                          //       final TextEditingController genderController =
-                          //           TextEditingController();
-                          //       final TextEditingController emailController =
-                          //           TextEditingController();
-
-                          //       return AlertDialog(
-                          //         shape: RoundedRectangleBorder(
-                          //           borderRadius: BorderRadius.circular(16),
-                          //         ),
-                          //         title: Text(
-                          //           "Add New Role",
-                          //           style: TextStyle(
-                          //             color: Colors.black,
-                          //             fontWeight: FontWeight.bold,
-                          //           ),
-                          //         ),
-                          //         content: SingleChildScrollView(
-                          //           child: Column(
-                          //             children: [
-                          //               TextField(
-                          //                 controller: nameController,
-                          //                 decoration: InputDecoration(
-                          //                   labelText: "Name",
-                          //                   hintText: "Enter name",
-                          //                 ),
-                          //               ),
-                          //               SizedBox(height: 12),
-
-                          //               SizedBox(height: 12),
-                          //               TextField(
-                          //                 controller: emailController,
-                          //                 decoration: InputDecoration(
-                          //                   labelText: "Role",
-                          //                   hintText: "Enter Role",
-                          //                 ),
-                          //               ),
-                          //               SizedBox(height: 20),
-                          //               ElevatedButton(
-                          //                 onPressed: () {
-                          //                   String name = nameController.text;
-                          //                   String gender = genderController.text;
-                          //                   String email = emailController.text;
-
-                          //                   // TODO: You can now save or process these values
-
-                          //                   Navigator.pop(
-                          //                     context,
-                          //                   ); // close dialog
-                          //                 },
-                          //                 style: ElevatedButton.styleFrom(
-                          //                   backgroundColor: Colors.black,
-                          //                   foregroundColor: Colors.white,
-                          //                 ),
-                          //                 child: Text("Add Role"),
-                          //               ),
-                          //             ],
-                          //           ),
-                          //         ),
-                          //       );
-                          //     },
-                          //   );
-                          // },
                           onTap: () async {
                             final supabase = Supabase.instance.client;
                             final TextEditingController roleController =
@@ -217,6 +151,64 @@ class _UserPageState extends State<UserPage> {
                               for (var item in response)
                                 item['permission'] as String: false,
                             };
+                            Future<void> saveRoleWithPermissions({
+                              required String roleName,
+                              required Map<String, bool> permissionToggles,
+                            }) async {
+                              final supabase = Supabase.instance.client;
+
+                              if (roleName.trim().isEmpty) {
+                                throw Exception('Role name cannot be empty');
+                              }
+
+                              final roleInsert = await supabase
+                                  .from('roles')
+                                  .insert({'name': roleName.trim()})
+                                  .select('id')
+                                  .single();
+
+                              final int roleId = roleInsert['id'] as int;
+                              print('roleid: $roleId');
+
+                              final enabledLabels = permissionToggles.entries
+                                  .where((entry) => entry.value) // ON only
+                                  .map((entry) => entry.key)
+                                  .toList();
+                              print(enabledLabels);
+                              if (enabledLabels.isEmpty) {
+                                // No permissions checked – nothing more to do
+                                return;
+                              }
+
+                              final permsQuery = await supabase
+                                  .from('permissions')
+                                  .select('id, permission')
+                                  .inFilter('permission', enabledLabels);
+
+                              final Map<String, int> labelToId = {
+                                for (final row in permsQuery)
+                                  row['permission'] as String: row['id'] as int,
+                              };
+
+                              final rowsToInsert = <Map<String, dynamic>>[];
+                              for (final label in enabledLabels) {
+                                final permId = labelToId[label];
+                                if (permId != null) {
+                                  rowsToInsert.add({
+                                    'roles': roleId,
+                                    'permissions': permId,
+                                  });
+                                }
+                              }
+                              print(rowsToInsert);
+                              await supabase
+                                  .from('user_permissions')
+                                  .upsert(
+                                    rowsToInsert,
+                                    onConflict: 'roles,permissions',
+                                    ignoreDuplicates: true,
+                                  );
+                            }
 
                             showModalBottomSheet(
                               context: context,
@@ -299,9 +291,40 @@ class _UserPageState extends State<UserPage> {
                                             SizedBox(
                                               width: double.infinity,
                                               child: ElevatedButton(
-                                                onPressed: () {
-                                                  // 👉 You can now save roleController.text and permissions map to your backend
-                                                  Navigator.pop(context);
+                                                onPressed: () async {
+                                                  try {
+                                                    await saveRoleWithPermissions(
+                                                      roleName:
+                                                          roleController.text,
+                                                      permissionToggles:
+                                                          permissions,
+                                                    );
+                                                    ScaffoldMessenger.of(
+                                                      context,
+                                                    ).showSnackBar(
+                                                      const SnackBar(
+                                                        content: Text(
+                                                          'Role saved successfully!',
+                                                          style: TextStyle(
+                                                            color: Colors.black,
+                                                          ),
+                                                        ),
+                                                        backgroundColor:
+                                                            Colors.green,
+                                                      ),
+                                                    );
+                                                    Navigator.pop(context);
+                                                  } catch (e) {
+                                                    ScaffoldMessenger.of(
+                                                      context,
+                                                    ).showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(
+                                                          'Error: \$e',
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }
                                                 },
                                                 style: ElevatedButton.styleFrom(
                                                   backgroundColor: Colors.black,
@@ -348,7 +371,7 @@ class _UserPageState extends State<UserPage> {
                                 TextEditingController();
                             List<String> roles = [];
                             List<String> selectedLocations = [];
-    List<String> allLocations = [];
+                            List<String> allLocations = [];
                             String? selectedRole;
                             final supabase = Supabase.instance.client;
 
@@ -365,10 +388,12 @@ class _UserPageState extends State<UserPage> {
                                     .toList();
                               });
                             }
-                             final locResponse = await supabase.from('Locations').select('title');
-    allLocations = (locResponse as List<dynamic>)
-        .map((e) => e['title'].toString())
-        .toList();
+                            final locResponse = await supabase
+                                .from('Locations')
+                                .select('title');
+                            allLocations = (locResponse as List<dynamic>)
+                                .map((e) => e['title'].toString())
+                                .toList();
 
                             showModalBottomSheet(
                               context: context,
@@ -475,66 +500,95 @@ class _UserPageState extends State<UserPage> {
                                         SizedBox(height: 12),
 
                                         // Location (readonly or dropdown can be implemented)
-                                          TextField(
-                    controller: locationController,
-                    readOnly: true,
-                    decoration: InputDecoration(
-                      hintText: "Select Locations",
-                      border: OutlineInputBorder(),
-                      suffixIcon: Icon(Icons.arrow_drop_down),
-                    ),
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return StatefulBuilder(
-                            builder: (context, setDialogState) {
-                              return AlertDialog(
-                                title: Text("Select Locations"),
-                                content: SizedBox(
-                                  width: double.maxFinite,
-                                  child: ListView(
-                                    shrinkWrap: true,
-                                    children: allLocations.map((location) {
-                                      final isSelected = selectedLocations.contains(location);
-                                      return CheckboxListTile(
-                                        title: Text(location),
-                                        value: isSelected,
-                                        onChanged: (checked) {
-                                          setDialogState(() {
-                                            if (checked == true) {
-                                              selectedLocations.add(location);
-                                            } else {
-                                              selectedLocations.remove(location);
-                                            }
-                                          });
-                                        },
-                                      );
-                                    }).toList(),
-                                  ),
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: Text("Cancel"),
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      setState(() {
-                                        locationController.text = selectedLocations.join(", ");
-                                      });
-                                    },
-                                    child: Text("Done"),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                      );
-                    },
-                  ),
+                                        TextField(
+                                          controller: locationController,
+                                          readOnly: true,
+                                          decoration: InputDecoration(
+                                            hintText: "Select Locations",
+                                            border: OutlineInputBorder(),
+                                            suffixIcon: Icon(
+                                              Icons.arrow_drop_down,
+                                            ),
+                                          ),
+                                          onTap: () {
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) {
+                                                return StatefulBuilder(
+                                                  builder: (context, setDialogState) {
+                                                    return AlertDialog(
+                                                      title: Text(
+                                                        "Select Locations",
+                                                      ),
+                                                      content: SizedBox(
+                                                        width: double.maxFinite,
+                                                        child: ListView(
+                                                          shrinkWrap: true,
+                                                          children: allLocations.map((
+                                                            location,
+                                                          ) {
+                                                            final isSelected =
+                                                                selectedLocations
+                                                                    .contains(
+                                                                      location,
+                                                                    );
+                                                            return CheckboxListTile(
+                                                              title: Text(
+                                                                location,
+                                                              ),
+                                                              value: isSelected,
+                                                              onChanged: (checked) {
+                                                                setDialogState(() {
+                                                                  if (checked ==
+                                                                      true) {
+                                                                    selectedLocations
+                                                                        .add(
+                                                                          location,
+                                                                        );
+                                                                  } else {
+                                                                    selectedLocations
+                                                                        .remove(
+                                                                          location,
+                                                                        );
+                                                                  }
+                                                                });
+                                                              },
+                                                            );
+                                                          }).toList(),
+                                                        ),
+                                                      ),
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed: () =>
+                                                              Navigator.pop(
+                                                                context,
+                                                              ),
+                                                          child: Text("Cancel"),
+                                                        ),
+                                                        ElevatedButton(
+                                                          onPressed: () {
+                                                            Navigator.pop(
+                                                              context,
+                                                            );
+                                                            setState(() {
+                                                              locationController
+                                                                      .text =
+                                                                  selectedLocations
+                                                                      .join(
+                                                                        ", ",
+                                                                      );
+                                                            });
+                                                          },
+                                                          child: Text("Done"),
+                                                        ),
+                                                      ],
+                                                    );
+                                                  },
+                                                );
+                                              },
+                                            );
+                                          },
+                                        ),
 
                                         SizedBox(height: 24),
 
@@ -574,70 +628,95 @@ class _UserPageState extends State<UserPage> {
                                                 }
 
                                                 try {
-                                                  // 1. Create new user in auth
-                                                  final authResponse = await supabase
-                                                      .auth
-                                                      .admin
-                                                      .createUser(
-                                                        AdminUserAttributes(
-                                                          email: emailController
-                                                              .text
-                                                              .trim(),
-                                                          password:
-                                                              passwordController
+                                                  // Sign up the user (no email confirmation)
+
+                                                  final signUpRes =
+                                                      await supabase.auth.signUp(
+                                                        email: emailController
+                                                            .text
+                                                            .trim(),
+                                                        password:
+                                                            passwordController
+                                                                .text
+                                                                .trim(),
+                                                        data: {
+                                                          'full_name':
+                                                              usernameController
                                                                   .text
                                                                   .trim(),
-                                                          emailConfirm: true,
-                                                        ),
+                                                        },
                                                       );
+                                                  Future<int?>
+                                                  getRoleIdFromRoleName(
+                                                    String roleName,
+                                                  ) async {
+                                                    final supabase = Supabase
+                                                        .instance
+                                                        .client;
 
-                                                  final newUser =
-                                                      authResponse.user;
+                                                    final response =
+                                                        await supabase
+                                                            .from('roles')
+                                                            .select('id')
+                                                            .eq(
+                                                              'name',
+                                                              roleName,
+                                                            )
+                                                            .maybeSingle();
+                                                    print(response);
+                                                    if (response != null &&
+                                                        response['id'] !=
+                                                            null) {
+                                                      return response['id']
+                                                          as int;
+                                                    }
 
-                                                  if (newUser == null)
-                                                    throw Exception(
-                                                      "Failed to create user",
-                                                    );
+                                                    return null;
+                                                  }
 
-                                                  // 2. Get the user's UUID
-                                                  final uuid = newUser.id;
-
-                                                  // 3. Map role name to role ID (you may already have a map or fetch it)
                                                   final roleId =
                                                       await getRoleIdFromRoleName(
                                                         selectedRole!,
                                                       );
 
-                                                  // 4. Insert into `profiles` table
-                                                  final profileResponse = await supabase
-                                                      .from('profiles')
-                                                      .insert({
-                                                        'id': uuid,
-                                                        'active': false,
-                                                        'profile_pictures':
-                                                            'https://vsvueqtgulraaczqnnvh.supabase.co/storage/v1/object/public/profile-pictures//user.png',
-                                                        'full_name':
-                                                            usernameController
-                                                                .text
-                                                                .trim(),
-                                                        // 'role_id': roleId,
-                                                        'role_id': 8,
-                                                        'email': emailController
-                                                            .text
-                                                            .trim(),
-                                                        // Add other optional fields if needed
-                                                      });
+                                                  // Don't expect user.id immediately if email confirmation is required
+                                                  if (signUpRes.user != null) {
+                                                    final uuid =
+                                                        signUpRes.user!.id;
 
-                                                  ScaffoldMessenger.of(
-                                                    context,
-                                                  ).showSnackBar(
-                                                    SnackBar(
-                                                      content: Text(
-                                                        "User added successfully.",
+                                                    // 3. Map role name to role ID (you may already have a map or fetch it)
+                                                    // 4. Insert into `profiles` table
+                                                    final profileResponse = await supabase
+                                                        .from('profiles')
+                                                        .insert({
+                                                          'id': uuid,
+                                                          'active': false,
+                                                          'profile_pictures':
+                                                              'https://vsvueqtgulraaczqnnvh.supabase.co/storage/v1/object/public/profile-pictures//user.png',
+                                                          'full_name':
+                                                              usernameController
+                                                                  .text
+                                                                  .trim(),
+                                                          // 'role_id': roleId,
+                                                          'role_id': roleId,
+                                                          'email':
+                                                              emailController
+                                                                  .text
+                                                                  .trim(),
+                                                          // Add other optional fields if needed
+                                                        });
+
+                                                    ScaffoldMessenger.of(
+                                                      context,
+                                                    ).showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(
+                                                          "User added successfully.",
+                                                        ),
                                                       ),
-                                                    ),
-                                                  );
-                                                  Navigator.pop(context);
+                                                    );
+                                                    Navigator.pop(context);
+                                                  }
                                                 } catch (e) {
                                                   print(
                                                     "Error adding user: $e",
@@ -806,181 +885,351 @@ class _UserPageState extends State<UserPage> {
                             },
                           ),
 
-                     IconButton(
-  icon: Icon(Icons.edit, color: Colors.blueAccent, size: 28),
-  onPressed: () async {
-    final TextEditingController usernameController = TextEditingController();
-    final TextEditingController emailController = TextEditingController();
-    final TextEditingController passwordController = TextEditingController();
-    final TextEditingController locationController = TextEditingController();
+                          IconButton(
+                            icon: Icon(
+                              Icons.edit,
+                              color: Colors.blueAccent,
+                              size: 28,
+                            ),
+                            onPressed: () async {
+                              final TextEditingController usernameController =
+                                  TextEditingController();
+                              final TextEditingController emailController =
+                                  TextEditingController();
+                              final TextEditingController passwordController =
+                                  TextEditingController();
+                              final TextEditingController locationController =
+                                  TextEditingController();
 
-    List<String> selectedLocations = [];
-    List<String> allLocations = [];
-    List<String> roles = [];
-    String? selectedRole;
+                              List<String> selectedLocations = [];
+                              List<String> allLocations = [];
+                              List<String> roles = [];
+                              String? selectedRole;
 
-    final supabase = Supabase.instance.client;
+                              final supabase = Supabase.instance.client;
 
-    // Fetch roles
-    final roleResponse = await supabase.from('roles').select('name');
-    if (roleResponse != null) {
-      roles = roleResponse
-          .map<String>((item) => item['name'] as String)
-          .toList();
-    }
+                              // Fetch roles
+                              final roleResponse = await supabase
+                                  .from('roles')
+                                  .select('name');
+                              if (roleResponse != null) {
+                                roles = roleResponse
+                                    .map<String>(
+                                      (item) => item['name'] as String,
+                                    )
+                                    .toList();
+                              }
 
-    // Fetch locations
-    final locResponse = await supabase.from('Locations').select('title');
-    allLocations = (locResponse as List<dynamic>)
-        .map((e) => e['title'].toString())
-        .toList();
+                              // Fetch locations
+                              final locResponse = await supabase
+                                  .from('Locations')
+                                  .select('title');
+                              allLocations = (locResponse as List<dynamic>)
+                                  .map((e) => e['title'].toString())
+                                  .toList();
 
-    // SHOW BOTTOM SHEET
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) {
-        return StatefulBuilder(builder: (context, setModalState) {
-          return Padding(
-            padding: EdgeInsets.only(
-              left: 16,
-              right: 16,
-              top: 20,
-              bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  Text("Edit User", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 12),
-                  TextField(
-                    controller: usernameController,
-                    decoration: InputDecoration(
-                      hintText: "Username",
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  SizedBox(height: 12),
-                  DropdownButtonFormField<String>(
-                    value: selectedRole,
-                    decoration: InputDecoration(
-                      hintText: "Select Role",
-                      border: OutlineInputBorder(),
-                    ),
-                    items: roles.map((role) => DropdownMenuItem(
-                      value: role,
-                      child: Text(role),
-                    )).toList(),
-                    onChanged: (val) => setModalState(() => selectedRole = val),
-                  ),
-                  SizedBox(height: 12),
-                  TextField(
-                    controller: emailController,
-                    decoration: InputDecoration(
-                      hintText: "Email",
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  SizedBox(height: 12),
-                  TextField(
-                    controller: passwordController,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      hintText: "Password",
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  SizedBox(height: 12),
-
-                  /// LOCATIONS DROPDOWN WITH MULTI-SELECT
-                  TextField(
-                    controller: locationController,
-                    readOnly: true,
-                    decoration: InputDecoration(
-                      hintText: "Select Locations",
-                      border: OutlineInputBorder(),
-                      suffixIcon: Icon(Icons.arrow_drop_down),
-                    ),
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return StatefulBuilder(
-                            builder: (context, setDialogState) {
-                              return AlertDialog(
-                                title: Text("Select Locations"),
-                                content: SizedBox(
-                                  width: double.maxFinite,
-                                  child: ListView(
-                                    shrinkWrap: true,
-                                    children: allLocations.map((location) {
-                                      final isSelected = selectedLocations.contains(location);
-                                      return CheckboxListTile(
-                                        title: Text(location),
-                                        value: isSelected,
-                                        onChanged: (checked) {
-                                          setDialogState(() {
-                                            if (checked == true) {
-                                              selectedLocations.add(location);
-                                            } else {
-                                              selectedLocations.remove(location);
-                                            }
-                                          });
-                                        },
-                                      );
-                                    }).toList(),
+                              // SHOW BOTTOM SHEET
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(24),
                                   ),
                                 ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: Text("Cancel"),
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      setModalState(() {
-                                        locationController.text = selectedLocations.join(", ");
-                                      });
+                                builder: (context) {
+                                  return StatefulBuilder(
+                                    builder: (context, setModalState) {
+                                      return Padding(
+                                        padding: EdgeInsets.only(
+                                          left: 16,
+                                          right: 16,
+                                          top: 20,
+                                          bottom:
+                                              MediaQuery.of(
+                                                context,
+                                              ).viewInsets.bottom +
+                                              20,
+                                        ),
+                                        child: SingleChildScrollView(
+                                          child: Column(
+                                            children: [
+                                              Text(
+                                                "Edit User",
+                                                style: TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              SizedBox(height: 12),
+                                              TextField(
+                                                controller: usernameController,
+                                                decoration: InputDecoration(
+                                                  hintText: "Username",
+                                                  border: OutlineInputBorder(),
+                                                ),
+                                              ),
+                                              SizedBox(height: 12),
+                                              DropdownButtonFormField<String>(
+                                                value: selectedRole,
+                                                decoration: InputDecoration(
+                                                  hintText: "Select Role",
+                                                  border: OutlineInputBorder(),
+                                                ),
+                                                items: roles
+                                                    .map(
+                                                      (role) =>
+                                                          DropdownMenuItem(
+                                                            value: role,
+                                                            child: Text(role),
+                                                          ),
+                                                    )
+                                                    .toList(),
+                                                onChanged: (val) =>
+                                                    setModalState(
+                                                      () => selectedRole = val,
+                                                    ),
+                                              ),
+                                              SizedBox(height: 12),
+                                              TextField(
+                                                controller: emailController,
+                                                decoration: InputDecoration(
+                                                  hintText: "Email",
+                                                  border: OutlineInputBorder(),
+                                                ),
+                                              ),
+                                              SizedBox(height: 12),
+                                              TextField(
+                                                controller: passwordController,
+                                                obscureText: true,
+                                                decoration: InputDecoration(
+                                                  hintText: "Password",
+                                                  border: OutlineInputBorder(),
+                                                ),
+                                              ),
+                                              SizedBox(height: 12),
+
+                                              /// LOCATIONS DROPDOWN WITH MULTI-SELECT
+                                              TextField(
+                                                controller: locationController,
+                                                readOnly: true,
+                                                decoration: InputDecoration(
+                                                  hintText: "Select Locations",
+                                                  border: OutlineInputBorder(),
+                                                  suffixIcon: Icon(
+                                                    Icons.arrow_drop_down,
+                                                  ),
+                                                ),
+                                                onTap: () {
+                                                  showDialog(
+                                                    context: context,
+                                                    builder: (context) {
+                                                      return StatefulBuilder(
+                                                        builder: (context, setDialogState) {
+                                                          return AlertDialog(
+                                                            title: Text(
+                                                              "Select Locations",
+                                                            ),
+                                                            content: SizedBox(
+                                                              width: double
+                                                                  .maxFinite,
+                                                              child: ListView(
+                                                                shrinkWrap:
+                                                                    true,
+                                                                children: allLocations.map((
+                                                                  location,
+                                                                ) {
+                                                                  final isSelected =
+                                                                      selectedLocations
+                                                                          .contains(
+                                                                            location,
+                                                                          );
+                                                                  return CheckboxListTile(
+                                                                    title: Text(
+                                                                      location,
+                                                                    ),
+                                                                    value:
+                                                                        isSelected,
+                                                                    onChanged: (checked) {
+                                                                      setDialogState(() {
+                                                                        if (checked ==
+                                                                            true) {
+                                                                          selectedLocations.add(
+                                                                            location,
+                                                                          );
+                                                                        } else {
+                                                                          selectedLocations.remove(
+                                                                            location,
+                                                                          );
+                                                                        }
+                                                                      });
+                                                                    },
+                                                                  );
+                                                                }).toList(),
+                                                              ),
+                                                            ),
+                                                            actions: [
+                                                              TextButton(
+                                                                onPressed: () =>
+                                                                    Navigator.pop(
+                                                                      context,
+                                                                    ),
+                                                                child: Text(
+                                                                  "Cancel",
+                                                                ),
+                                                              ),
+                                                              ElevatedButton(
+                                                                onPressed: () {
+                                                                  Navigator.pop(
+                                                                    context,
+                                                                  );
+                                                                  setModalState(() {
+                                                                    locationController
+                                                                        .text = selectedLocations
+                                                                        .join(
+                                                                          ", ",
+                                                                        );
+                                                                  });
+                                                                },
+                                                                child: Text(
+                                                                  "Done",
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          );
+                                                        },
+                                                      );
+                                                    },
+                                                  );
+                                                },
+                                              ),
+
+                                              SizedBox(height: 20),
+                                              ElevatedButton(
+                                                onPressed: () async {
+                                                  print(
+                                                    "Username: ${usernameController.text}",
+                                                  );
+                                                  print(
+                                                    "Email: ${emailController.text}",
+                                                  );
+                                                  print(
+                                                    "Password: ${passwordController.text}",
+                                                  );
+                                                  print("Role: $selectedRole");
+                                                  print(
+                                                    "Locations: ${locationController.text}",
+                                                  );
+
+                                                  // ── 1. Basic validation ────────────────────────────────────────────────────
+                                                  if (usernameController.text
+                                                          .trim()
+                                                          .isEmpty ||
+                                                      emailController.text
+                                                          .trim()
+                                                          .isEmpty ||
+                                                      selectedRole == null) {
+                                                    ScaffoldMessenger.of(
+                                                      context,
+                                                    ).showSnackBar(
+                                                      const SnackBar(
+                                                        content: Text(
+                                                          'Please fill all the mandatory fields',
+                                                        ),
+                                                      ),
+                                                    );
+                                                    return;
+                                                  }
+
+                                                  final supabase =
+                                                      Supabase.instance.client;
+
+                                                  try {
+                                                    // ── 2. Resolve role name -> role_id ──────────────────────────────────────
+                                                    final roleRow =
+                                                        await supabase
+                                                            .from('roles')
+                                                            .select('id')
+                                                            .eq(
+                                                              'name',
+                                                              selectedRole!,
+                                                            )
+                                                            .maybeSingle();
+
+                                                    if (roleRow == null) {
+                                                      throw Exception(
+                                                        'Role “$selectedRole” not found',
+                                                      );
+                                                    }
+                                                    final int roleId =
+                                                        roleRow['id'] as int;
+
+                                                    final id = userData['id']!;
+                                                    // ── 3. Update the record in `profiles` ───────────────────────────────────
+                                                    await supabase
+                                                        .from('profiles')
+                                                        .update({
+                                                          'full_name':
+                                                              usernameController
+                                                                  .text
+                                                                  .trim(),
+                                                          'email':
+                                                              emailController
+                                                                  .text
+                                                                  .trim(),
+                                                          'role_id': roleId,
+                                                          // add any other columns you want to update, e.g.  'active': true
+                                                        })
+                                                        .eq('id', id);
+
+                                                    // ── 4. Notify and close ─────────────────────────────────────────────────
+                                                    if (context.mounted) {
+                                                      ScaffoldMessenger.of(
+                                                        context,
+                                                      ).showSnackBar(
+                                                        const SnackBar(
+                                                          content: Text(
+                                                            'Profile updated successfully',
+                                                          ),
+                                                        ),
+                                                      );
+                                                      Navigator.pop(
+                                                        context,
+                                                      ); // close bottom‑sheet
+                                                    }
+                                                  } catch (e) {
+                                                    debugPrint(
+                                                      'Error updating profile: $e',
+                                                    );
+                                                    if (context.mounted) {
+                                                      ScaffoldMessenger.of(
+                                                        context,
+                                                      ).showSnackBar(
+                                                        SnackBar(
+                                                          content: Text(
+                                                            'Failed to update profile: $e',
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }
+                                                  }
+
+                                                  Navigator.pop(
+                                                    context,
+                                                  ); // Close bottom sheet here
+                                                },
+                                                child: Text("Edit User"),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
                                     },
-                                    child: Text("Done"),
-                                  ),
-                                ],
+                                  );
+                                },
                               );
                             },
-                          );
-                        },
-                      );
-                    },
-                  ),
-
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      print("Username: ${usernameController.text}");
-                      print("Email: ${emailController.text}");
-                      print("Password: ${passwordController.text}");
-                      print("Role: $selectedRole");
-                      print("Locations: ${locationController.text}");
-                      Navigator.pop(context); // Close bottom sheet here
-                    },
-                    child: Text("Edit User"),
-                  )
-                ],
-              ),
-            ),
-          );
-        });
-      },
-    );
-  },
-)
- 
-                       
-                       
+                          ),
                         ],
                       ),
                     );

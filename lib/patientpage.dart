@@ -428,30 +428,47 @@ class _PatientsPageState extends State<PatientsPage> {
               /// Header Section
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Image.asset('assets/images/medicineicon.png', height: 80),
-                  Row(
-                    children: [
-                      Text(
-                        AppData.selectedLocation ?? 'No location selected',
-                        style: const TextStyle(
-                          decoration: TextDecoration.underline,
+                  Flexible(
+                    flex: 1,
+                    child: Image.asset(
+                      'assets/images/medicineicon.png',
+                      height: 60,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            AppData.selectedLocation ?? 'No location selected',
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            style: const TextStyle(
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      GestureDetector(
-                        onTap: () async {
-                          final result = await showLocationBottomSheet(context);
-                          if (result != null) {
-                            setState(() => AppData.selectedLocation!);
-                          }
-                          fetchPatients();
-                        },
-                        child: const Icon(Icons.location_pin, size: 30),
-                      ),
-                      const SizedBox(width: 10),
-                      const Icon(Icons.person, size: 30),
-                    ],
+                        const SizedBox(width: 10),
+                        GestureDetector(
+                          onTap: () async {
+                            final result = await showLocationBottomSheet(
+                              context,
+                            );
+                            if (result != null) {
+                              setState(() => AppData.selectedLocation!);
+                            }
+                            fetchPatients();
+                          },
+                          child: const Icon(Icons.location_pin, size: 30),
+                        ),
+                        const SizedBox(width: 10),
+                        const Icon(Icons.person, size: 30),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -571,7 +588,20 @@ class _PatientsPageState extends State<PatientsPage> {
                           ),
 
                           const Spacer(),
-
+                          IconButton(
+                            onPressed: () async {
+                              final supabase = Supabase.instance.client;
+                              final id = patient['id'];
+                              print(id);
+                              await supabase
+                                  .from('allpatients')
+                                  .delete()
+                                  .eq('id', id);
+                             
+                              fetchPatients();
+                            },
+                            icon: Icon(Icons.delete, color: Colors.red),
+                          ),
                           // Bottom arrow
                           const Align(
                             alignment: Alignment.bottomRight,
