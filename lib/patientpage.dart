@@ -4,7 +4,12 @@ import 'package:medicineapp/navigationbar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class PatientsPage extends StatefulWidget {
-  const PatientsPage({super.key});
+   final String userId;
+  const PatientsPage({super.key,
+   required this.userId,
+  
+  
+  });
 
   @override
   State<PatientsPage> createState() => _PatientsPageState();
@@ -456,7 +461,7 @@ class _PatientsPageState extends State<PatientsPage> {
                         GestureDetector(
                           onTap: () async {
                             final result = await showLocationBottomSheet(
-                              context,
+                              context,widget.userId
                             );
                             if (result != null) {
                               setState(() => AppData.selectedLocation!);
@@ -621,6 +626,7 @@ class _PatientsPageState extends State<PatientsPage> {
         ),
       ),
       bottomNavigationBar: NavigatorBar(
+        userId: widget.userId,
         currentIndex: _selectedIndex,
         onTap: (index) {
           setState(() => _selectedIndex = index);

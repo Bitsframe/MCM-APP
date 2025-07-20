@@ -1,10 +1,17 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
 import 'package:intl/intl.dart';
 import 'package:medicineapp/location.dart';
+import 'package:medicineapp/main.dart';
 import 'package:medicineapp/navigationbar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AppointmentPage extends StatefulWidget {
+  final String userId;
+  const AppointmentPage({Key? key, required this.userId}) : super(key: key);
+
   @override
   State<AppointmentPage> createState() => _AppointmentPageState();
 }
@@ -20,6 +27,8 @@ class _AppointmentPageState extends State<AppointmentPage> {
 
   final List<String> days = ["MON", "Tue", "Wed", "Thr", "Fri", "Sat"];
   final List<String> dates = ["4", "5", "6", "7", "8", "9"];
+  List<dynamic> allAppointments = []; // All fetched appointments
+
   Future<List<String>> fetchServices() async {
     final supabase = Supabase.instance.client;
     final data = await supabase.from('services').select('title');
@@ -32,6 +41,33 @@ class _AppointmentPageState extends State<AppointmentPage> {
   void initState() {
     super.initState();
     fetchAppointments();
+    FirebaseMessaging.onMessage.listen((payload) {
+      final notification = payload.notification;
+      print(notification);
+      if (notification != null) {
+        // Show Snackbar
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(notification.title ?? 'Notification')),
+        );
+
+        // Show local notification
+        flutterLocalNotificationsPlugin.show(
+          notification.hashCode,
+          notification.title ?? 'New Appointment',
+          notification.body ?? 'You have booked an appointment!',
+          const NotificationDetails(
+            android: AndroidNotificationDetails(
+              'appointment_channel_id',
+              'Appointments',
+              channelDescription: 'For appointment notifications',
+              importance: Importance.max,
+              priority: Priority.high,
+              icon: '@mipmap/ic_launcher',
+            ),
+          ),
+        );
+      }
+    });
 
     //fetchServices();
   }
@@ -56,7 +92,10 @@ class _AppointmentPageState extends State<AppointmentPage> {
         .eq('location_id', AppData.selectedLocationId!);
 
     if (mounted) {
-      setState(() => appointments = response);
+      setState(() {
+        allAppointments = response;
+        appointments = response;
+      });
     }
   }
 
@@ -79,7 +118,10 @@ class _AppointmentPageState extends State<AppointmentPage> {
             children: [
               GestureDetector(
                 onTap: () async {
-                  final result = await showLocationBottomSheet(context);
+                  final result = await showLocationBottomSheet(
+                    context,
+                    widget.userId,
+                  );
                   fetchAppointments();
                   if (result != null) {
                     setState(() {
@@ -106,6 +148,26 @@ class _AppointmentPageState extends State<AppointmentPage> {
               ),
             ],
           ),
+          //           ElevatedButton(
+          //   onPressed: () {
+          //     flutterLocalNotificationsPlugin.show(
+          //       0,
+          //       'Test Notification',
+          //       'If you see this, local notifications work!',
+          //       const NotificationDetails(
+          //         android: AndroidNotificationDetails(
+          //           'appointment_channel_id',
+          //           'Appointments',
+          //           channelDescription: 'For appointment notifications',
+          //           importance: Importance.max,
+          //           priority: Priority.high,
+          //           icon: '@mipmap/ic_launcher', // Must exist
+          //         ),
+          //       ),
+          //     );
+          //   },
+          //   child: Text("Test Notification"),
+          // ),
           TextButton.icon(
             onPressed: () async {
               final services = await fetchServices(); // ⬅️ wait for the list
@@ -133,44 +195,44 @@ class _AppointmentPageState extends State<AppointmentPage> {
               ],
             ),
             SizedBox(height: 24),
-            Text("Select Date", style: TextStyle(fontWeight: FontWeight.bold)),
-            SizedBox(height: 12),
-            SizedBox(
-              height: 60,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: days.length,
-                itemBuilder: (context, index) {
-                  bool isSelected = index == 0;
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                    child: Container(
-                      padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: isSelected ? Colors.blue : Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(
-                        children: [
-                          Text(
-                            days[index],
-                            style: TextStyle(
-                              color: isSelected ? Colors.white : Colors.black,
-                            ),
-                          ),
-                          Text(
-                            dates[index],
-                            style: TextStyle(
-                              color: isSelected ? Colors.white : Colors.black,
-                            ),
-                          ),
-                        ],
-                      ),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: Column(
+                children: [
+                  TextField(
+                    onChanged: (value) {
+                      setState(() {
+                        appointments = allAppointments.where((appointment) {
+                          final name =
+                              appointment['first_name']?.toLowerCase() ?? '';
+                          return name.contains(value.toLowerCase());
+                        }).toList();
+                      });
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'Search by first name',
+                      prefixIcon: Icon(Icons.search),
+                      border: OutlineInputBorder(),
                     ),
-                  );
-                },
+                  ),
+
+                  // Text(
+                  //   days[index],
+                  //   style: TextStyle(
+                  //     color: isSelected ? Colors.white : Colors.black,
+                  //   ),
+                  // ),
+                  // Text(
+                  //   dates[index],
+                  //   style: TextStyle(
+                  //     color: isSelected ? Colors.white : Colors.black,
+                  //   ),
+                  // ),
+                ],
               ),
             ),
+
             SizedBox(height: 16),
             ListView.builder(
               itemCount: appointments.length,
@@ -178,6 +240,9 @@ class _AppointmentPageState extends State<AppointmentPage> {
               physics: NeverScrollableScrollPhysics(),
               itemBuilder: (context, index) {
                 final appointment = appointments[index];
+                String raw = appointment['date_and_time'] ?? '';
+                final match = RegExp(r'\|\s*(.*)').firstMatch(raw);
+                String displayDate = match != null ? match.group(1)! : raw;
                 return Card(
                   color: Color(0xFFEAF4FB),
                   shape: RoundedRectangleBorder(
@@ -272,8 +337,9 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                     size: 16,
                                   ),
                                   SizedBox(width: 6),
+
                                   Text(
-                                    "${appointment['date_and_time']}",
+                                    displayDate,
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 12,
@@ -321,7 +387,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                     );
                                   },
                                 ),
-                                
+
                                 IconButton(
                                   icon: Icon(Icons.edit, color: Colors.blue),
                                   onPressed: () async {
@@ -346,6 +412,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
         ),
       ),
       bottomNavigationBar: NavigatorBar(
+        userId: widget.userId,
         currentIndex: _selectedIndex,
         onTap: (index) {
           setState(() {
@@ -459,6 +526,7 @@ void showAddAppointmentBottomSheet(
     "Wisconsin - WI",
     "Wyoming - WY",
   ];
+
   Future<List<String>> fetchTodayTimeSlots(int locationId) async {
     final supabase = Supabase.instance.client;
 
@@ -622,7 +690,7 @@ void showAddAppointmentBottomSheet(
                         child: TextField(
                           controller: firstNameController,
                           decoration: InputDecoration(
-                            labelText: "First Name",
+                            labelText: "First Name *",
                             border: OutlineInputBorder(),
                           ),
                         ),
@@ -632,7 +700,7 @@ void showAddAppointmentBottomSheet(
                         child: TextField(
                           controller: lastNameController,
                           decoration: InputDecoration(
-                            labelText: "Last Name",
+                            labelText: "Last Name *",
                             border: OutlineInputBorder(),
                           ),
                         ),
@@ -645,7 +713,7 @@ void showAddAppointmentBottomSheet(
                   TextField(
                     controller: emailController,
                     decoration: InputDecoration(
-                      labelText: "Email Address",
+                      labelText: "Email Address *",
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -687,7 +755,7 @@ void showAddAppointmentBottomSheet(
                   SizedBox(height: 16),
 
                   // Gender
-                  Text("Sex", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("Sex *", style: TextStyle(fontWeight: FontWeight.bold)),
                   Wrap(
                     spacing: 10,
                     children: ["male", "female", "others"].map((val) {
@@ -747,12 +815,12 @@ void showAddAppointmentBottomSheet(
 
                   // Service
                   Text(
-                    "Treatment",
+                    "Treatment *",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   DropdownButtonFormField<String>(
                     decoration: InputDecoration(
-                      hintText: "Select treatment type",
+                      hintText: "Select treatment type *",
                       border: OutlineInputBorder(),
                       fillColor: Colors.grey.shade100,
                     ),
@@ -877,32 +945,8 @@ void showAddAppointmentBottomSheet(
                   ),
                   SizedBox(height: 16),
 
-                  // Switches
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text("Is this an in-office appointment?"),
-                      Switch(
-                        value: inOfficePatient ?? false,
-                        onChanged: (val) =>
-                            setModalState(() => inOfficePatient = val),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text("Is this a new patient?"),
-                      Switch(
-                        value: newPatient ?? false,
-                        onChanged: (val) =>
-                            setModalState(() => newPatient = val),
-                      ),
-                    ],
-                  ),
                   SizedBox(height: 24),
 
-                  // Submit Button
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -917,22 +961,19 @@ void showAddAppointmentBottomSheet(
                             firstNameController.text,
                             lastNameController.text,
                             emailController.text,
-                            phoneController.text,
-                            dobController.text,
-                            addressController.text,
-                            zipcodeController.text,
+
                             dateController.text,
                             selectedTimeSlot,
                             gender,
                             selectedTreatment,
-                            visitType,
-                            patientType,
                           ].any(
                             (e) => e == null || (e is String && e.isEmpty),
                           )) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text("Please fill all fields."),
+                                content: Text(
+                                  "Please fill the Required fields.",
+                                ),
                                 backgroundColor: Colors.red,
                               ),
                             );
@@ -952,6 +993,8 @@ void showAddAppointmentBottomSheet(
                                 'yyyy-MM-dd',
                               ).parse(dateController.text.trim()),
                             );
+                            final userId =
+                                Supabase.instance.client.auth.currentUser!.id;
 
                             final dateAndTime =
                                 "$rawDate - ${selectedTimeSlot}";
@@ -967,9 +1010,9 @@ void showAddAppointmentBottomSheet(
                               'address': addressController.text.trim(),
                               'service': selectedTreatment,
                               'date_and_time': dateAndTime,
-
-                              'in_office_patient': inOfficePatient ?? true,
-                              'new_patient': newPatient ?? true,
+                              'user_id': userId,
+                              'in_office_patient': true,
+                              'new_patient': true,
                               'isApproved': false,
                               'text_opt': true,
                               'email_opt': true,
@@ -982,16 +1025,42 @@ void showAddAppointmentBottomSheet(
                             final response = await supabase
                                 .from('Appoinments')
                                 .insert(insertData);
+                            print(response);
 
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  "Appointment added successfully.",
+                            if (response == null) {
+                             
+
+                           
+
+                              Navigator.pop(context);
+                           
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    "Appointment added successfully.",
+                                  ),
+                                  backgroundColor: Colors.green,
                                 ),
-                                backgroundColor: Colors.green,
-                              ),
-                            );
+                              );
+                               flutterLocalNotificationsPlugin.show(
+                                0,
+                                'Appointment Booked',
+                                "Dear ${firstNameController.text.trim()},Your appointment has been successfully booked!",
+                                const NotificationDetails(
+                                  android: AndroidNotificationDetails(
+                                    'appointment_channel_id',
+                                    'Appointments',
+                                    channelDescription:
+                                        'For appointment notifications',
+                                    importance: Importance.max,
+                                    priority: Priority.high,
+                                    icon: '@mipmap/ic_launcher', // Must exist
+                                  ),
+                                ),
+                              );
+                            }
+                            ;
                           } catch (e) {
                             print("Supabase insert error: $e");
                             ScaffoldMessenger.of(context).showSnackBar(

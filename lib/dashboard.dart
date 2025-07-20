@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:medicineapp/location.dart';
+import 'package:medicineapp/loginpage.dart';
+import 'package:medicineapp/main.dart';
 import 'package:medicineapp/navigationbar.dart';
-import 'package:medicineapp/patientpage.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DashboardPage extends StatefulWidget {
+  final String userId;
+
+  const DashboardPage({Key? key, required this.userId}) : super(key: key);
+
   @override
   _DashboardPageState createState() => _DashboardPageState();
 }
@@ -11,39 +17,290 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   int _selectedIndex = 2;
   String selectedLocation = "Pasadena";
+  String userName = "Mack";
+  bool isLoading = true;
+  num totalSalesAmount = 0;
+  int appointmentsCount = 0;
+  // New list to store selected location IDs
+  List<int> selectedLocationIds = [];
+  int patientsCount = 0;
+  int totalInventoryQuantity = 0;
+  DateTime? lastUpdatedTime;
 
-  // void _onBottomNavTapped(int index) {
-  //   setState(() {
-  //     _selectedIndex = index;
-  //   });
-  //   if (index == 0) {
-  //     showModalBottomSheet(
-  //       context: context,
-  //       isScrollControlled: true,
-  //       shape: RoundedRectangleBorder(
-  //         borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
-  //       ),
-  //       builder: (context) => DraggableScrollableSheet(
-  //         expand: false,
-  //         builder: (context, scrollController) => AppointmentPage(),
-  //       ),
-  //     );
-  //   }
-  // else if (index == 1) {
-  //     Navigator.push(
-  //       context,
-  //       MaterialPageRoute(builder: (context) => PatientsPage()),
-  //     );
-  //   }
-  // }
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserProfile();
+    fetchPatientsCount();
+  }
 
-  void _onTileTapped(String type) {
-    if (type == 'Appointments') {
-    } else {
+  String getTimeAgoText() {
+    if (lastUpdatedTime == null) return "Refresh";
+
+    final now = DateTime.now();
+    final difference = now.difference(lastUpdatedTime!);
+
+    if (difference.inMinutes < 1) return "Just now";
+    if (difference.inMinutes < 10) return "${difference.inMinutes} mins ago";
+    if (difference.inHours < 24) return "${difference.inHours} hours ago";
+
+    return "${difference.inDays} days ago";
+  }
+
+  Future<void> fetchTotalSalesAmount() async {
+    try {
+      final supabase = Supabase.instance.client;
+
+      // Step 1: Get patient_ids based on selected location_ids
+      final patientResponse = await supabase
+          .from('allpatients')
+          .select('id, locationid')
+          .inFilter('locationid', selectedLocationIds);
+
+      if (patientResponse == null || patientResponse.isEmpty) {
+        setState(() {
+          totalSalesAmount = 0;
+        });
+        return;
+      }
+
+      final List<int> patientIds = patientResponse
+          .map<int>((item) => item['id'] as int)
+          .toList();
+
+      // Step 2: Get orders based on patient_ids
+      final orderResponse = await supabase
+          .from('orders')
+          .select('paid_amount, patient_id')
+          .inFilter('patient_id', patientIds);
+
+      // Step 3: Sum the paid_amounts
+      num total = 0;
+      for (final order in orderResponse) {
+        final amount = order['paid_amount'];
+        if (amount is num) {
+          total += amount;
+        }
+      }
+
+      setState(() {
+        totalSalesAmount = total;
+      });
+    } catch (e) {
+      print('Error fetching total sales: $e');
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("$type clicked!")));
+      ).showSnackBar(SnackBar(content: Text('Failed to fetch total sales')));
     }
+  }
+
+  Future<void> fetchPatientsCount() async {
+    if (selectedLocationIds.isEmpty) {
+      setState(() {
+        patientsCount = 0;
+      });
+      return;
+    }
+
+    try {
+      final response = await Supabase.instance.client
+          .from('allpatients') // replace with actual table name if different
+          .select('id')
+          .inFilter('locationid', selectedLocationIds);
+
+      if (response != null) {
+        setState(() {
+          patientsCount = response.length;
+        });
+      }
+    } catch (e) {
+      print('Error fetching patients count: $e');
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to fetch patients count')));
+    }
+  }
+
+  Future<void> _fetchUserProfile() async {
+    final response = await Supabase.instance.client
+        .from('profiles')
+        .select('full_name')
+        .eq('id', widget.userId)
+        .single();
+
+    if (response != null) {
+      setState(() {
+        userName = response['full_name'] ?? 'Mack';
+        isLoading = false;
+      });
+    } else {
+      setState(() {
+        isLoading = false;
+      });
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Failed to load user data')));
+    }
+  }
+
+  Future<void> fetchAppointmentsCount() async {
+    if (selectedLocationIds.isEmpty) {
+      setState(() {
+        appointmentsCount = 0;
+      });
+      return;
+    }
+
+    try {
+      print('selected locations: $selectedLocationIds');
+      final response = await Supabase.instance.client
+          .from('Appoinments') // or whatever your table is called
+          .select('id')
+          .inFilter('location_id', selectedLocationIds);
+
+      if (response != null) {
+        setState(() {
+          appointmentsCount = response.length;
+        });
+      }
+    } catch (e) {
+      print('Error fetching appointments count: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to fetch appointments count')),
+      );
+    }
+  }
+
+  Future<void> fetchInventoryQuantity() async {
+    if (selectedLocationIds.isEmpty) {
+      setState(() {
+        totalInventoryQuantity = 0;
+      });
+      return;
+    }
+
+    try {
+      final response = await Supabase.instance.client
+          .from('inventory') // Replace with your actual inventory table name
+          .select('quantity, location_id') // Adjust field names if needed
+          .inFilter('location_id', selectedLocationIds);
+
+      if (response != null) {
+        int total = 0;
+        for (final item in response) {
+          final quantity = item['quantity'];
+
+          // Ensure it's a number and cast it safely
+          if (quantity is num) {
+            total += quantity.toInt();
+          }
+        }
+        setState(() {
+          totalInventoryQuantity = total;
+        });
+      }
+    } catch (e) {
+      print('Error fetching inventory: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to fetch inventory quantity')),
+      );
+    }
+  }
+
+  void _onTileTapped(String type) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text("$type clicked!")));
+  }
+
+  Future<void> _refreshDashboardData() async {
+    setState(() => isLoading = true);
+
+    await fetchAppointmentsCount();
+    await fetchPatientsCount();
+    await fetchInventoryQuantity();
+    await fetchTotalSalesAmount();
+
+    setState(() {
+      lastUpdatedTime = DateTime.now();
+      isLoading = false;
+    });
+  }
+
+  String formatNumberCompact(num number) {
+    if (number >= 1000000000) {
+      return "${(number / 1000000000).toStringAsFixed(1)}B";
+    } else if (number >= 1000000) {
+      return "${(number / 1000000).toStringAsFixed(1)}M";
+    } else if (number >= 1000) {
+      return "${(number / 1000).toStringAsFixed(1)}K";
+    } else {
+      return number.toStringAsFixed(0);
+    }
+  }
+
+  void _showProfileOptions(BuildContext context) {
+    bool notificationsEnabled = true;
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) => Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.drag_handle, color: Colors.grey),
+                const SizedBox(height: 8),
+                const Text(
+                  "Account Settings",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 20),
+
+                // Notification toggle
+                SwitchListTile(
+                  value: notificationsEnabled,
+                  onChanged: (value) {
+                    setState(() => notificationsEnabled = value);
+                    // TODO: Save this preference to Supabase or local storage if needed
+                  },
+                  title: const Text("Notifications"),
+                  secondary: const Icon(Icons.notifications),
+                ),
+                const SizedBox(height: 8),
+
+                // Logout button
+                ListTile(
+  leading: const Icon(Icons.logout, color: Colors.red),
+  title: const Text(
+    "Logout",
+    style: TextStyle(color: Colors.red),
+  ),
+  onTap: () async {
+    // Sign out from Supabase
+    await Supabase.instance.client.auth.signOut();
+
+    // Navigate to LoginPage
+    if (context.mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginPage()),
+      );
+    }
+  },
+),
+
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -60,6 +317,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // App Bar Row with logo and location button
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -67,84 +325,273 @@ class _DashboardPageState extends State<DashboardPage> {
                           'assets/images/medicineicon.png',
                           height: 100,
                         ),
-                        Row(
-                          children: [
-                            GestureDetector(
-                              onTap: () async {
-                                final result = await showLocationBottomSheet(
-                                  context,
-                                );
-                                if (result != null) {
-                                  setState(() {
-                                    selectedLocation =
-                                        AppData.selectedLocation!;
-                                  });
-                                  // Text(
-                                  //   AppData.selectedLocation ??
-                                  //       'No location selected',
-                                  // );
-                                }
-                              },
-                              child: Row(
-                                children: [
-                                  Text(
-                                    AppData.selectedLocation ?? 'No location selected',
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      decoration: TextDecoration.underline,
-                                      fontSize: 16,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                  SizedBox(width: 8),
-                                  Icon(
-                                    Icons.location_pin,
-                                    size: 24,
-                                    color: Colors.black,
-                                  ),
-                                ],
+                        GestureDetector(
+                          onTap: () async {
+                            final result = await showLocationBottomSheet(
+                              context,
+                              widget.userId,
+                            );
+                            if (result != null) {
+                              setState(() {
+                                selectedLocation = AppData.selectedLocation!;
+                              });
+                            }
+                          },
+                          child: Row(
+                            children: [
+                              Text(
+                                AppData.selectedLocation ??
+                                    'No location selected',
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  decoration: TextDecoration.underline,
+                                  fontSize: 10,
+                                  color: Colors.black87,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                   
-                    
-                    SizedBox(height: 24),
-                    Text("Hello,", style: TextStyle(fontSize: 24)),
-                    Text(
-                      "Mack",
-                      style: TextStyle(
-                        fontSize: 40,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Icon(Icons.error_outline, color: Colors.amber),
-                        SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            "You have unattended appointments.",
-                            style: TextStyle(color: Colors.grey.shade700),
+                              SizedBox(width: 8),
+                              Icon(
+                                Icons.location_pin,
+                                size: 24,
+                                color: Colors.black,
+                              ),
+                              const SizedBox(width: 12),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.person,
+                                  color: Colors.black,
+                                ),
+                                onPressed: () => _showProfileOptions(context),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
+
                     SizedBox(height: 24),
+
+                    // Welcome text and user name
+                    Text("Hello,", style: TextStyle(fontSize: 24)),
+                    isLoading
+                        ? CircularProgressIndicator()
+                        : Text(
+                            userName,
+                            style: TextStyle(
+                              fontSize: 40,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+
+                    SizedBox(height: 16),
+
+                    // New Location Multi-Select Button
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        final supabase = Supabase.instance.client;
+
+                        try {
+                          final userLocationResponse = await supabase
+                              .from('user_locations')
+                              .select('location_id')
+                              .eq('profile_id', widget.userId);
+
+                          if (userLocationResponse == null ||
+                              userLocationResponse.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'No locations found for this user.',
+                                ),
+                              ),
+                            );
+                            return;
+                          }
+
+                          List<int> locationIds = userLocationResponse
+                              .map<int>((item) => item['location_id'] as int)
+                              .toList();
+
+                          final locationResponse = await supabase
+                              .from('Locations')
+                              .select('id, title')
+                              .inFilter('id', locationIds);
+
+                          if (locationResponse == null ||
+                              locationResponse.isEmpty)
+                            return;
+
+                          List<Map<String, dynamic>> locations =
+                              List<Map<String, dynamic>>.from(locationResponse);
+                          List<int> tempSelected = List.from(
+                            selectedLocationIds,
+                          );
+
+                          await showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(20),
+                              ),
+                            ),
+                            builder: (context) {
+                              bool selectAll =
+                                  tempSelected.length == locations.length;
+
+                              return StatefulBuilder(
+                                builder: (context, setModalState) {
+                                  return Padding(
+                                    padding: EdgeInsets.only(
+                                      left: 16,
+                                      right: 16,
+                                      top: 16,
+                                      bottom:
+                                          MediaQuery.of(
+                                            context,
+                                          ).viewInsets.bottom +
+                                          16,
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Text(
+                                          "Select Locations",
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const Divider(),
+
+                                        CheckboxListTile(
+                                          title: const Text("Select All"),
+                                          value: selectAll,
+                                          onChanged: (value) {
+                                            setModalState(() {
+                                              selectAll = value ?? false;
+                                              if (selectAll) {
+                                                tempSelected = locations
+                                                    .map<int>(
+                                                      (loc) => loc['id'] as int,
+                                                    )
+                                                    .toList();
+                                              } else {
+                                                tempSelected.clear();
+                                              }
+                                            });
+                                          },
+                                        ),
+
+                                        ...locations.map((location) {
+                                          final int locId = location['id'];
+                                          final String title =
+                                              location['title'];
+
+                                          return CheckboxListTile(
+                                            title: Text(title),
+                                            value: tempSelected.contains(locId),
+                                            onChanged: (bool? value) {
+                                              setModalState(() {
+                                                if (value == true) {
+                                                  tempSelected.add(locId);
+                                                } else {
+                                                  tempSelected.remove(locId);
+                                                }
+                                                selectAll =
+                                                    tempSelected.length ==
+                                                    locations.length;
+                                              });
+                                            },
+                                          );
+                                        }).toList(),
+
+                                        SizedBox(height: 16),
+                                        ElevatedButton(
+                                          onPressed: () async {
+                                            setState(() {
+                                              selectedLocationIds = List.from(
+                                                tempSelected,
+                                              );
+                                            });
+                                            await fetchAppointmentsCount();
+                                            await fetchPatientsCount();
+                                            await fetchInventoryQuantity();
+                                            await fetchTotalSalesAmount();
+                                            Navigator.pop(context);
+                                          },
+                                          child: const Text("Done"),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                          );
+                        } catch (e) {
+                          print('Error fetching locations: $e');
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Failed to fetch locations'),
+                            ),
+                          );
+                        }
+                      },
+                      icon: Icon(Icons.list),
+                      label: Text("Select Locations"),
+                    ),
+
+                    SizedBox(height: 16),
+
+                    // Row(
+                    //   children: [
+                    //     Icon(Icons.error_outline, color: Colors.amber),
+                    //     SizedBox(width: 8),
+                    //     Expanded(
+                    //       child: Text(
+                    //         "You have unattended appointments.",
+                    //         style: TextStyle(color: Colors.grey.shade700),
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
+                    // SizedBox(height: 24),
+
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //   children: [
+                    //     Text(
+                    //       "30 mins ago",
+                    //       style: TextStyle(fontWeight: FontWeight.bold),
+                    //     ),
+                    //     Icon(Icons.refresh),
+                    //   ],
+                    // ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "30 mins ago",
+                          getTimeAgoText(),
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        Icon(Icons.refresh),
+                        isLoading
+                            ? SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : GestureDetector(
+                                onTap: _refreshDashboardData,
+                                child: Icon(Icons.refresh),
+                              ),
                       ],
                     ),
+
                     SizedBox(height: 20),
+
                     GridView.count(
                       crossAxisCount: 2,
                       crossAxisSpacing: 16,
@@ -155,7 +602,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         _buildDashboardTile(
                           label: "Patients",
                           icon: Icons.groups,
-                          value: "350",
+                          value: "$patientsCount",
                           color: Colors.pink.shade50,
                           textColor: Colors.pink,
                           onTap: () => _onTileTapped("Patients"),
@@ -163,7 +610,8 @@ class _DashboardPageState extends State<DashboardPage> {
                         _buildDashboardTile(
                           label: "Sales",
                           icon: Icons.point_of_sale,
-                          value: "\$780k",
+                          value: "\$ ${formatNumberCompact(totalSalesAmount)}",
+                          // value: "\$ ${totalSalesAmount.toStringAsFixed(1)}",
                           color: Colors.purple.shade50,
                           textColor: Colors.purple,
                           onTap: () => _onTileTapped("Sales"),
@@ -171,7 +619,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         _buildDashboardTile(
                           label: "Appointments",
                           icon: Icons.calendar_month,
-                          value: "78",
+                          value: "$appointmentsCount",
                           color: Colors.cyan.shade50,
                           textColor: Colors.teal,
                           onTap: () => _onTileTapped("Appointments"),
@@ -179,7 +627,9 @@ class _DashboardPageState extends State<DashboardPage> {
                         _buildDashboardTile(
                           label: "Products",
                           icon: Icons.inventory,
-                          value: "315",
+                          value:
+                              "\$ ${formatNumberCompact(totalInventoryQuantity)}",
+                          // value: "$totalInventoryQuantity",
                           color: Colors.blue.shade50,
                           textColor: Colors.blue,
                           onTap: () => _onTileTapped("Products"),
@@ -193,30 +643,8 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
         ),
       ),
-      // bottomNavigationBar: BottomNavigationBar(
-      //   currentIndex: _selectedIndex,
-      //   onTap: _onBottomNavTapped,
-      //   type: BottomNavigationBarType.fixed,
-      //   backgroundColor: Colors.grey.shade300,
-      //   items: [
-      //     BottomNavigationBarItem(icon: Icon(Icons.medical_services_outlined), label: ""),
-      //     BottomNavigationBarItem(icon: Icon(Icons.contact_page), label: ""),
-      //     BottomNavigationBarItem(
-      //       icon: Container(
-      //         padding: EdgeInsets.all(8),
-      //         decoration: BoxDecoration(
-      //           color: Colors.black87,
-      //           shape: BoxShape.circle,
-      //         ),
-      //         child: Icon(Icons.home, color: Colors.white),
-      //       ),
-      //       label: "",
-      //     ),
-      //     BottomNavigationBarItem(icon: Icon(Icons.podcasts), label: ""),
-      //     BottomNavigationBarItem(icon: Icon(Icons.group), label: ""),
-      //   ],
-      // ),
       bottomNavigationBar: NavigatorBar(
+        userId: widget.userId,
         currentIndex: _selectedIndex,
         onTap: (index) {
           setState(() {
@@ -274,728 +702,3 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 }
-// class AppointmentPage extends StatefulWidget {
-//   const AppointmentPage({super.key});
-
-//   @override
-//   State<AppointmentPage> createState() => _AppointmentPageState();
-// }
-
-// class _AppointmentPageState extends State<AppointmentPage> {
-//    var  _selectedIndex = 0;
-//   final List<String> days = ["MON", "Tue", "Wed", "Thr", "Fri", "Sat"];
-//   final List<String> dates = ["4", "5", "6", "7", "8", "9"];
- 
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         backgroundColor: Colors.white,
-//         elevation: 0,
-//         leading: IconButton(
-//           icon: Icon(Icons.arrow_back, color: Colors.black),
-//           onPressed: () => Navigator.pop(context),
-//         ),
-//         title: Text(
-//           "Appointments",
-//           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-//         ),
-//         actions: [
-//           TextButton.icon(
-//             onPressed: () => showAddAppointmentBottomSheet(context),
-//             icon: Icon(Icons.add_circle_outline, color: Colors.blue),
-//             label: Text("Add New", style: TextStyle(color: Colors.blue)),
-//           ),
-//         ],
-//       ),
-//       body: SingleChildScrollView(
-//         padding: const EdgeInsets.all(16),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             Center(
-//               child: Row(
-//                 mainAxisAlignment: MainAxisAlignment.center,
-//                 children: [
-//                   _buildStatusChip("Approved", Color(0xFF37474F), Colors.white),
-//                   SizedBox(width: 12),
-//                   _buildStatusChip(
-//                     "Need Approval",
-//                     Colors.grey.shade300,
-//                     Colors.black,
-//                   ),
-//                 ],
-//               ),
-//             ),
-//             SizedBox(height: 24),
-//             Text("Select Date", style: TextStyle(fontWeight: FontWeight.bold)),
-//             SizedBox(height: 12),
-//             SizedBox(
-//               height: 60,
-//               child: ListView.builder(
-//                 scrollDirection: Axis.horizontal,
-//                 itemCount: days.length,
-//                 itemBuilder: (context, index) {
-//                   bool isSelected = index == 0;
-//                   return Padding(
-//                     padding: const EdgeInsets.symmetric(horizontal: 4.0),
-//                     child: Container(
-//                       padding: EdgeInsets.all(10),
-//                       decoration: BoxDecoration(
-//                         color: isSelected ? Colors.blue : Colors.grey.shade200,
-//                         borderRadius: BorderRadius.circular(12),
-//                       ),
-//                       child: Column(
-//                         children: [
-//                           Text(
-//                             days[index],
-//                             style: TextStyle(
-//                               color: isSelected ? Colors.white : Colors.black,
-//                             ),
-//                           ),
-//                           Text(
-//                             dates[index],
-//                             style: TextStyle(
-//                               color: isSelected ? Colors.white : Colors.black,
-//                             ),
-//                           ),
-//                         ],
-//                       ),
-//                     ),
-//                   );
-//                 },
-//               ),
-//             ),
-//             SizedBox(height: 16),
-//             ListView.builder(
-//               shrinkWrap: true,
-//               physics: NeverScrollableScrollPhysics(),
-//               itemCount: 5,
-//               itemBuilder: (context, index) => Card(
-//                 color: Color(0xFFEAF4FB),
-//                 shape: RoundedRectangleBorder(
-//                   borderRadius: BorderRadius.circular(12),
-//                 ),
-//                 margin: EdgeInsets.symmetric(vertical: 8),
-//                 child: Padding(
-//                   padding: const EdgeInsets.all(12),
-//                   child: Row(
-//                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                     children: [
-//                       Column(
-//                         crossAxisAlignment: CrossAxisAlignment.start,
-//                         children: [
-//                           Text(
-//                             "Mr. Jack Sparrow",
-//                             style: TextStyle(fontWeight: FontWeight.bold),
-//                           ),
-//                           Text(
-//                             "Ultra Sound",
-//                             style: TextStyle(color: Colors.blue),
-//                           ),
-//                           Text("Male"),
-//                         ],
-//                       ),
-//                       Column(
-//                         children: [
-//                           Container(
-//                             padding: EdgeInsets.symmetric(
-//                               horizontal: 12,
-//                               vertical: 8,
-//                             ),
-//                             decoration: BoxDecoration(
-//                               color: Color(0xFF37474F),
-//                               borderRadius: BorderRadius.circular(8),
-//                             ),
-//                             child: Row(
-//                               children: [
-//                                 Icon(
-//                                   Icons.access_time,
-//                                   color: Colors.white,
-//                                   size: 16,
-//                                 ),
-//                                 SizedBox(width: 6),
-//                                 Column(
-//                                   crossAxisAlignment: CrossAxisAlignment.start,
-//                                   children: [
-//                                     Text(
-//                                       "22-Feb-2025",
-//                                       style: TextStyle(
-//                                         color: Colors.white,
-//                                         fontWeight: FontWeight.bold,
-//                                         fontSize: 12,
-//                                       ),
-//                                     ),
-//                                     Text(
-//                                       "5:00 PM",
-//                                       style: TextStyle(
-//                                         color: Colors.white,
-//                                         fontSize: 12,
-//                                       ),
-//                                     ),
-//                                   ],
-//                                 ),
-//                               ],
-//                             ),
-//                           ),
-//                           Row(
-//                             children: [
-//                               IconButton(
-//                                 onPressed: () {
-//                                   _showConfirmDialog(context, "delete");
-//                                 },
-//                                 icon: Icon(
-//                                   Icons.delete,
-//                                   color: Colors.redAccent,
-//                                   size: 28,
-//                                 ),
-//                               ),
-//                               IconButton(
-//                                 onPressed: () {
-//                                   _showConfirmDialog(context, "edit");
-//                                 },
-//                                 icon: Icon(
-//                                   Icons.edit,
-//                                   color: Colors.blueAccent,
-//                                   size: 28,
-//                                 ),
-//                               ),
-//                             ],
-//                           ),
-//                         ],
-//                       ),
-//                     ],
-//                   ),
-//                 ),
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-
-//       bottomNavigationBar: NavigatorBar(
-//         currentIndex: _selectedIndex,
-//         onTap: (index) {
-//           setState(() {
-//             _selectedIndex = index;
-//           });
-//         },
-//       ),
-//     );
-//   }
-
-//   Widget _buildStatusChip(String text, Color bgColor, Color textColor) {
-//     return Container(
-//       padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-//       decoration: BoxDecoration(
-//         color: bgColor,
-//         borderRadius: BorderRadius.circular(24),
-//       ),
-//       child: Text(text, style: TextStyle(color: textColor)),
-//     );
-//   }
-
-//   void _showConfirmDialog(BuildContext context, String action) {
-//     showDialog(
-//       context: context,
-//       builder: (_) => AlertDialog(
-//         title: Text("Are you sure?"),
-//         content: Text("Do you want to $action this appointment?"),
-//         actions: [
-//           TextButton(
-//             onPressed: () => Navigator.pop(context),
-//             child: Text("Cancel", style: TextStyle(color: Colors.grey)),
-//           ),
-//           ElevatedButton(
-//             onPressed: () {
-//               Navigator.pop(context);
-//             },
-//             style: ElevatedButton.styleFrom(
-//               backgroundColor: Colors.black,
-//               foregroundColor: Colors.white,
-//             ),
-//             child: Text("Yes"),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
-
-// void showAddAppointmentBottomSheet(BuildContext context) {
-//   final TextEditingController firstNameController = TextEditingController();
-//   final TextEditingController lastNameController = TextEditingController();
-//   final TextEditingController emailController = TextEditingController();
-//   final TextEditingController phoneController = TextEditingController();
-//   final TextEditingController dobController = TextEditingController();
-
-//   String visitType = '';
-//   String patientType = '';
-//   String gender = '';
-
-//   showModalBottomSheet(
-//     context: context,
-//     isScrollControlled: true,
-//     shape: RoundedRectangleBorder(
-//       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-//     ),
-//     builder: (context) {
-//       return Padding(
-//         padding: EdgeInsets.only(
-//           left: 16,
-//           right: 16,
-//           top: 24,
-//           bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-//         ),
-//         child: SingleChildScrollView(
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: [
-//               Text(
-//                 "Add an Appointment",
-//                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-//               ),
-//               SizedBox(height: 4),
-//               Text("Make changes to the patient's information and save them"),
-//               SizedBox(height: 16),
-
-//               Text(
-//                 "Current Location:",
-//                 style: TextStyle(fontWeight: FontWeight.w600),
-//               ),
-//               Text(
-//                 "Clinica San Miguel Fondren",
-//                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-//               ),
-//               SizedBox(height: 16),
-
-//               Row(
-//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                 children: [
-//                   Text("Type of visit"),
-//                   Text("Are you a new or returning patient?"),
-//                 ],
-//               ),
-//               SizedBox(height: 8),
-//               Row(
-//                 children: [
-//                   Expanded(
-//                     child: Wrap(
-//                       spacing: 10,
-//                       children: [
-//                         ChoiceChip(
-//                           label: Text("Office visit"),
-//                           selected: visitType == "office",
-//                           onSelected: (_) => visitType = "office",
-//                         ),
-//                         ChoiceChip(
-//                           label: Text("Virtual visit"),
-//                           selected: visitType == "virtual",
-//                           onSelected: (_) => visitType = "virtual",
-//                         ),
-//                       ],
-//                     ),
-//                   ),
-//                   Expanded(
-//                     child: Wrap(
-//                       spacing: 10,
-//                       children: [
-//                         ChoiceChip(
-//                           label: Text("New"),
-//                           selected: patientType == "new",
-//                           onSelected: (_) => patientType = "new",
-//                         ),
-//                         ChoiceChip(
-//                           label: Text("Coming back"),
-//                           selected: patientType == "returning",
-//                           onSelected: (_) => patientType = "returning",
-//                         ),
-//                       ],
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//               SizedBox(height: 16),
-
-//               Row(
-//                 children: [
-//                   Expanded(
-//                     child: TextField(
-//                       controller: firstNameController,
-//                       decoration: InputDecoration(
-//                         labelText: "First Name",
-//                         hintText: "FirstName",
-//                         border: OutlineInputBorder(),
-//                       ),
-//                     ),
-//                   ),
-//                   SizedBox(width: 12),
-//                   Expanded(
-//                     child: TextField(
-//                       controller: lastNameController,
-//                       decoration: InputDecoration(
-//                         labelText: "Last Name",
-//                         hintText: "LastName",
-//                         border: OutlineInputBorder(),
-//                       ),
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//               SizedBox(height: 12),
-//               Row(
-//                 children: [
-//                   Expanded(
-//                     child: TextField(
-//                       controller: emailController,
-//                       decoration: InputDecoration(
-//                         labelText: "Email",
-//                         hintText: "Email",
-//                         border: OutlineInputBorder(),
-//                       ),
-//                     ),
-//                   ),
-//                   SizedBox(width: 12),
-//                   Expanded(
-//                     child: TextField(
-//                       controller: phoneController,
-//                       decoration: InputDecoration(
-//                         labelText: "Phone Number",
-//                         hintText: "Phone Number",
-//                         border: OutlineInputBorder(),
-//                       ),
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//               SizedBox(height: 12),
-//               Row(
-//                 children: [
-//                   Expanded(
-//                     child: TextField(
-//                       controller: dobController,
-//                       decoration: InputDecoration(
-//                         labelText: "Your date of birth",
-//                         hintText: "mm/dd/yyyy",
-//                         border: OutlineInputBorder(),
-//                         suffixIcon: Icon(Icons.calendar_today),
-//                       ),
-//                       onTap: () async {
-//                         FocusScope.of(
-//                           context,
-//                         ).requestFocus(FocusNode()); // hide keyboard
-//                         DateTime? picked = await showDatePicker(
-//                           context: context,
-//                           initialDate: DateTime(2000),
-//                           firstDate: DateTime(1900),
-//                           lastDate: DateTime.now(),
-//                         );
-//                         if (picked != null) {
-//                           dobController.text =
-//                               "${picked.month}/${picked.day}/${picked.year}";
-//                         }
-//                       },
-//                     ),
-//                   ),
-//                   SizedBox(width: 12),
-//                   Expanded(
-//                     child: Column(
-//                       crossAxisAlignment: CrossAxisAlignment.start,
-//                       children: [
-//                         Text(
-//                           "Sex",
-//                           style: TextStyle(fontWeight: FontWeight.w500),
-//                         ),
-//                         Wrap(
-//                           spacing: 10,
-//                           children: [
-//                             ChoiceChip(
-//                               label: Text("Male"),
-//                               selected: gender == "male",
-//                               onSelected: (_) => gender = "male",
-//                             ),
-//                             ChoiceChip(
-//                               label: Text("Female"),
-//                               selected: gender == "female",
-//                               onSelected: (_) => gender = "female",
-//                             ),
-//                             ChoiceChip(
-//                               label: Text("Others"),
-//                               selected: gender == "others",
-//                               onSelected: (_) => gender = "others",
-//                             ),
-//                           ],
-//                         ),
-//                       ],
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//               SizedBox(height: 24),
-//               Row(
-//                 mainAxisAlignment: MainAxisAlignment.end,
-//                 children: [
-//                   TextButton(
-//                     onPressed: () => Navigator.pop(context),
-//                     child: Text("Cancel"),
-//                   ),
-//                   SizedBox(width: 12),
-//                   ElevatedButton(
-//                     onPressed: () {
-//                       // Collect and process input here
-//                       Navigator.pop(context);
-//                     },
-//                     style: ElevatedButton.styleFrom(
-//                       backgroundColor: Color(0xFF0B5FFF),
-//                       foregroundColor: Colors.white,
-//                     ),
-//                     child: Text("Add appointment"),
-//                   ),
-//                 ],
-//               ),
-//             ],
-//           ),
-//         ),
-//       );
-//     },
-//   );
-// }
-
-
-// // class AppointmentPage extends StatelessWidget {
-// //   // final ScrollController scrollController;
-// //   // AppointmentPage({required this.scrollController});
-
-// //   final List<String> days = ["MON", "Tue", "Wed", "Thr", "Fri", "Sat"];
-// //   final List<String> dates = ["4", "5", "6", "7", "8", "9"];
-
-// //   @override
-// //   Widget build(BuildContext context) {
-// //     return SingleChildScrollView(
-// //       // controller: scrollController,
-// //       child: Padding(
-// //         padding: const EdgeInsets.all(16.0),
-// //         child: Column(
-// //           crossAxisAlignment: CrossAxisAlignment.start,
-// //           children: [
-// //             Row(
-// //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-// //               children: [
-// //                 Text("Appointments", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-// //                 Row(
-// //                   children: [
-// //                      GestureDetector(
-// //                         onTap: (){
-// //                             showDialog(
-// //       context: context,
-// //       builder: (BuildContext context) {
-// //         final TextEditingController nameController = TextEditingController();
-// //         final TextEditingController genderController = TextEditingController();
-// //         final TextEditingController emailController = TextEditingController();
-
-// //         return AlertDialog(
-// //           shape: RoundedRectangleBorder(
-// //             borderRadius: BorderRadius.circular(16),
-// //           ),
-// //           title: Text(
-// //             "Add Appointment",
-// //             style: TextStyle(
-// //               color: Colors.black,
-// //               fontWeight: FontWeight.bold,
-// //             ),
-// //           ),
-// //           content: SingleChildScrollView(
-// //             child: Column(
-// //               children: [
-// //                 TextField(
-// //                   controller: nameController,
-// //                   decoration: InputDecoration(
-// //                     labelText: "Name",
-// //                     hintText: "Enter name",
-// //                   ),
-// //                 ),
-// //                 SizedBox(height: 12),
-// //                 TextField(
-// //                   controller: genderController,
-// //                   decoration: InputDecoration(
-// //                     labelText: "Date",
-// //                     hintText: "Enter Date",
-// //                   ),
-// //                 ),
-// //                 SizedBox(height: 12),
-// //                 TextField(
-// //                   controller: emailController,
-// //                   decoration: InputDecoration(
-// //                     labelText: "Time",
-// //                     hintText: "Enter time",
-// //                   ),
-// //                 ),
-// //                 SizedBox(height: 20),
-// //                 ElevatedButton(
-// //                   onPressed: () {
-// //                     String name = nameController.text;
-// //                     String gender = genderController.text;
-// //                     String email = emailController.text;
-
-// //                     // TODO: You can now save or process these values
-
-// //                     Navigator.pop(context); // close dialog
-// //                   },
-// //                   style: ElevatedButton.styleFrom(
-// //                     backgroundColor: Colors.black,
-// //                     foregroundColor: Colors.white,
-// //                   ),
-// //                   child: Text("Book Appointment"),
-// //                 ),
-// //               ],
-// //             ),
-// //           ),
-// //         );
-// //       },
-// //     );
-// //                         },
-// //                         child: Row(
-// //                           children: [
-// //                             Icon(Icons.add_circle_outline, color: Colors.blue),
-// //                             SizedBox(width: 4),
-// //                             Text(
-// //                               "Add New",
-// //                               style: TextStyle(color: Colors.blue),
-// //                             ),
-// //                           ],
-// //                         ), 
-
-// //                       ),
-// //                     // Icon(Icons.add_circle_outline, color: Colors.blue),
-// //                     // SizedBox(width: 4),
-// //                     // Text("Add New", style: TextStyle(color: Colors.blue)),
-// //                   ],
-// //                 )
-// //               ],
-// //             ),
-// //             SizedBox(height: 16),
-// //             Row(
-// //               mainAxisAlignment: MainAxisAlignment.center,
-// //               children: [
-// //                 Container(
-// //                   padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-// //                   decoration: BoxDecoration(
-// //                     color: Color(0xFF37474F),
-// //                     borderRadius: BorderRadius.circular(24),
-// //                   ),
-// //                   child: Text("Approved", style: TextStyle(color: Colors.white)),
-// //                 ),
-// //                 SizedBox(width: 12),
-// //                 Container(
-// //                   padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-// //                   decoration: BoxDecoration(
-// //                     color: Colors.grey.shade300,
-// //                     borderRadius: BorderRadius.circular(24),
-// //                   ),
-// //                   child: Text("Need Approval"),
-// //                 ),
-// //               ],
-// //             ),
-// //             SizedBox(height: 24),
-// //             Text("Select Date", style: TextStyle(fontWeight: FontWeight.bold)),
-// //             SizedBox(height: 12),
-// //             SizedBox(
-// //               height: 60,
-// //               child: ListView.builder(
-// //                 scrollDirection: Axis.horizontal,
-// //                 itemCount: days.length,
-// //                 itemBuilder: (context, index) {
-// //                   bool isSelected = index == 0;
-// //                   return Padding(
-// //                     padding: const EdgeInsets.symmetric(horizontal: 4.0),
-// //                     child: Column(
-// //                       children: [
-// //                         Container(
-// //                           padding: EdgeInsets.all(10),
-// //                           decoration: BoxDecoration(
-// //                             color: isSelected ? Colors.blue : Colors.grey.shade200,
-// //                             borderRadius: BorderRadius.circular(12),
-// //                           ),
-// //                           child: Column(
-// //                             children: [
-// //                               Text(days[index], style: TextStyle(color: isSelected ? Colors.white : Colors.black)),
-// //                               Text(dates[index], style: TextStyle(color: isSelected ? Colors.white : Colors.black)),
-// //                             ],
-// //                           ),
-// //                         ),
-// //                       ],
-// //                     ),
-// //                   );
-// //                 },
-// //               ),
-// //             ),
-// //             SizedBox(height: 16),
-// //             ListView.builder(
-// //               itemCount: 5,
-// //               shrinkWrap: true,
-// //               physics: NeverScrollableScrollPhysics(),
-// //               itemBuilder: (context, index) => Card(
-// //                 color: Color(0xFFEAF4FB),
-// //                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-// //                 margin: EdgeInsets.symmetric(vertical: 8),
-// //                 child: Padding(
-// //                   padding: const EdgeInsets.all(12.0),
-// //                   child: Row(
-// //                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-// //                     children: [
-// //                       Column(
-// //                         crossAxisAlignment: CrossAxisAlignment.start,
-// //                         children: [
-// //                           Text("Mr. Jack Sparrow", style: TextStyle(fontWeight: FontWeight.bold)),
-// //                           Text("Ultra Sound", style: TextStyle(color: Colors.blue)),
-// //                           Text("Male"),
-// //                         ],
-// //                       ),
-// //                       Column(
-// //                         children: [
-// //                           Container(
-// //                             padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-// //                             decoration: BoxDecoration(
-// //                               color: Color(0xFF37474F),
-// //                               borderRadius: BorderRadius.circular(8),
-// //                             ),
-// //                             child: Row(
-// //                               children: [
-// //                                 Icon(Icons.access_time, color: Colors.white, size: 16),
-// //                                 SizedBox(width: 6),
-// //                                 Column(
-// //                                   crossAxisAlignment: CrossAxisAlignment.start,
-// //                                   children: [
-// //                                     Text("22-Feb-2025", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
-// //                                     Text("5:00 PM", style: TextStyle(color: Colors.white, fontSize: 12)),
-// //                                   ],
-// //                                 ),
-// //                               ],
-// //                             ),
-// //                           ),
-// //                           Row(
-// //                             children: [
-// //                               IconButton(
-// //                                 icon: Icon(Icons.delete, color: Colors.red),
-// //                                 onPressed: () {},
-// //                               ),
-// //                               IconButton(
-// //                                 icon: Icon(Icons.edit, color: Colors.blue),
-// //                                 onPressed: () {},
-// //                               ),
-// //                             ],
-// //                           ),
-// //                         ],
-// //                       ),
-// //                     ],
-// //                   ),
-// //                 ),
-// //               ),
-// //             ),
-// //           ],
-// //         ),
-// //       ),
-// //     );
-// //   }
-// // }

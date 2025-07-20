@@ -1,10 +1,23 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:medicineapp/location.dart';
 import 'package:medicineapp/navigationbar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:http/http.dart';
 
 class EmailTemplateScreen extends StatefulWidget {
-  const EmailTemplateScreen({super.key});
+  final String userId;
+
+
+ 
+  
+ 
+  const EmailTemplateScreen({super.key,
+   required this.userId,
+  
+  });
 
   @override
   State<EmailTemplateScreen> createState() => _EmailTemplateScreenState();
@@ -136,6 +149,39 @@ class _EmailTemplateScreenState extends State<EmailTemplateScreen> {
   Widget build(BuildContext context) {
     int? _selectedIndex = 3;
     final selected = templateContent[selectedTemplate]!;
+
+    // const emailApiUrl =
+    //     'https://send-resent-mail-646827ff1a0b.herokuapp.com/send';
+
+   Future<void> sendEmailToPatients({
+  required List<String> recipients,   // e.g. ['a@x.com', 'b@y.com']
+  required String subject,
+  required String htmlBody,           // full HTML you built
+}) async {
+  const endpoint =
+      'https://send-resent-mail-646827ff1a0b.herokuapp.com/send-batch-email';
+
+  final payload = {
+    "from": "noreply@alerts.myclinicmd.com",   // must match backend allow‑list
+    "recipients": recipients,                 // <-- NOT  "to"
+    "subject": subject,
+    "html": htmlBody,                         // <-- NOT  "body"
+  };
+
+  final res = await http.post(
+    Uri.parse(endpoint),
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode(payload),
+  );
+
+  if (res.statusCode == 200) {
+    debugPrint('✅ Emails sent!');
+  } else {
+    debugPrint('❌ ${res.statusCode} – ${res.body}');
+    throw Exception('Email‑service error');
+  }
+}
+
     void _showPatientSelectionSheet(BuildContext context) {
       showModalBottomSheet(
         context: context,
@@ -159,7 +205,7 @@ class _EmailTemplateScreenState extends State<EmailTemplateScreen> {
                     TextField(
                       controller: searchController,
                       onChanged: (value) {
-                        setModalState(() {
+                        setState(() {
                           filteredPatients = patients
                               .where(
                                 (p) => (p['email'] ?? '')
@@ -179,13 +225,14 @@ class _EmailTemplateScreenState extends State<EmailTemplateScreen> {
                       title: const Text("Select All"),
                       value: selectAll,
                       onChanged: (checked) {
-                        setModalState(() {
+                        setState(() {
                           selectAll = checked!;
                           selectedEmails = checked
                               ? filteredPatients
                                     .map((p) => p['email'] as String)
                                     .toList()
                               : [];
+                          print(selectedEmails);
                         });
                       },
                     ),
@@ -204,12 +251,13 @@ class _EmailTemplateScreenState extends State<EmailTemplateScreen> {
                             title: Text('$name ($email)'),
                             value: isChecked,
                             onChanged: (checked) {
-                              setModalState(() {
+                              setState(() {
                                 if (checked == true) {
                                   selectedEmails.add(email);
                                 } else {
                                   selectedEmails.remove(email);
                                 }
+                                print(selectedEmails);
                                 selectAll =
                                     selectedEmails.length ==
                                     filteredPatients.length;
@@ -220,62 +268,7 @@ class _EmailTemplateScreenState extends State<EmailTemplateScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () async {
-  final supabase = Supabase.instance.client;
-
-  // Prepare subject and message
-  final subject = subjectController.text.trim();
-  final greeting = templateContent[selectedTemplate]?['greeting'] ?? '';
-  final rawMessage = templateContent[selectedTemplate]?['message'] ?? '';
-  final sender = nameController.text.trim().isEmpty
-      ? (templateContent[selectedTemplate]?['sender'] ?? '')
-      : nameController.text.trim();
-  final price = priceController.text.trim().isEmpty ? '0' : priceController.text.trim();
-
-  final body = '''
-$greeting
-
-${rawMessage.replaceAll('\$0', 'Rs. $price')}
-
-Best,
-$sender
-''';
-
-  if (selectedEmails.isEmpty || subject.isEmpty || body.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Please select patients, subject, and template")),
-    );
-    return;
-  }
-
-  // Loop through selected emails and send email via Supabase function or table insert
-  for (String email in selectedEmails) {
-    await supabase.from('emails').insert({
-      'to': email,
-      'subject': subject,
-      'body': body,
-      'status': 'pending', // optional tracking
-      'sent_at': DateTime.now().toIso8601String(), // optional
-    });
-  }
-
-  // Feedback to user
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text("Email sent to ${selectedEmails.length} patients.")),
-  );
-
-  // Optional: reset selections
-  setState(() {
-    selectedEmails.clear();
-    subjectController.clear();
-    nameController.clear();
-    priceController.clear();
-  });
-},
-
-                      child: const Text("Done"),
-                    ),
+                    ElevatedButton(onPressed: () {}, child: const Text("Done")),
                   ],
                 ),
               );
@@ -304,7 +297,6 @@ $sender
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // --- FORM SECTION ---
-           
               const Text("Target Patients *"),
               const SizedBox(height: 16),
               GestureDetector(
@@ -386,9 +378,84 @@ $sender
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
                   ),
-                  onPressed: () {
-                    // Send logic
+
+                  onPressed: () async {
+                    final subject = subjectController.text.trim();
+                    print('subject $subject');
+                    final greeting =
+                        templateContent[selectedTemplate]?['greeting'] ?? '';
+                    print('greeting $greeting');
+                    final rawMessage =
+                        templateContent[selectedTemplate]?['message'] ?? '';
+                    final sender = nameController.text.trim().isEmpty
+                        ? (templateContent[selectedTemplate]?['sender'] ?? '')
+                        : nameController.text.trim();
+                    final price = priceController.text.trim().isEmpty
+                        ? '0'
+                        : priceController.text.trim();
+
+                    final body =
+                        '''
+$greeting
+
+${rawMessage.replaceAll('\$0', 'Rs. $price')}
+
+Best,
+$sender
+''';
+                    print('body $body');
+
+                    if (selectedEmails.isEmpty ||
+                        subject.isEmpty ||
+                        body.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            "Please select patients, subject, and template",
+                          ),
+                        ),
+                      );
+                      return;
+                    }
+
+                    try {
+                      print('yahan agye hain $selectedEmails');
+                      print(subject);
+                      print(body);
+                      await sendEmailToPatients(
+                        recipients: selectedEmails,
+                        subject: subject,
+                        htmlBody: body,
+                      );
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            "Emails sent to ${selectedEmails.length} patients.",
+                          ),
+                        ),
+                      );
+
+                      // Reset form
+                      setState(() {
+                        selectedEmails.clear();
+                        subjectController.clear();
+                        nameController.clear();
+                        priceController.clear();
+                      });
+                    } catch (e) {
+                      print("❌ Email sending error: $e");
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            "Something went wrong while sending email.",
+                          ),
+                        ),
+                      );
+                    }
                   },
+
+                  // Send logic
                   child: const Text(
                     "Run email",
                     style: TextStyle(color: Colors.white),
@@ -451,6 +518,7 @@ $sender
       ),
 
       bottomNavigationBar: NavigatorBar(
+        userId: widget.userId,
         currentIndex: _selectedIndex,
         onTap: (index) {
           setState(() => _selectedIndex = index);

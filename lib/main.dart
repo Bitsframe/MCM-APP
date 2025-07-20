@@ -1,16 +1,54 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:medicineapp/loginpage.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:medicineapp/appointments.dart';
+import 'package:medicineapp/firebase_options.dart';
+
+import 'package:medicineapp/warehouse.dart';
+import 'package:permission_handler/permission_handler.dart';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'loginpage.dart'; // or your app's root widget
+// final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+//     FlutterLocalNotificationsPlugin();
 
-void main() async {
 
+// Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+//   // Handle background message here
+//   print("📩 FCM background message: ${message.notification?.title}");
+// }
+
+// v
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Supabase.initialize(
-    url: 'https://vsvueqtgulraaczqnnvh.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzdnVlcXRndWxyYWFjenFubnZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDAwNDQ5OTMsImV4cCI6MjAxNTYyMDk5M30.umGVRqypGULFtZUXemNtANCGns-a2o4E8zSbnrZbldg',
+  // Android Initialization
+  const AndroidInitializationSettings initializationSettingsAndroid =
+      AndroidInitializationSettings('@mipmap/ic_launcher'); // Ensure this icon exists
+
+  const InitializationSettings initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
   );
 
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
+  // Ask for permission (Android 13+)
+  if (await Permission.notification.isDenied) {
+    await Permission.notification.request();
+  }
+
+  // Initialize Supabase
+  await Supabase.initialize(
+    url: 'https://vsvueqtgulraaczqnnvh.supabase.co',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzdnVlcXRndWxyYWFjenFubnZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDAwNDQ5OTMsImV4cCI6MjAxNTYyMDk5M30.umGVRqypGULFtZUXemNtANCGns-a2o4E8zSbnrZbldg',
+  );
+
+  // Run your Flutter app
   runApp(MyApp());
 }
 
@@ -26,7 +64,8 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         fontFamily: 'Arial', // You can use a custom font if needed
       ),
-      home: const MyHomePage(),
+      // home: const MyHomePage(),
+      home: MyHomePage(),
     );
   }
 }
@@ -43,21 +82,20 @@ class MyHomePage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Container(
-              child: Image.asset('assets/images/medicineimage.png',height: 300,),
+              child: Image.asset(
+                'assets/images/medicineimage.png',
+                height: 300,
+              ),
             ),
-            
-         
 
             SizedBox(height: 40),
 
-          
             ElevatedButton(
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute( builder: (context) => LoginPage(), )
+                  MaterialPageRoute(builder: (context) => LoginPage()),
                 );
-                
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.black,

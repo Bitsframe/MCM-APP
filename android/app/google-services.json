@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "349937631240",
+    "project_id": "mcm-app-2f2f7",
+    "storage_bucket": "mcm-app-2f2f7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:349937631240:android:e95ddb4d780b62970e11bd",
+        "android_client_info": {
+          "package_name": "com.bitsframe.mcm"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDepY_YYtQ-plImKs2R_1ZO3HRWboPS_TY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

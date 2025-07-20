@@ -4,6 +4,9 @@ import 'package:medicineapp/navigationbar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class UserPage extends StatefulWidget {
+  final String userId;
+  const UserPage({Key? key, required this.userId}) : super(key: key);
+
   @override
   _UserPageState createState() => _UserPageState();
 }
@@ -81,7 +84,10 @@ class _UserPageState extends State<UserPage> {
                       const SizedBox(width: 10),
                       GestureDetector(
                         onTap: () async {
-                          final result = await showLocationBottomSheet(context);
+                          final result = await showLocationBottomSheet(
+                            context,
+                            widget.userId,
+                          );
                           if (result != null) {
                             setState(() {
                               selectedLocation = AppData.selectedLocation!;
@@ -349,12 +355,12 @@ class _UserPageState extends State<UserPage> {
 
                           child: Column(
                             children: [
-                              Icon(Icons.person_4_outlined, color: Colors.blue),
-                              SizedBox(width: 4),
-                              Text(
-                                "Add New Role",
-                                style: TextStyle(color: Colors.blue),
-                              ),
+                              // Icon(Icons.person_4_outlined, color: Colors.blue),
+                              // SizedBox(width: 4),
+                              // Text(
+                              //   "Add New Role",
+                              //   style: TextStyle(color: Colors.blue),
+                              // ),
                             ],
                           ),
                         ),
@@ -420,7 +426,6 @@ class _UserPageState extends State<UserPage> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        // Top bar drag handle
                                         Center(
                                           child: Container(
                                             width: 40,
@@ -443,7 +448,6 @@ class _UserPageState extends State<UserPage> {
                                         ),
                                         SizedBox(height: 16),
 
-                                        // Username
                                         TextField(
                                           controller: usernameController,
 
@@ -456,7 +460,6 @@ class _UserPageState extends State<UserPage> {
                                         ),
                                         SizedBox(height: 12),
 
-                                        // Role Dropdown
                                         DropdownButtonFormField<String>(
                                           value: selectedRole,
                                           decoration: InputDecoration(
@@ -499,7 +502,6 @@ class _UserPageState extends State<UserPage> {
                                         ),
                                         SizedBox(height: 12),
 
-                                        // Location (readonly or dropdown can be implemented)
                                         TextField(
                                           controller: locationController,
                                           readOnly: true,
@@ -628,7 +630,13 @@ class _UserPageState extends State<UserPage> {
                                                 }
 
                                                 try {
-                                                  // Sign up the user (no email confirmation)
+                                                  print(
+                                                    'email:$emailController',
+                                                  );
+                                                  print(
+                                                    'password:$passwordController',
+                                                  );
+                                                  print('working');
 
                                                   final signUpRes =
                                                       await supabase.auth.signUp(
@@ -639,6 +647,7 @@ class _UserPageState extends State<UserPage> {
                                                             passwordController
                                                                 .text
                                                                 .trim(),
+                                                                
                                                         data: {
                                                           'full_name':
                                                               usernameController
@@ -646,6 +655,7 @@ class _UserPageState extends State<UserPage> {
                                                                   .trim(),
                                                         },
                                                       );
+                                                  print(signUpRes);
                                                   Future<int?>
                                                   getRoleIdFromRoleName(
                                                     String roleName,
@@ -678,14 +688,11 @@ class _UserPageState extends State<UserPage> {
                                                       await getRoleIdFromRoleName(
                                                         selectedRole!,
                                                       );
-
-                                                  // Don't expect user.id immediately if email confirmation is required
+                                                  print(roleId);
                                                   if (signUpRes.user != null) {
                                                     final uuid =
                                                         signUpRes.user!.id;
-
-                                                    // 3. Map role name to role ID (you may already have a map or fetch it)
-                                                    // 4. Insert into `profiles` table
+                                                    print(uuid);
                                                     final profileResponse = await supabase
                                                         .from('profiles')
                                                         .insert({
@@ -697,14 +704,86 @@ class _UserPageState extends State<UserPage> {
                                                               usernameController
                                                                   .text
                                                                   .trim(),
-                                                          // 'role_id': roleId,
                                                           'role_id': roleId,
                                                           'email':
                                                               emailController
                                                                   .text
                                                                   .trim(),
-                                                          // Add other optional fields if needed
                                                         });
+
+                                                    if (profileResponse.error !=
+                                                        null) {
+                                                      print(
+                                                        "Error inserting profile: ${profileResponse.error!.message}",
+                                                      );
+                                                      ScaffoldMessenger.of(
+                                                        context,
+                                                      ).showSnackBar(
+                                                        SnackBar(
+                                                          content: Text(
+                                                            "Failed to insert profile",
+                                                          ),
+                                                        ),
+                                                      );
+                                                      return;
+                                                    }
+
+                                                    // 👇 Insert into user_locations here
+                                                    final locationIds =
+                                                        locationController.text
+                                                            .split(
+                                                              ',',
+                                                            ) // or however your app stores multiple IDs
+                                                            .map(
+                                                              (id) =>
+                                                                  int.tryParse(
+                                                                    id.trim(),
+                                                                  ),
+                                                            )
+                                                            .where(
+                                                              (id) =>
+                                                                  id != null,
+                                                            )
+                                                            .toList();
+
+                                                    final locationEntries =
+                                                        locationIds
+                                                            .map(
+                                                              (locationId) => {
+                                                                'profile_id':
+                                                                    uuid,
+                                                                'location_id':
+                                                                    locationId,
+                                                              },
+                                                            )
+                                                            .toList();
+
+                                                    final userLocationsRes =
+                                                        await supabase
+                                                            .from(
+                                                              'user_locations',
+                                                            )
+                                                            .insert(
+                                                              locationEntries,
+                                                            );
+
+                                                    if (userLocationsRes
+                                                            .error !=
+                                                        null) {
+                                                      print(
+                                                        "Error inserting user_locations: ${userLocationsRes.error!.message}",
+                                                      );
+                                                      ScaffoldMessenger.of(
+                                                        context,
+                                                      ).showSnackBar(
+                                                        SnackBar(
+                                                          content: Text(
+                                                            "Failed to insert user locations",
+                                                          ),
+                                                        ),
+                                                      );
+                                                      return;
+                                                    }
 
                                                     ScaffoldMessenger.of(
                                                       context,
@@ -732,7 +811,6 @@ class _UserPageState extends State<UserPage> {
                                                   );
                                                 }
 
-                                                // You can save all data here
                                                 print(
                                                   "Username: ${usernameController.text}",
                                                 );
@@ -771,15 +849,15 @@ class _UserPageState extends State<UserPage> {
 
                           child: Column(
                             children: [
-                              Icon(
-                                Icons.add_circle_outline,
-                                color: Colors.blue,
-                              ),
-                              SizedBox(width: 4),
-                              Text(
-                                "Add New User",
-                                style: TextStyle(color: Colors.blue),
-                              ),
+                              // Icon(
+                              //   Icons.add_circle_outline,
+                              //   color: Colors.blue,
+                              // ),
+                              // SizedBox(width: 4),
+                              // Text(
+                              //   "Add New User",
+                              //   style: TextStyle(color: Colors.blue),
+                              // ),
                             ],
                           ),
                         ),
@@ -794,11 +872,9 @@ class _UserPageState extends State<UserPage> {
               // User List
               Expanded(
                 child: ListView.builder(
-                  itemCount: user.length, // <- use the list’s length
+                  itemCount: user.length,
                   itemBuilder: (context, index) {
-                    final userData =
-                        user[index]; // <- rename so it’s NOT the same name as the list
-
+                    final userData = user[index];
                     return Container(
                       margin: const EdgeInsets.symmetric(vertical: 8),
                       padding: const EdgeInsets.all(16),
@@ -1121,7 +1197,6 @@ class _UserPageState extends State<UserPage> {
                                                     "Locations: ${locationController.text}",
                                                   );
 
-                                                  // ── 1. Basic validation ────────────────────────────────────────────────────
                                                   if (usernameController.text
                                                           .trim()
                                                           .isEmpty ||
@@ -1178,11 +1253,9 @@ class _UserPageState extends State<UserPage> {
                                                                   .text
                                                                   .trim(),
                                                           'role_id': roleId,
-                                                          // add any other columns you want to update, e.g.  'active': true
                                                         })
                                                         .eq('id', id);
 
-                                                    // ── 4. Notify and close ─────────────────────────────────────────────────
                                                     if (context.mounted) {
                                                       ScaffoldMessenger.of(
                                                         context,
@@ -1193,9 +1266,7 @@ class _UserPageState extends State<UserPage> {
                                                           ),
                                                         ),
                                                       );
-                                                      Navigator.pop(
-                                                        context,
-                                                      ); // close bottom‑sheet
+                                                      Navigator.pop(context);
                                                     }
                                                   } catch (e) {
                                                     debugPrint(
@@ -1241,6 +1312,7 @@ class _UserPageState extends State<UserPage> {
         ),
       ),
       bottomNavigationBar: NavigatorBar(
+        userId: widget.userId,
         currentIndex: _selectedIndex,
         onTap: (index) {
           setState(() {
