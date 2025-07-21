@@ -34,13 +34,24 @@ Future<void> main() async {
     android: initializationSettingsAndroid,
   );
 
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings,
+
+    onDidReceiveNotificationResponse: (NotificationResponse response) async {
+      if (response.actionId == 'approve_action') {
+        // ✅ Call the function to approve the appointment
+        await approveLatestAppointment();
+      }
+    },
+  
+  );
 
   // Ask for permission (Android 13+)
   if (await Permission.notification.isDenied) {
     await Permission.notification.request();
   }
-
+await Firebase.initializeApp(
+  options: DefaultFirebaseOptions.currentPlatform
+);
   // Initialize Supabase
   await Supabase.initialize(
     url: 'https://vsvueqtgulraaczqnnvh.supabase.co',
@@ -116,5 +127,37 @@ class MyHomePage extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+Future<void> approveLatestAppointment() async {
+  final supabase = Supabase.instance.client;
+  final userId = supabase.auth.currentUser?.id;
+
+  if (userId == null) return;
+
+  try {
+    // 1. Get latest appointment (assuming by created_at)
+    final latest = await supabase
+        .from('Appoinments')
+        .select('id')
+        .eq('user_id', userId)
+        .order('created_at', ascending: false)
+        .limit(1)
+        .maybeSingle();
+
+    if (latest != null) {
+      final appointmentId = latest['id'];
+
+      // 2. Update isApproved
+      await supabase
+          .from('Appoinments')
+          .update({'isApproved': true})
+          .eq('id', appointmentId);
+
+      print("✅ Appointment approved via notification.");
+    }
+  } catch (e) {
+    print("❌ Error approving appointment: $e");
   }
 }

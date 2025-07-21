@@ -240,7 +240,89 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   void _showProfileOptions(BuildContext context) {
-    bool notificationsEnabled = true;
+      bool notificationsEnabled = false;
+  bool isLoaded = false;
+    final TextEditingController currentPasswordController =
+        TextEditingController();
+    final TextEditingController newPasswordController = TextEditingController();
+
+    void _showChangePasswordDialog(BuildContext context) {
+      final currentPasswordController = TextEditingController();
+      final newPasswordController = TextEditingController();
+
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Change Password'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: currentPasswordController,
+                obscureText: true,
+                decoration: InputDecoration(labelText: 'Current Password'),
+              ),
+              TextField(
+                controller: newPasswordController,
+                obscureText: true,
+                decoration: InputDecoration(labelText: 'New Password'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final email = Supabase.instance.client.auth.currentUser?.email;
+                final currentPassword = currentPasswordController.text.trim();
+                final newPassword = newPasswordController.text.trim();
+
+                if (email == null ||
+                    currentPassword.isEmpty ||
+                    newPassword.isEmpty) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Please fill in all fields.")),
+                  );
+                  return;
+                }
+
+                try {
+                  // Re-authenticate
+                  final res = await Supabase.instance.client.auth
+                      .signInWithPassword(
+                        email: email,
+                        password: currentPassword,
+                      );
+
+                  if (res.user == null) {
+                    throw Exception("Incorrect current password.");
+                  }
+
+                  // Update password
+                  final updateRes = await Supabase.instance.client.auth
+                      .updateUser(UserAttributes(password: newPassword));
+
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Password changed successfully.")),
+                  );
+                } catch (e) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Error: ${e.toString()}")),
+                  );
+                }
+              },
+              child: Text('Save'),
+            ),
+          ],
+        ),
+      );
+    }
 
     showModalBottomSheet(
       context: context,
@@ -249,55 +331,98 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
       builder: (context) {
         return StatefulBuilder(
-          builder: (context, setState) => Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.drag_handle, color: Colors.grey),
-                const SizedBox(height: 8),
-                const Text(
-                  "Account Settings",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 20),
+          builder: (context, setState) {
+          
+          Future<void> _loadPreference() async {
+            final userId = Supabase.instance.client.auth.currentUser?.id;
+            if (userId == null) return;
 
-                // Notification toggle
-                SwitchListTile(
-                  value: notificationsEnabled,
-                  onChanged: (value) {
-                    setState(() => notificationsEnabled = value);
-                    // TODO: Save this preference to Supabase or local storage if needed
-                  },
-                  title: const Text("Notifications"),
-                  secondary: const Icon(Icons.notifications),
-                ),
-                const SizedBox(height: 8),
+            final response = await Supabase.instance.client
+                .from('profiles')
+                .select('notify')
+                .eq('id', userId)
+                .maybeSingle();
 
-                // Logout button
-                ListTile(
-  leading: const Icon(Icons.logout, color: Colors.red),
-  title: const Text(
-    "Logout",
-    style: TextStyle(color: Colors.red),
-  ),
-  onTap: () async {
-    // Sign out from Supabase
-    await Supabase.instance.client.auth.signOut();
+            print("Supabase notify response: $response");
 
-    // Navigate to LoginPage
-    if (context.mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginPage()),
-      );
-    }
-  },
-),
+            if (response != null && response['notify'] != null) {
+              setState(() {
+                notificationsEnabled = response['notify'] as bool;
+                isLoaded = true;
+              });
+            }
+          }
 
-              ],
-            ),
-          ),
+          Future<void> _updatePreference(bool value) async {
+            final userId = Supabase.instance.client.auth.currentUser?.id;
+            if (userId == null) return;
+
+            setState(() {
+              notificationsEnabled = value;
+            });
+
+            await Supabase.instance.client
+                .from('profiles')
+                .update({'notify': value})
+                .eq('id', userId);
+
+            print("Updated notify to: $value");
+          }
+
+          if (!isLoaded) {
+            _loadPreference();
+          }
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.drag_handle, color: Colors.grey),
+                  const SizedBox(height: 8),
+                  const Text(
+                    "Account Settings",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Notification toggle
+                  SwitchListTile(
+                    value: notificationsEnabled,
+                    onChanged: (value) {
+                      _updatePreference(value);
+                    },
+                    title: const Text("Notifications"),
+                    secondary: const Icon(Icons.notifications),
+                  ),
+                  const SizedBox(height: 8),
+
+                  ElevatedButton(
+                    onPressed: () => _showChangePasswordDialog(context),
+                    child: const Text('Change Password'),
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Logout button
+                  ListTile(
+                    leading: const Icon(Icons.logout, color: Colors.red),
+                    title: const Text(
+                      "Logout",
+                      style: TextStyle(color: Colors.red),
+                    ),
+                    onTap: () async {
+                      await Supabase.instance.client.auth.signOut();
+                      if (context.mounted) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => LoginPage()),
+                        );
+                      }
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
         );
       },
     );

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'package:intl/intl.dart';
+import 'package:medicineapp/dashboard.dart';
 import 'package:medicineapp/location.dart';
 import 'package:medicineapp/main.dart';
 import 'package:medicineapp/navigationbar.dart';
@@ -17,6 +18,9 @@ class AppointmentPage extends StatefulWidget {
 }
 
 class _AppointmentPageState extends State<AppointmentPage> {
+  bool isLoading = true;
+  String? permissionError;
+
   int _selectedIndex = 0;
   String selectedLocation = "Pasadena";
   List<String> services = [];
@@ -40,37 +44,67 @@ class _AppointmentPageState extends State<AppointmentPage> {
   @override
   void initState() {
     super.initState();
-    fetchAppointments();
-    FirebaseMessaging.onMessage.listen((payload) {
-      final notification = payload.notification;
-      print(notification);
-      if (notification != null) {
-        // Show Snackbar
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(notification.title ?? 'Notification')),
-        );
-
-        // Show local notification
-        flutterLocalNotificationsPlugin.show(
-          notification.hashCode,
-          notification.title ?? 'New Appointment',
-          notification.body ?? 'You have booked an appointment!',
-          const NotificationDetails(
-            android: AndroidNotificationDetails(
-              'appointment_channel_id',
-              'Appointments',
-              channelDescription: 'For appointment notifications',
-              importance: Importance.max,
-              priority: Priority.high,
-              icon: '@mipmap/ic_launcher',
+    // Location check before proceeding
+    Future.delayed(Duration.zero, () {
+      if (mounted) {
+        if (AppData.selectedLocationId == null) {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text("Location Required"),
+              content: const Text("Please select a location first."),
+              actions: [
+                TextButton(
+                  child: const Text("OK"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            DashboardPage(userId: widget.userId),
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
-          ),
-        );
+          );
+        } else {
+          checkAndFetchAppointments();
+        }
       }
     });
-
-    //fetchServices();
   }
+  // FirebaseMessaging.onMessage.listen((payload) {
+  //   final notification = payload.notification;
+  //   print(notification);
+  //   if (notification != null) {
+  //     // Show Snackbar
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text(notification.title ?? 'Notification')),
+  //     );
+
+  //     // Show local notification
+  //     flutterLocalNotificationsPlugin.show(
+  //       notification.hashCode,
+  //       notification.title ?? 'New Appointment',
+  //       notification.body ?? 'You have booked an appointment!',
+  //       const NotificationDetails(
+  //         android: AndroidNotificationDetails(
+  //           'appointment_channel_id',
+  //           'Appointments',
+  //           channelDescription: 'For appointment notifications',
+  //           importance: Importance.max,
+  //           priority: Priority.high,
+  //           icon: '@mipmap/ic_launcher',
+  //         ),
+  //       ),
+  //     );
+  //   }
+  // });
+
+  //fetchServices();
 
   // Future<void> fetchAppointments() async {
   //   final response = await supabase
@@ -82,6 +116,61 @@ class _AppointmentPageState extends State<AppointmentPage> {
   //     appointments = response;
   //   });
   // }
+  Future<int?> getUserRoleId() async {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) return null;
+
+    final response = await Supabase.instance.client
+        .from('profiles')
+        .select('role_id')
+        .eq('id', userId)
+        .maybeSingle();
+
+    return response?['role_id'];
+  }
+
+  Future<void> checkAndFetchAppointments() async {
+    try {
+      final roleId = await getUserRoleId(); // Get role id of the current user
+      print(roleId);
+      if (roleId == null) {
+        setState(() {
+          permissionError = "No role assigned.";
+          isLoading = false;
+        });
+        return;
+      }
+
+      // Fetch permissions for the role
+      final permissionList = await Supabase.instance.client
+          .from('user_permissions')
+          .select('permissions(permission)')
+          .eq('roles', roleId)
+          .eq('permissions.permission', 'Appointments'); // will return List
+
+      print("Permission list: $permissionList");
+
+      final hasPermission = permissionList.any(
+        (row) => row['permissions']?['permission'] == 'Appointments',
+      );
+
+      if (hasPermission) {
+        await fetchAppointments();
+        setState(() => isLoading = false);
+      } else {
+        setState(() {
+          permissionError = "You cannot use this module.";
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        permissionError = "Error occurred: $e";
+        isLoading = false;
+      });
+    }
+  }
+
   Future<void> fetchAppointments() async {
     print('appointment ${AppData.selectedLocationId}');
 
@@ -101,6 +190,29 @@ class _AppointmentPageState extends State<AppointmentPage> {
 
   @override
   Widget build(BuildContext context) {
+      if (isLoading) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      if (permissionError != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+  Future.delayed(const Duration(seconds: 5), () {
+    Navigator.pop(context); // Or pushReplacement if needed
+  });
+});
+        return Container(
+          height: double.infinity,
+          width: double.infinity,
+          color: Colors.white,
+          child: Center(child:Text(
+            permissionError!,
+            style: const TextStyle(
+              color: Colors.red,
+              fontWeight: FontWeight.bold,
+            ),)
+          ),
+        );
+      
+      }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -1028,12 +1140,7 @@ void showAddAppointmentBottomSheet(
                             print(response);
 
                             if (response == null) {
-                             
-
-                           
-
                               Navigator.pop(context);
-                           
 
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
@@ -1043,22 +1150,48 @@ void showAddAppointmentBottomSheet(
                                   backgroundColor: Colors.green,
                                 ),
                               );
-                               flutterLocalNotificationsPlugin.show(
-                                0,
-                                'Appointment Booked',
-                                "Dear ${firstNameController.text.trim()},Your appointment has been successfully booked!",
-                                const NotificationDetails(
-                                  android: AndroidNotificationDetails(
-                                    'appointment_channel_id',
-                                    'Appointments',
-                                    channelDescription:
-                                        'For appointment notifications',
-                                    importance: Importance.max,
-                                    priority: Priority.high,
-                                    icon: '@mipmap/ic_launcher', // Must exist
+                              final userId =
+                                  Supabase.instance.client.auth.currentUser!.id;
+
+                              // 1. Fetch the current user's `notify` setting from the `profiles` table
+                              final profileResponse = await Supabase
+                                  .instance
+                                  .client
+                                  .from('profiles')
+                                  .select('notify')
+                                  .eq('id', userId)
+                                  .maybeSingle();
+                              print(profileResponse);
+
+                              final shouldNotify =
+                                  profileResponse?['notify'] == true;
+                              print(shouldNotify);
+                              if (response == null && shouldNotify) {
+                                flutterLocalNotificationsPlugin.show(
+                                  0,
+                                  'Appointment Booked',
+                                  "Dear ${firstNameController.text.trim()},Your appointment has been successfully booked!",
+                                  const NotificationDetails(
+                                    android: AndroidNotificationDetails(
+                                      'appointment_channel_id',
+                                      'Appointments',
+                                      channelDescription:
+                                          'For appointment notifications',
+                                      importance: Importance.max,
+                                      priority: Priority.high,
+                                      icon: '@mipmap/ic_launcher', // Must exist
+                                      actions: <AndroidNotificationAction>[
+                                        AndroidNotificationAction(
+                                          'approve_action',
+                                          'Approve',
+                                          showsUserInterface: true,
+                                          cancelNotification: true,
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              );
+                                );
+                              }
                             }
                             ;
                           } catch (e) {

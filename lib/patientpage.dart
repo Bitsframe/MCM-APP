@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:medicineapp/dashboard.dart';
 import 'package:medicineapp/location.dart';
 import 'package:medicineapp/navigationbar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class PatientsPage extends StatefulWidget {
-   final String userId;
-  const PatientsPage({super.key,
-   required this.userId,
-  
-  
-  });
+  final String userId;
+  const PatientsPage({super.key, required this.userId});
 
   @override
   State<PatientsPage> createState() => _PatientsPageState();
@@ -17,6 +14,8 @@ class PatientsPage extends StatefulWidget {
 
 class _PatientsPageState extends State<PatientsPage> {
   int _selectedIndex = 1;
+  bool isLoading = true;
+  String? permissionError;
 
   List<Map<String, dynamic>> patients = [];
   List<String> services = [];
@@ -36,6 +35,7 @@ class _PatientsPageState extends State<PatientsPage> {
   }
 
   void _showAddPatientBottomSheet(BuildContext context) {
+    fetchServices();
     final firstNameController = TextEditingController();
     final lastNameController = TextEditingController();
     final phoneController = TextEditingController();
@@ -415,14 +415,122 @@ class _PatientsPageState extends State<PatientsPage> {
   @override
   void initState() {
     super.initState();
-    fetchPatients();
-    fetchServices();
+    Future.delayed(Duration.zero, () {
+      if (mounted) {
+        if (AppData.selectedLocationId == null) {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text("Location Required"),
+              content: const Text("Please select a location first."),
+              actions: [
+                TextButton(
+                  child: const Text("OK"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            DashboardPage(userId: widget.userId),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          );
+        } else {
+          checkAndFetchPatients();
+          fetchPatients();
+          fetchServices();
+        }
+      }
+    });
+  }
+
+  Future<int?> getUserRoleId() async {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) return null;
+
+    final response = await Supabase.instance.client
+        .from('profiles')
+        .select('role_id')
+        .eq('id', userId)
+        .maybeSingle();
+
+    return response?['role_id'];
+  }
+
+  Future<void> checkAndFetchPatients() async {
+    try {
+      final roleId = await getUserRoleId(); // Get role id of the current user
+      print(roleId);
+      if (roleId == null) {
+        setState(() {
+          permissionError = "No role assigned.";
+          isLoading = false;
+        });
+        return;
+      }
+
+      // Fetch permissions for the role
+      final permissionList = await Supabase.instance.client
+          .from('user_permissions')
+          .select('permissions(permission)')
+          .eq('roles', roleId)
+          .eq('permissions.permission', 'Patients'); // will return List
+
+      print("Permission list: $permissionList");
+
+      final hasPermission = permissionList.any(
+        (row) => row['permissions']?['permission'] == 'Patients',
+      );
+
+      if (hasPermission) {
+        //    await fetchPatients();
+        // await fetchServices();
+        setState(() => isLoading = false);
+      } else {
+        setState(() {
+          permissionError = "You cannot use this module.";
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        permissionError = "Error occurred: $e";
+        isLoading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-
+       if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (permissionError != null) {
+     WidgetsBinding.instance.addPostFrameCallback((_) {
+  Future.delayed(const Duration(seconds: 5), () {
+    Navigator.pop(context); // Or pushReplacement if needed
+  });
+});
+      return Container(
+        height: double.infinity,
+        width: double.infinity,
+        color: Colors.white,
+        child: Center(child:Text(
+          permissionError!,
+          style: const TextStyle(
+            color: Colors.red,
+            fontWeight: FontWeight.bold,
+          ),)
+        ),
+      );
+     
+    }
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -461,7 +569,8 @@ class _PatientsPageState extends State<PatientsPage> {
                         GestureDetector(
                           onTap: () async {
                             final result = await showLocationBottomSheet(
-                              context,widget.userId
+                              context,
+                              widget.userId,
                             );
                             if (result != null) {
                               setState(() => AppData.selectedLocation!);
@@ -602,7 +711,7 @@ class _PatientsPageState extends State<PatientsPage> {
                                   .from('allpatients')
                                   .delete()
                                   .eq('id', id);
-                             
+
                               fetchPatients();
                             },
                             icon: Icon(Icons.delete, color: Colors.red),

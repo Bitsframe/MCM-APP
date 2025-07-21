@@ -21,16 +21,16 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  Future<void> saveFcmToken(userId) async {
-    final token = await FirebaseMessaging.instance.getToken();
-    print(token);
-    if (token != null && userId != null) {
-      await Supabase.instance.client
-          .from('profiles')
-          .update({'fcm_token': token})
-          .eq('id', userId);
-    }
-  }
+  // Future<void> saveFcmToken(userId) async {
+  //   final token = await FirebaseMessaging.instance.getToken();
+  //   print(token);
+  //   if (token != null && userId != null) {
+  //     await Supabase.instance.client
+  //         .from('profiles')
+  //         .update({'fcm_token': token})
+  //         .eq('id', userId);
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -157,7 +157,7 @@ class _LoginPageState extends State<LoginPage> {
                           if (response.user != null) {
                             final userId = response.user!.id;
                             print(userId);
-                            saveFcmToken(userId);
+                            // saveFcmToken(userId);
                             // Optional: Fetch profile from 'profiles' table using user ID
                             // final profileData = await Supabase.instance.client
                             //     .from('profiles')
