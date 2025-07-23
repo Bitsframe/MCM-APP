@@ -157,6 +157,29 @@ class _LoginPageState extends State<LoginPage> {
                           if (response.user != null) {
                             final userId = response.user!.id;
                             print(userId);
+
+                            final userEmail = email;
+
+                            print("User ID: $userId");
+                            print("User Email: $userEmail");
+
+                            // ✅ Send login email using Edge Function
+                            final emailResponse = await Supabase
+                                .instance
+                                .client
+                                .functions
+                                .invoke(
+                                  'send-email',
+                                 body: {
+  "to": userEmail,
+  "subject": "Welcome Back",
+  "html": "<p>Hello,</p><p>You have successfully logged in.</p>",
+},
+                                    
+                                );
+
+                            print("Email response: ${emailResponse.data}");
+
                             // saveFcmToken(userId);
                             // Optional: Fetch profile from 'profiles' table using user ID
                             // final profileData = await Supabase.instance.client
@@ -186,6 +209,7 @@ class _LoginPageState extends State<LoginPage> {
                             );
                           }
                         } catch (error) {
+                          print(error);
                           // ❌ Error during sign-in
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(

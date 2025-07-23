@@ -140,7 +140,7 @@ Future<void> approveLatestAppointment() async {
     // 1. Get latest appointment (assuming by created_at)
     final latest = await supabase
         .from('Appoinments')
-        .select('id')
+        .select('id,email_address, first_name, service')
         .eq('user_id', userId)
         .order('created_at', ascending: false)
         .limit(1)
@@ -148,6 +148,9 @@ Future<void> approveLatestAppointment() async {
 
     if (latest != null) {
       final appointmentId = latest['id'];
+ final email = latest['email_address'];
+      final name = latest['first_name'] ?? '';
+      final service = latest['service'] ?? 'your appointment';
 
       // 2. Update isApproved
       await supabase
@@ -156,6 +159,22 @@ Future<void> approveLatestAppointment() async {
           .eq('id', appointmentId);
 
       print("✅ Appointment approved via notification.");
+      final emailResponse = await supabase.functions.invoke(
+        'send-email', // ← replace with your edge function name
+        body: {
+          "to": email,
+          "subject": "Your Appointment is Approved",
+          "html": """
+            <p>Hi $name,</p>
+            <p>Your appointment for <strong>$service</strong> has been approved.</p>
+            <p>We look forward to seeing you!</p>
+            <p>— The Clinic Team</p>
+          """,
+        },
+      );
+
+      print("📧 Email sent: ${emailResponse.data}");
+    
     }
   } catch (e) {
     print("❌ Error approving appointment: $e");

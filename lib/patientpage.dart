@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:medicineapp/dashboard.dart';
 import 'package:medicineapp/location.dart';
 import 'package:medicineapp/navigationbar.dart';
@@ -33,6 +34,147 @@ class _PatientsPageState extends State<PatientsPage> {
       });
     }
   }
+void showPatientDrawer(BuildContext context, int id) {
+  showGeneralDialog(
+    context: context,
+    barrierDismissible: true,
+    barrierLabel: "Patient Detail",
+    transitionDuration: const Duration(milliseconds: 300),
+    pageBuilder: (context, anim1, anim2) {
+      return const SizedBox.shrink(); // Required by builder
+    },
+    transitionBuilder: (context, anim1, anim2, child) {
+      return SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(1, 0),
+          end: Offset.zero,
+        ).animate(anim1),
+        child: Align(
+          alignment: Alignment.centerRight,
+          child: Material(
+            color: Colors.white,
+            elevation: 8,
+            child: Container(
+              width: MediaQuery.of(context).size.width * 0.85,
+              height: MediaQuery.of(context).size.height,
+              padding: const EdgeInsets.all(20),
+              child: FutureBuilder(
+                future: Supabase.instance.client
+                    .from('allpatients')
+                    .select()
+                    .eq('id', id)
+                    .single(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (!snapshot.hasData || snapshot.hasError) {
+                    return const Center(
+                      child: Text("Failed to load patient details."),
+                    );
+                  }
+
+                  final patient = snapshot.data as Map<String, dynamic>;
+                  final formatter = DateFormat('MMM dd, yyyy');
+
+                  return SafeArea(
+                    child: ListView(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Patient Details',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                          ],
+                        ),
+                        const Divider(height: 20),
+                        infoRow("Patient ID", patient['id'].toString()),
+                        if (patient['onsite'] == true)
+                          Container(
+                            margin: const EdgeInsets.symmetric(vertical: 10),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade100,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Text(
+                              'On-site Patient',
+                              style: TextStyle(color: Colors.green),
+                            ),
+                          ),
+                        const SizedBox(height: 10),
+                        infoRow("Full Name",
+                            "${patient['firstname'] ?? ''} ${patient['lastname'] ?? ''}"),
+                        infoRow("Phone", patient['phone'] ?? 'N/A'),
+                        infoRow("Email", patient['email'] ?? 'N/A'),
+                        infoRow("Treatment Type",
+                            patient['treatmenttype'] ?? 'N/A'),
+                        infoRow("Gender", patient['gender'] ?? 'N/A'),
+                        infoRow("Note", patient['note'] ?? 'No note'),
+                        infoRow("Text Opt-in",
+                            (patient['text_opt'] ?? false) ? 'Yes' : 'No'),
+                        infoRow("Email Opt-in",
+                            (patient['email_opt'] ?? false) ? 'Yes' : 'No'),
+                        infoRow("Location ID", patient['locationid'].toString()),
+                        infoRow("Created At",
+                            formatter.format(DateTime.parse(patient['created_at']))),
+                        infoRow("Last Visit",
+                            formatter.format(DateTime.parse(patient['lastvisit']))),
+                        const SizedBox(height: 30),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            // TODO: Edit functionality
+                          },
+                          icon: const Icon(Icons.edit),
+                          label: const Text("Edit"),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
+
+Widget infoRow(String title, String value) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 10.0),
+    child: RichText(
+      text: TextSpan(
+        text: "$title\n",
+        style: const TextStyle(
+            color: Colors.black54, fontSize: 12, fontWeight: FontWeight.w400),
+        children: [
+          TextSpan(
+            text: value,
+            style: const TextStyle(
+                color: Colors.black, fontSize: 16, fontWeight: FontWeight.w500),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+
+
+
 
   void _showAddPatientBottomSheet(BuildContext context) {
     fetchServices();
@@ -717,13 +859,15 @@ class _PatientsPageState extends State<PatientsPage> {
                             icon: Icon(Icons.delete, color: Colors.red),
                           ),
                           // Bottom arrow
-                          const Align(
-                            alignment: Alignment.bottomRight,
-                            child: Icon(
-                              Icons.arrow_forward,
-                              color: Colors.blue,
-                            ),
-                          ),
+                         Align(
+  alignment: Alignment.bottomRight,
+  child: IconButton(
+    icon: const Icon(Icons.arrow_forward, color: Colors.blue),
+    onPressed: () {
+      showPatientDrawer(context, patient['id']);
+    },
+  ),
+),
                         ],
                       ),
                     );

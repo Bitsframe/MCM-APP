@@ -40,6 +40,107 @@ class _AppointmentPageState extends State<AppointmentPage> {
     // `data` comes back as `List<dynamic>`; convert to List<String>
     return data.map<String>((item) => item['title'] as String).toList();
   }
+  void showAppointmentDrawer(BuildContext context, int appointmentId) {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return Align(
+        alignment: Alignment.centerRight,
+        child: FractionallySizedBox(
+          widthFactor: 0.7, // Drawer width (70% of screen)
+          child: Material(
+            color: Colors.white,
+            child: FutureBuilder(
+              future: Supabase.instance.client
+                  .from('Appoinments') // adjust table name
+                  .select()
+                  .eq('id', appointmentId)
+                  .single(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                final appointment = snapshot.data as Map<String, dynamic>;
+
+                return SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: ListView(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              "Appointment Details",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        infoLabel("First Name", appointment['first_name']),
+                        infoLabel("Last Name", appointment['last_name']),
+                        infoLabel("Email", appointment['email_address']),
+                        infoLabel("Sex", appointment['sex']),
+                        infoLabel("Service", appointment['service']),
+                        infoLabel("Locations", appointment['location_id'].toString()),
+                        infoLabel("Phone number", appointment['phone']),
+                        infoLabel("Address", appointment['address']),
+                        infoLabel("Date of Birth", appointment['dob'] ?? 'N/A'),
+                        infoLabel("Date Slot", appointment['date_slot'] ?? 'N/A'),
+                        infoLabel("Time Slot", appointment['date_and_time'] ?? 'N/A'),
+                        infoLabel(
+                          "Created at",
+                          DateFormat('MMMM dd, yyyy h:mm a').format(
+                            DateTime.parse(appointment['created_at']),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        ElevatedButton(
+                          onPressed: () {
+                            // TODO: implement update or edit logic
+                          },
+                          child: const Text("Edit Appointment"),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
+Widget infoLabel(String title, String value) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 6),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+      ],
+    ),
+  );
+}
+
 
   @override
   void initState() {
@@ -146,12 +247,12 @@ class _AppointmentPageState extends State<AppointmentPage> {
           .from('user_permissions')
           .select('permissions(permission)')
           .eq('roles', roleId)
-          .eq('permissions.permission', 'Appointments'); // will return List
+          .eq('permissions.permission', 'Appointment'); // will return List
 
       print("Permission list: $permissionList");
 
       final hasPermission = permissionList.any(
-        (row) => row['permissions']?['permission'] == 'Appointments',
+        (row) => row['permissions']?['permission'] == 'Appointment',
       );
 
       if (hasPermission) {
@@ -462,6 +563,12 @@ class _AppointmentPageState extends State<AppointmentPage> {
                             ),
                             Row(
                               children: [
+                                IconButton(
+  icon: const Icon(Icons.remove_red_eye_outlined, color: Colors.blue),
+  onPressed: () {
+    showAppointmentDrawer(context, appointment['id']);
+  },
+),
                                 IconButton(
                                   icon: Icon(Icons.delete, color: Colors.red),
                                   onPressed: () {
