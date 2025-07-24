@@ -51,6 +51,7 @@ Future<void> main() async {
   }
 await Firebase.initializeApp(
   options: DefaultFirebaseOptions.currentPlatform
+ 
 );
   // Initialize Supabase
   await Supabase.initialize(

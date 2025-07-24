@@ -132,13 +132,13 @@ void showPatientDrawer(BuildContext context, int id) {
                         infoRow("Last Visit",
                             formatter.format(DateTime.parse(patient['lastvisit']))),
                         const SizedBox(height: 30),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            // TODO: Edit functionality
-                          },
-                          icon: const Icon(Icons.edit),
-                          label: const Text("Edit"),
-                        ),
+                        // ElevatedButton.icon(
+                        //   onPressed: () {
+                        //     // TODO: Edit functionality
+                        //   },
+                        //   icon: const Icon(Icons.edit),
+                        //   label: const Text("Edit"),
+                        // ),
                       ],
                     ),
                   );
@@ -745,19 +745,21 @@ Widget infoRow(String title, String value) {
                   ),
                   Row(
                     children: [
-                      GestureDetector(
-                        onTap: () => _showAddPatientBottomSheet(context),
-                        child: Row(
-                          children: const [
-                            Icon(Icons.add_circle_outline, color: Colors.blue),
-                            SizedBox(width: 4),
-                            Text(
-                              "Add New",
-                              style: TextStyle(color: Colors.blue),
-                            ),
-                          ],
-                        ),
-                      ),
+                      // GestureDetector(
+                      //   onTap: () => _showAddPatientBottomSheet(context),
+                      //   child: Row(
+                      //     children: const [
+                      //       Icon(Icons.add_circle_outline, color: Colors.blue),
+                      //       SizedBox(width: 4),
+                      //       Text(
+                      //         "Add New",
+                      //         style: TextStyle(color: Colors.blue),
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
+                     
+                     
                       const SizedBox(width: 12),
                       const Icon(Icons.filter_alt_outlined, size: 30),
                     ],

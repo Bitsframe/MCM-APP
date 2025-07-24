@@ -103,12 +103,12 @@ class _AppointmentPageState extends State<AppointmentPage> {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: () {
-                            // TODO: implement update or edit logic
-                          },
-                          child: const Text("Edit Appointment"),
-                        ),
+                        // ElevatedButton(
+                        //   onPressed: () {
+                        //     // TODO: implement update or edit logic
+                        //   },
+                        //   child: const Text("Edit Appointment"),
+                        // ),
                       ],
                     ),
                   ),
@@ -381,17 +381,17 @@ Widget infoLabel(String title, String value) {
           //   },
           //   child: Text("Test Notification"),
           // ),
-          TextButton.icon(
-            onPressed: () async {
-              final services = await fetchServices(); // ⬅️ wait for the list
-              if (mounted) {
-                showAddAppointmentBottomSheet(context, services);
-                fetchAppointments();
-              }
-            },
-            icon: Icon(Icons.add_circle_outline, color: Colors.blue),
-            label: Text("Add New", style: TextStyle(color: Colors.blue)),
-          ),
+          // TextButton.icon(
+          //   onPressed: () async {
+          //     final services = await fetchServices(); // ⬅️ wait for the list
+          //     if (mounted) {
+          //       showAddAppointmentBottomSheet(context, services);
+          //       fetchAppointments();
+          //     }
+          //   },
+          //   icon: Icon(Icons.add_circle_outline, color: Colors.blue),
+          //   label: Text("Add New", style: TextStyle(color: Colors.blue)),
+          // ),
         ],
       ),
       body: SingleChildScrollView(
@@ -568,44 +568,134 @@ Widget infoLabel(String title, String value) {
   onPressed: () {
     showAppointmentDrawer(context, appointment['id']);
   },
+ ),
+//                                 IconButton(
+//                                   icon: Icon(Icons.delete, color: Colors.red),
+//                                   onPressed: () {
+//                                     showDialog(
+//                                       context: context,
+//                                       builder: (context) => AlertDialog(
+//                                         title: Text("Confirm Delete"),
+//                                         content: Text(
+//                                           "Are you sure you want to delete this appointment?",
+//                                         ),
+//                                         actions: [
+//                                           TextButton(
+//                                             onPressed: () =>
+//                                                 Navigator.of(context).pop(),
+//                                             child: Text("Cancel"),
+//                                           ),
+//                                           ElevatedButton(
+//                                             onPressed: () async {
+//                                               final id = appointment['id'];
+//                                               await supabase
+//                                                   .from('Appoinments')
+//                                                   .delete()
+//                                                   .eq('id', id);
+//                                               Navigator.pop(context);
+//                                               fetchAppointments();
+//                                             },
+//                                             style: ElevatedButton.styleFrom(
+//                                               backgroundColor: Colors.black,
+//                                               foregroundColor: Colors.white,
+//                                             ),
+//                                             child: Text("Delete"),
+//                                           ),
+//                                         ],
+//                                       ),
+//                                     );
+//                                   },
+//                                 ),
+IconButton(
+  icon: Icon(Icons.delete, color: Colors.red),
+  onPressed: () async {
+    final List<dynamic> reasons = await Supabase.instance.client
+        .from('refusal_reasons')
+        .select('reason');
+
+    String? selectedReason;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) => AlertDialog(
+            title: Text("Confirm Delete"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text("Are you sure you want to delete this appointment?"),
+                SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  decoration: InputDecoration(
+                    labelText: 'Select reason',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: reasons
+                      .map((r) => DropdownMenuItem<String>(
+                            value: r['reason'],
+                            child: Text(r['reason']),
+                          ))
+                      .toList(),
+                  value: selectedReason,
+                  onChanged: (val) => setState(() => selectedReason = val),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text("Cancel"),
+              ),
+              ElevatedButton(
+                onPressed: selectedReason == null
+                    ? null
+                    : () async {
+                        final id = appointment['id'];
+                        final name = appointment['first_name'] ?? 'User';
+                        final email = appointment['email_address'];
+                        final service = appointment['service'] ?? 'the service';
+
+                        // 1. Delete appointment
+                        await Supabase.instance.client
+                            .from('Appoinments')
+                            .delete()
+                            .eq('id', id);
+
+                        // 2. Send email with reason
+                        final emailResponse = await Supabase.instance.client.functions.invoke(
+                          'send-email',
+                          body: {
+                            "to": email,
+                            "subject": "Appointment Cancelled",
+                            "html": """
+                              <p>Hi $name,</p>
+                              <p>Your appointment for <strong>$service</strong> has been cancelled.</p>
+                              <p><strong>Reason:</strong> $selectedReason</p>
+                              <p>If you have any questions, feel free to contact us.</p>
+                              <p>— The Clinic Team</p>
+                            """,
+                          },
+                        );
+
+                        print("📧 Email sent: ${emailResponse.data}");
+
+                        Navigator.pop(context);
+                        fetchAppointments();
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  foregroundColor: Colors.white,
+                ),
+                child: Text("Delete"),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  },
 ),
-                                IconButton(
-                                  icon: Icon(Icons.delete, color: Colors.red),
-                                  onPressed: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) => AlertDialog(
-                                        title: Text("Confirm Delete"),
-                                        content: Text(
-                                          "Are you sure you want to delete this appointment?",
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.of(context).pop(),
-                                            child: Text("Cancel"),
-                                          ),
-                                          ElevatedButton(
-                                            onPressed: () async {
-                                              final id = appointment['id'];
-                                              await supabase
-                                                  .from('Appoinments')
-                                                  .delete()
-                                                  .eq('id', id);
-                                              Navigator.pop(context);
-                                              fetchAppointments();
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.black,
-                                              foregroundColor: Colors.white,
-                                            ),
-                                            child: Text("Delete"),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                ),
 
                                 IconButton(
                                   icon: Icon(Icons.edit, color: Colors.blue),
@@ -1339,11 +1429,9 @@ void showEditAppointmentBottomSheet(
   final TextEditingController timeController = TextEditingController();
 
   final List<String> timeSlots = [
-    "09:00 AM",
-    "10:00 AM",
-    "11:00 AM",
-    "01:00 PM",
-    "02:00 PM",
+    "09:00 AM", "9:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", "12:00 PM", "12:30 PM", "1:00 PM",
+    "1:30 PM","2:00 PM","2:30 PM","3:00 PM","3:30 PM","4:00 PM","4:30 PM","5:00 PM","5:30 PM","6:00 PM","6:30 PM","7:00 PM","7:30 PM",
+    "8:00 PM","8:30 PM","9:00 PM","9:30 PM","10:00 PM","10:30 PM","11:00 PM","11:30 PM","12:00 PM",
   ];
 
   final originalDateTime = appointment['date_and_time'] ?? '';
@@ -1456,7 +1544,27 @@ void showEditAppointmentBottomSheet(
                                 .from('Appoinments')
                                 .update({'date_and_time': newDateTime})
                                 .eq('id', appointment['id']);
+  // 2. Send Email Notification
+    final name = appointment['first_name'] ?? 'Patient';
+    final email = appointment['email_address'];
+    final service = appointment['service'] ?? 'your service';
 
+    final emailResponse = await supabase.functions.invoke(
+      'send-email',
+      body: {
+        "to": email,
+        "subject": "Updated Appointment Schedule",
+        "html": """
+          <p>Hi $name,</p>
+          <p>Your appointment for <strong>$service</strong> has been rescheduled.</p>
+          <p><strong>New Date & Time:</strong> $newDateTime</p>
+          <p>If you have any questions, please contact us.</p>
+          <p>— The Clinic Team</p>
+        """,
+      },
+    );
+
+    print("📧 Email sent: ${emailResponse.data}");
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(

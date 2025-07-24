@@ -21,16 +21,16 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  // Future<void> saveFcmToken(userId) async {
-  //   final token = await FirebaseMessaging.instance.getToken();
-  //   print(token);
-  //   if (token != null && userId != null) {
-  //     await Supabase.instance.client
-  //         .from('profiles')
-  //         .update({'fcm_token': token})
-  //         .eq('id', userId);
-  //   }
-  // }
+  Future<void> saveFcmToken(userId) async {
+    final token = await FirebaseMessaging.instance.getToken();
+    print(token);
+    if (token != null && userId != null) {
+      await Supabase.instance.client
+          .from('profiles')
+          .update({'fcm_token': token})
+          .eq('id', userId);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -180,15 +180,14 @@ class _LoginPageState extends State<LoginPage> {
 
                             print("Email response: ${emailResponse.data}");
 
-                            // saveFcmToken(userId);
-                            // Optional: Fetch profile from 'profiles' table using user ID
-                            // final profileData = await Supabase.instance.client
-                            //     .from('profiles')
-                            //     .select()
-                            //     .eq('id', userId)
-                            //     .single();
+                            saveFcmToken(userId);
+                          
+                            final profileData = await Supabase.instance.client
+                                .from('profiles')
+                                .select()
+                                .eq('id', userId)
+                                .single();
 
-                            // ✅ Navigate to dashboard and pass user ID or profileData
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
