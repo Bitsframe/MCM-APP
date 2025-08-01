@@ -15,7 +15,7 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  int _selectedIndex = 2;
+  int _selectedIndex = 0;
   String selectedLocation = "Pasadena";
   String userName = "Mack";
   bool isLoading = true;
@@ -240,8 +240,8 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   void _showProfileOptions(BuildContext context) {
-      bool notificationsEnabled = false;
-  bool isLoaded = false;
+    bool notificationsEnabled = false;
+    bool isLoaded = false;
     final TextEditingController currentPasswordController =
         TextEditingController();
     final TextEditingController newPasswordController = TextEditingController();
@@ -253,7 +253,10 @@ class _DashboardPageState extends State<DashboardPage> {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text('Change Password'),
+          title: Text(
+            'Change Password',
+            style: TextStyle(fontWeight: FontWeight.w700),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -272,7 +275,7 @@ class _DashboardPageState extends State<DashboardPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('Cancel'),
+              child: Text('Cancel', style: TextStyle(color: const Color(0xFF0057FF),)),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -317,7 +320,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   );
                 }
               },
-              child: Text('Save'),
+              child: Text('Save', style: TextStyle(color: Colors.blue)),
             ),
           ],
         ),
@@ -332,46 +335,45 @@ class _DashboardPageState extends State<DashboardPage> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
-          
-          Future<void> _loadPreference() async {
-            final userId = Supabase.instance.client.auth.currentUser?.id;
-            if (userId == null) return;
+            Future<void> _loadPreference() async {
+              final userId = Supabase.instance.client.auth.currentUser?.id;
+              if (userId == null) return;
 
-            final response = await Supabase.instance.client
-                .from('profiles')
-                .select('notify')
-                .eq('id', userId)
-                .maybeSingle();
+              final response = await Supabase.instance.client
+                  .from('profiles')
+                  .select('notify')
+                  .eq('id', userId)
+                  .maybeSingle();
 
-            print("Supabase notify response: $response");
+              print("Supabase notify response: $response");
 
-            if (response != null && response['notify'] != null) {
-              setState(() {
-                notificationsEnabled = response['notify'] as bool;
-                isLoaded = true;
-              });
+              if (response != null && response['notify'] != null) {
+                setState(() {
+                  notificationsEnabled = response['notify'] as bool;
+                  isLoaded = true;
+                });
+              }
             }
-          }
 
-          Future<void> _updatePreference(bool value) async {
-            final userId = Supabase.instance.client.auth.currentUser?.id;
-            if (userId == null) return;
+            Future<void> _updatePreference(bool value) async {
+              final userId = Supabase.instance.client.auth.currentUser?.id;
+              if (userId == null) return;
 
-            setState(() {
-              notificationsEnabled = value;
-            });
+              setState(() {
+                notificationsEnabled = value;
+              });
 
-            await Supabase.instance.client
-                .from('profiles')
-                .update({'notify': value})
-                .eq('id', userId);
+              await Supabase.instance.client
+                  .from('profiles')
+                  .update({'notify': value})
+                  .eq('id', userId);
 
-            print("Updated notify to: $value");
-          }
+              print("Updated notify to: $value");
+            }
 
-          if (!isLoaded) {
-            _loadPreference();
-          }
+            if (!isLoaded) {
+              _loadPreference();
+            }
             return Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -379,27 +381,45 @@ class _DashboardPageState extends State<DashboardPage> {
                 children: [
                   const Icon(Icons.drag_handle, color: Colors.grey),
                   const SizedBox(height: 8),
-                  const Text(
-                    "Account Settings",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 20),
+                  Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Account Settings",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+                ),
+                IconButton(
+                  icon: Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const Divider(),
+            const SizedBox(height: 25),
 
                   // Notification toggle
                   SwitchListTile(
                     value: notificationsEnabled,
+                    activeColor: const Color(0xFF0057FF),
                     onChanged: (value) {
                       _updatePreference(value);
                     },
                     title: const Text("Notifications"),
-                    secondary: const Icon(Icons.notifications),
+                    secondary: const Icon(
+                      Icons.notifications,
+                      color: const Color(0xFF0057FF),
+                    ),
                   ),
                   const SizedBox(height: 8),
-
-                  ElevatedButton(
-                    onPressed: () => _showChangePasswordDialog(context),
-                    child: const Text('Change Password'),
+                  ListTile(
+                    onTap: () => _showChangePasswordDialog(context),
+                    title: const Text('Change Password'),
+                    leading: Icon(Icons.lock_open, color: const Color(0xFF0057FF),),
                   ),
+                  // ElevatedButton(
+                  //   onPressed: () => _showChangePasswordDialog(context),
+                  //   child: const Text('Change Password'),
+                  // ),
                   const SizedBox(height: 8),
 
                   // Logout button
@@ -446,48 +466,128 @@ class _DashboardPageState extends State<DashboardPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Image.asset(
-                          'assets/images/medicineicon.png',
-                          height: 100,
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+
+                        
+                          Text("\n Hello,", style: TextStyle(fontSize: 24,fontWeight: FontWeight.w500)),
+                    isLoading
+                        ? CircularProgressIndicator()
+                        : Text(
+                            userName,
+                            style: TextStyle(
+                              fontSize: 35,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                            ],
                         ),
+                        // Image.asset(
+                        //   'assets/images/medicineicon1.png',
+                        //   height: 100,
+                        // ),
                         GestureDetector(
                           onTap: () async {
                             final result = await showLocationBottomSheet(
                               context,
                               widget.userId,
                             );
+
                             if (result != null) {
                               setState(() {
+                                 
                                 selectedLocation = AppData.selectedLocation!;
+                                 Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DashboardPage(userId: widget.userId),
+        ),
+      );
                               });
                             }
+                           
                           },
                           child: Row(
                             children: [
-                              Text(
-                                AppData.selectedLocation ??
-                                    'No location selected',
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  decoration: TextDecoration.underline,
-                                  fontSize: 10,
-                                  color: Colors.black87,
-                                ),
-                              ),
+
+                              // Text(
+                              //   AppData.selectedLocation ??
+                              //       'No location selected',
+                              //   overflow: TextOverflow.ellipsis,
+                              //   style: TextStyle(
+                              //     decoration: TextDecoration.underline,
+                              //     fontSize: 10,
+                              //     color: Colors.black87,
+                              //   ),
+                              // ),
                               SizedBox(width: 8),
-                              Icon(
-                                Icons.location_pin,
-                                size: 24,
-                                color: Colors.black,
-                              ),
+                              Container(
+  padding: const EdgeInsets.all(3),
+  decoration: BoxDecoration(
+    color: Colors.white,
+     border: Border.all(
+      color: Color(0xFF0057FF),
+      width: 1,
+    ),
+    borderRadius: BorderRadius.circular(8),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.blue.withOpacity(0.2),
+        blurRadius: 6,
+        offset: Offset(0, 4),
+      ),
+    ],
+  ),
+  child: Icon(
+    Icons.location_pin,
+    size: 24,
+    color: Color(0xFF0057FF),
+  ),
+),
+                              // Icon(
+                              //   Icons.location_pin,
+                              //   size: 24,
+                              //   color:  const Color(0xFF0057FF),
+                              // ),
                               const SizedBox(width: 12),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.person,
-                                  color: Colors.black,
-                                ),
-                                onPressed: () => _showProfileOptions(context),
-                              ),
+                              InkWell(
+                                onTap:()=>   _showProfileOptions(context),
+                                child: 
+                            
+                    Container(
+  padding: const EdgeInsets.all(3),
+  decoration: BoxDecoration(
+    color: Colors.white,
+     border: Border.all(
+      color: Color(0xFF0057FF),
+      width: 1,
+    ),
+    borderRadius: BorderRadius.circular(8),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.blue.withOpacity(0.2),
+        blurRadius: 6,
+        offset: Offset(0, 4),
+      ),
+    ],
+  ),
+  child: Icon(
+      Icons.person,
+      color: Color(0xFF0057FF),
+    ),
+   
+  ),
+),
+                          
+                              // IconButton(
+                              //   icon: const Icon(
+                              //     Icons.person,
+                              //     color:  const Color(0xFF0057FF),
+                              //   ),
+                              //   onPressed: () => _showProfileOptions(context),
+                              // ),
                             ],
                           ),
                         ),
@@ -497,21 +597,62 @@ class _DashboardPageState extends State<DashboardPage> {
                     SizedBox(height: 24),
 
                     // Welcome text and user name
-                    Text("Hello,", style: TextStyle(fontSize: 24)),
-                    isLoading
-                        ? CircularProgressIndicator()
-                        : Text(
-                            userName,
-                            style: TextStyle(
-                              fontSize: 40,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                    // Text("Hello,", style: TextStyle(fontSize: 24)),
+                    // isLoading
+                    //     ? CircularProgressIndicator()
+                    //     : Text(
+                    //         userName,
+                    //         style: TextStyle(
+                    //           fontSize: 40,
+                    //           fontWeight: FontWeight.bold,
+                    //         ),
+                    //       ),
 
                     SizedBox(height: 16),
 
+               Container(
+  width: double.infinity,
+decoration: BoxDecoration(
+  borderRadius: BorderRadius.circular(20),
+      color: const Color(0xFFF1F6FF),
+),
+
+                /// LOCATION
+               child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    
+                    Row(
+                      children: [
+   const SizedBox(width: 3),
+                   
+                    Icon(Icons.location_on,size: 25,color:  const Color(0xFF0057FF),),
+                    SizedBox(width: 4),
+                    Text(
+                      "Location",
+                      style: TextStyle(fontWeight: FontWeight.w600,),
+                    ),
+                 ],),
+                  const  SizedBox(width: 4),
+                Text(' '),
+                Text(  
+                    AppData.selectedLocation ?? '  No location selected',
+                    style: const TextStyle(fontWeight: FontWeight.bold),textAlign: TextAlign.left,
+                  ),
+                SizedBox(height: 3,)
+                  ],
+                ),
+),
+            SizedBox(height: 16),
+
                     // New Location Multi-Select Button
                     ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        side: BorderSide(
+                          color: const Color(0xFF0057FF),
+                        )
+                      ),
                       onPressed: () async {
                         final supabase = Supabase.instance.client;
 
@@ -580,14 +721,21 @@ class _DashboardPageState extends State<DashboardPage> {
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        const Text(
-                                          "Select Locations",
-                                          style: TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        const Divider(),
+                                        Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Select Locations",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+                ),
+                IconButton(
+                  icon: Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const Divider(),
+            const SizedBox(height: 25),
 
                                         CheckboxListTile(
                                           title: const Text("Select All"),
@@ -628,10 +776,16 @@ class _DashboardPageState extends State<DashboardPage> {
                                                     locations.length;
                                               });
                                             },
+
+                                            activeColor: const Color(0xFF0057FF),
+  controlAffinity: ListTileControlAffinity.trailing,
                                           );
                                         }).toList(),
 
                                         SizedBox(height: 16),
+                                        Row(
+                                            mainAxisAlignment: MainAxisAlignment.end,
+                                            children: [
                                         ElevatedButton(
                                           onPressed: () async {
                                             setState(() {
@@ -645,8 +799,13 @@ class _DashboardPageState extends State<DashboardPage> {
                                             await fetchTotalSalesAmount();
                                             Navigator.pop(context);
                                           },
-                                          child: const Text("Done"),
+                                         
+                                              
+
+child:Text("Done",style: TextStyle(color: const Color(0xFF0057FF),),),),
+                                          ] 
                                         ),
+                                        
                                       ],
                                     ),
                                   );
@@ -663,8 +822,8 @@ class _DashboardPageState extends State<DashboardPage> {
                           );
                         }
                       },
-                      icon: Icon(Icons.list),
-                      label: Text("Select Locations"),
+                      icon: Icon(Icons.location_on_outlined,color:const Color(0xFF0057FF),),
+                      label: Text("Select Locations",style: TextStyle(color:  const Color(0xFF0057FF)),),
                     ),
 
                     SizedBox(height: 16),
@@ -710,57 +869,95 @@ class _DashboardPageState extends State<DashboardPage> {
                               )
                             : GestureDetector(
                                 onTap: _refreshDashboardData,
-                                child: Icon(Icons.refresh),
+                                child: Icon(Icons.refresh,color:const Color(0xFF0057FF) ,),
                               ),
                       ],
                     ),
 
                     SizedBox(height: 20),
+                   GridView.count(
+          crossAxisCount: 2,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          children: [
+            _buildDashboardTile(
+              label: "Patients",
+              icon: Icons.person_outline,
+              value: "$patientsCount",
+              onTap: () => _onTileTapped("Patients"),
+            ),
+            _buildDashboardTile(
+              label: "Sales",
+              icon: Icons.attach_money,
+              value: "\$ ${formatNumberCompact(totalSalesAmount)}",
+              onTap: () => _onTileTapped("Sales"),
+            ),
+            _buildDashboardTile(
+              label: "Appointments",
+              icon: Icons.calendar_today_outlined,
+              value: "$appointmentsCount",
+              onTap: () => _onTileTapped("Appointments"),
+            ),
+            _buildDashboardTile(
+              label: "Products",
+              icon: Icons.shopping_basket_outlined,
+              value: "\$ ${formatNumberCompact(totalInventoryQuantity)}",
+              onTap: () => _onTileTapped("Products"),
+            ),
+          ],
+        ),
+      
+   
 
-                    GridView.count(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      children: [
-                        _buildDashboardTile(
-                          label: "Patients",
-                          icon: Icons.groups,
-                          value: "$patientsCount",
-                          color: Colors.pink.shade50,
-                          textColor: Colors.pink,
-                          onTap: () => _onTileTapped("Patients"),
-                        ),
-                        _buildDashboardTile(
-                          label: "Sales",
-                          icon: Icons.point_of_sale,
-                          value: "\$ ${formatNumberCompact(totalSalesAmount)}",
-                          // value: "\$ ${totalSalesAmount.toStringAsFixed(1)}",
-                          color: Colors.purple.shade50,
-                          textColor: Colors.purple,
-                          onTap: () => _onTileTapped("Sales"),
-                        ),
-                        _buildDashboardTile(
-                          label: "Appointments",
-                          icon: Icons.calendar_month,
-                          value: "$appointmentsCount",
-                          color: Colors.cyan.shade50,
-                          textColor: Colors.teal,
-                          onTap: () => _onTileTapped("Appointments"),
-                        ),
-                        _buildDashboardTile(
-                          label: "Products",
-                          icon: Icons.inventory,
-                          value:
-                              "\$ ${formatNumberCompact(totalInventoryQuantity)}",
-                          // value: "$totalInventoryQuantity",
-                          color: Colors.blue.shade50,
-                          textColor: Colors.blue,
-                          onTap: () => _onTileTapped("Products"),
-                        ),
-                      ],
-                    ),
+
+                    // GridView.count(
+                    //   crossAxisCount: 2,
+                    //   crossAxisSpacing: 16,
+                    //   mainAxisSpacing: 16,
+                    //   shrinkWrap: true,
+                    //   physics: NeverScrollableScrollPhysics(),
+                    //   children: [
+                    //     _buildDashboardTile(
+                    //       label: "Patients",
+                    //       icon: Icons.groups,
+                    //       value: "$patientsCount",
+                    //       color: Colors.pink.shade50,
+                    //       textColor: Colors.pink,
+                    //       onTap: () => _onTileTapped("Patients"),
+                    //     ),
+                    //     _buildDashboardTile(
+                    //       label: "Sales",
+                    //       icon: Icons.point_of_sale,
+                    //       value: "\$ ${formatNumberCompact(totalSalesAmount)}",
+                    //       // value: "\$ ${totalSalesAmount.toStringAsFixed(1)}",
+                    //       color: Colors.purple.shade50,
+                    //       textColor: Colors.purple,
+                    //       onTap: () => _onTileTapped("Sales"),
+                    //     ),
+                    //     _buildDashboardTile(
+                    //       label: "Appointments",
+                    //       icon: Icons.calendar_month,
+                    //       value: "$appointmentsCount",
+                    //       color: Colors.cyan.shade50,
+                    //       textColor: Colors.teal,
+                    //       onTap: () => _onTileTapped("Appointments"),
+                    //     ),
+                    //     _buildDashboardTile(
+                    //       label: "Products",
+                    //       icon: Icons.inventory,
+                    //       value:
+                    //           "\$ ${formatNumberCompact(totalInventoryQuantity)}",
+                    //       // value: "$totalInventoryQuantity",
+                    //       color: Colors.blue.shade50,
+                    //       textColor: Colors.blue,
+                    //       onTap: () => _onTileTapped("Products"),
+                    //     ),
+                    //   ],
+                    // ),
+                
+                
                   ],
                 ),
               ),
@@ -779,13 +976,10 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
     );
   }
-
-  Widget _buildDashboardTile({
+   Widget _buildDashboardTile({
     required String label,
     required IconData icon,
     required String value,
-    required Color color,
-    required Color textColor,
     required VoidCallback onTap,
   }) {
     return GestureDetector(
@@ -793,32 +987,57 @@ class _DashboardPageState extends State<DashboardPage> {
       child: Container(
         padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(24),
+          color: Color(0xFFEAF2FD), // Soft pastel blue background
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+           BoxShadow(
+        color: Colors.blue.withOpacity(0.2),
+        blurRadius: 6,
+        offset: Offset(0, 4),
+      ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(icon, color: textColor),
-                SizedBox(width: 8),
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: textColor,
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Text(
+                    value,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF0A4DD5), // Strong blue
+                    ),
                   ),
                 ),
+               Container(
+  decoration: BoxDecoration(
+    color: const Color.fromARGB(255, 175, 205, 246), // Blue background
+    borderRadius: BorderRadius.circular(250), // Rounded corners
+  ),
+  child:
+                IconButton(
+                  icon:Icon(icon,
+                  color: Color(0xFF0A4DD5),
+                  size: 24,
+                  
+                  
+                  ),
+                  
+                  onPressed: (){},
+                ),
+               )
               ],
             ),
             Spacer(),
             Text(
-              value,
+              label,
               style: TextStyle(
-                fontSize: 28,
-                color: textColor,
-                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: Color(0xFF0A4DD5),
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
@@ -827,3 +1046,53 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 }
+
+
+
+//   Widget _buildDashboardTile({
+//     required String label,
+//     required IconData icon,
+//     required String value,
+//     required Color color,
+//     required Color textColor,
+//     required VoidCallback onTap,
+//   }) {
+//     return GestureDetector(
+//       onTap: onTap,
+//       child: Container(
+//         padding: EdgeInsets.all(16),
+//         decoration: BoxDecoration(
+//           color: color,
+//           borderRadius: BorderRadius.circular(24),
+//         ),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             Row(
+//               children: [
+//                 Icon(icon, color: textColor),
+//                 SizedBox(width: 8),
+//                 Text(
+//                   label,
+//                   style: TextStyle(
+//                     color: textColor,
+//                     fontWeight: FontWeight.bold,
+//                   ),
+//                 ),
+//               ],
+//             ),
+//             Spacer(),
+//             Text(
+//               value,
+//               style: TextStyle(
+//                 fontSize: 28,
+//                 color: textColor,
+//                 fontWeight: FontWeight.bold,
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }

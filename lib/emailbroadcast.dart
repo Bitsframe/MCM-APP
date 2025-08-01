@@ -10,14 +10,7 @@ import 'package:http/http.dart';
 class EmailTemplateScreen extends StatefulWidget {
   final String userId;
 
-
- 
-  
- 
-  const EmailTemplateScreen({super.key,
-   required this.userId,
-  
-  });
+  const EmailTemplateScreen({super.key, required this.userId});
 
   @override
   State<EmailTemplateScreen> createState() => _EmailTemplateScreenState();
@@ -153,172 +146,253 @@ class _EmailTemplateScreenState extends State<EmailTemplateScreen> {
     // const emailApiUrl =
     //     'https://send-resent-mail-646827ff1a0b.herokuapp.com/send';
 
-   Future<void> sendEmailToPatients({
-  required List<String> recipients,   // e.g. ['a@x.com', 'b@y.com']
-  required String subject,
-  required String htmlBody,           // full HTML you built
-}) async {
-  const endpoint =
-      'https://send-resent-mail-646827ff1a0b.herokuapp.com/send-batch-email';
+    Future<void> sendEmailToPatients({
+      required List<String> recipients, // e.g. ['a@x.com', 'b@y.com']
+      required String subject,
+      required String htmlBody, // full HTML you built
+    }) async {
+      const endpoint =
+          'https://send-resent-mail-646827ff1a0b.herokuapp.com/send-batch-email';
 
-  final payload = {
-    "from": "noreply@alerts.myclinicmd.com",   // must match backend allow‑list
-    "recipients": recipients,                 // <-- NOT  "to"
-    "subject": subject,
-    "html": htmlBody,                         // <-- NOT  "body"
-  };
+      final payload = {
+        "from":
+            "noreply@alerts.myclinicmd.com", // must match backend allow‑list
+        "recipients": recipients, // <-- NOT  "to"
+        "subject": subject,
+        "html": htmlBody, // <-- NOT  "body"
+      };
 
-  final res = await http.post(
-    Uri.parse(endpoint),
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode(payload),
-  );
-
-  if (res.statusCode == 200) {
-    debugPrint('✅ Emails sent!');
-  } else {
-    debugPrint('❌ ${res.statusCode} – ${res.body}');
-    throw Exception('Email‑service error');
-  }
-}
-
-    void _showPatientSelectionSheet(BuildContext context) {
-      showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        builder: (_) {
-          return StatefulBuilder(
-            builder: (context, setModalState) {
-              return Padding(
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom,
-                  left: 16,
-                  right: 16,
-                  top: 24,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: searchController,
-                      onChanged: (value) {
-                        setState(() {
-                          filteredPatients = patients
-                              .where(
-                                (p) => (p['email'] ?? '')
-                                    .toLowerCase()
-                                    .contains(value.toLowerCase()),
-                              )
-                              .toList();
-                        });
-                      },
-                      decoration: const InputDecoration(
-                        labelText: "Search by email",
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    CheckboxListTile(
-                      title: const Text("Select All"),
-                      value: selectAll,
-                      onChanged: (checked) {
-                        setState(() {
-                          selectAll = checked!;
-                          selectedEmails = checked
-                              ? filteredPatients
-                                    .map((p) => p['email'] as String)
-                                    .toList()
-                              : [];
-                          print(selectedEmails);
-                        });
-                      },
-                    ),
-                    const Divider(),
-                    SizedBox(
-                      height: 300,
-                      child: ListView.builder(
-                        itemCount: filteredPatients.length,
-                        itemBuilder: (_, index) {
-                          final email =
-                              filteredPatients[index]['email'] as String;
-                          final name =
-                              filteredPatients[index]['firstname'] ?? 'Unnamed';
-                          final isChecked = selectedEmails.contains(email);
-                          return CheckboxListTile(
-                            title: Text('$name ($email)'),
-                            value: isChecked,
-                            onChanged: (checked) {
-                              setState(() {
-                                if (checked == true) {
-                                  selectedEmails.add(email);
-                                } else {
-                                  selectedEmails.remove(email);
-                                }
-                                print(selectedEmails);
-                                selectAll =
-                                    selectedEmails.length ==
-                                    filteredPatients.length;
-                              });
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(onPressed: () {}, child: const Text("Done")),
-                  ],
-                ),
-              );
-            },
-          );
-        },
+      final res = await http.post(
+        Uri.parse(endpoint),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(payload),
       );
+
+      if (res.statusCode == 200) {
+        debugPrint('✅ Emails sent!');
+      } else {
+        debugPrint('❌ ${res.statusCode} – ${res.body}');
+        throw Exception('Email‑service error');
+      }
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            icon: Icon(Icons.arrow_back),
-          ),
-        ],
-      ),
+    void _showPatientSelectionSheet(BuildContext context) {
+  bool selectAll = false;
 
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (_) {
+      return StatefulBuilder(
+        builder: (context, setModalState) {
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom +30,
+              left: 30,
+              right: 30,
+              top: 30,
+            ),  child: SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.85,
+                ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      "Select Patients",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+                const Divider(),
+                const SizedBox(height: 25),
+
+                // Search bar
+                TextField(
+                  controller: searchController,
+                  onChanged: (value) {
+                    setState(() {
+                      filteredPatients = patients
+                          .where((p) => (p['email'] ?? '')
+                              .toLowerCase()
+                              .contains(value.toLowerCase()))
+                          .toList();
+                    });
+
+                    setModalState(() {
+                      // Also update selectAll flag
+                      selectAll = selectedEmails.length == filteredPatients.length;
+                    });
+                  },
+                  decoration: const InputDecoration(
+                    labelText: "Search by email",
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFF0057FF)),
+                    ),
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Select All
+                CheckboxListTile(
+                  title: const Text("Select All"),
+                  value: selectAll,
+                  onChanged: (checked) {
+                    setState(() {
+                      selectAll = checked!;
+                      selectedEmails = checked
+                          ? filteredPatients
+                              .map((p) => p['email'] as String)
+                              .toList()
+                          : [];
+                    });
+
+                    setModalState(() {}); // Refresh modal state
+                  },
+                ),
+                const Divider(),
+
+                // Patient list
+                SizedBox(
+                  height: 300,
+                  child: ListView.builder(
+                    itemCount: filteredPatients.length,
+                    itemBuilder: (_, index) {
+                      final email = filteredPatients[index]['email'] as String;
+                      final name =
+                          filteredPatients[index]['firstname'] ?? 'Unnamed';
+                      final isChecked = selectedEmails.contains(email);
+
+                      return CheckboxListTile(
+                        title: Text('$name ($email)'),
+                        value: isChecked,
+                        activeColor: const Color(0xFF0057FF),
+                        controlAffinity: ListTileControlAffinity.trailing,
+                        onChanged: (bool? checked) {
+                          setState(() {
+                            if (checked == true) {
+                              selectedEmails.add(email);
+                            } else {
+                              selectedEmails.remove(email);
+                            }
+
+                            // Update selectAll flag
+                            selectAll = selectedEmails.length ==
+                                filteredPatients.length;
+                          });
+
+                          setModalState(() {}); // Refresh modal state
+                        },
+                      );
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Done button
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      // backgroundColor: const Color(0xFF0057FF),
+                    ),
+                    child: const Text(
+                      "Done",
+                      style: TextStyle(color: const Color(0xFF0057FF),),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )
+        
+            )
+            
+            );
+        },
+      );
+    },
+  );
+}
+
+    return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              SizedBox(height: 50),
+              Row(
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.arrow_back, size: 28, color: Colors.black),
+
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                  Text('Back', style: TextStyle(color: Colors.black)),
+                  SizedBox(width: 55, height: 10),
+                  Text(
+                    "Broadcast",
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 30),
               // --- FORM SECTION ---
-              const Text("Target Patients *"),
+              const Text(
+                "Target Patients *",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 16),
               GestureDetector(
                 onTap: () => _showPatientSelectionSheet(context),
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: const Color(0xFF0057FF)),
+                    borderRadius: BorderRadius.circular(25),
                   ),
                   child: Text(
                     selectedEmails.isEmpty
                         ? 'Select patients'
                         : '${selectedEmails.length} selected',
-                    style: const TextStyle(fontSize: 16),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: const Color(0xFF0057FF),
+                    ),
                   ),
                 ),
               ),
 
               const SizedBox(height: 16),
 
-              const Text("Email Template *"),
+              const Text(
+                "Email Template *",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
                 value: selectedTemplate,
@@ -339,7 +413,10 @@ class _EmailTemplateScreenState extends State<EmailTemplateScreen> {
               ),
               const SizedBox(height: 16),
 
-              const Text("Write Subject *"),
+              const Text(
+                "Write Subject *",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 8),
               TextFormField(
                 controller: subjectController,
@@ -350,7 +427,10 @@ class _EmailTemplateScreenState extends State<EmailTemplateScreen> {
               ),
               const SizedBox(height: 16),
 
-              const Text("Name"),
+              const Text(
+                "Name",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 8),
               TextFormField(
                 controller: nameController,
@@ -361,7 +441,10 @@ class _EmailTemplateScreenState extends State<EmailTemplateScreen> {
               ),
               const SizedBox(height: 16),
 
-              const Text("Price"),
+              const Text(
+                "Price",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 8),
               TextFormField(
                 controller: priceController,
@@ -376,7 +459,7 @@ class _EmailTemplateScreenState extends State<EmailTemplateScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
+                    backgroundColor: const Color(0xFF0057FF),
                   ),
 
                   onPressed: () async {
@@ -465,30 +548,50 @@ $sender
 
               const SizedBox(height: 32),
 
-              // --- PREVIEW SECTION ---
+              //               Center(
+              //                 child:
+
+              //  Container(
+              //       padding: const EdgeInsets.all(2), // Border width
+              //       decoration: BoxDecoration(
+              //         color: const Color(0xFF0057FF), // Dark blue border
+              //         shape: BoxShape.circle,
+              //       ),
+              //       child: CircleAvatar(
+              //         radius: 40,
+
+              //         backgroundImage: AssetImage('assets/images/stethoscope.png'),
+              //       ),
+              //     ),
+              //                     ),      // --- PREVIEW SECTION ---
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: Colors.grey[100],
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: const Color(0xFF0057FF), width: 2),
                 ),
+
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      "preview",
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Image.asset(
+                          "assets/images/medicineicon1.png",
+                          width: 80,
+                          height: 100,
+                        ),
+                        const SizedBox(width: 150),
+                        const Text(
+                          "Preview",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 12),
-                    Center(
-                      child: Image.asset(
-                        "assets/images/medicineicon.png",
-                        width: 60,
-                        height: 60,
-                      ),
-                    ),
+
                     const SizedBox(height: 20),
                     Text(
                       templateContent[selectedTemplate]?['greeting'] ?? '',
@@ -505,8 +608,12 @@ $sender
                     ),
                     const SizedBox(height: 20),
                     const Divider(),
+                    // Text(
+                    //   "Best Regards,\n${nameController.text.trim().isEmpty ? (templateContent[selectedTemplate]?['sender'] ?? '') : nameController.text.trim()}",
+                    //   style: const TextStyle(fontSize: 16),
+                    // ),
                     Text(
-                      "Best,\n${nameController.text.trim().isEmpty ? (templateContent[selectedTemplate]?['sender'] ?? '') : nameController.text.trim()}",
+                      "Best Regards,\n Clinica San Miguel Team",
                       style: const TextStyle(fontSize: 16),
                     ),
                   ],

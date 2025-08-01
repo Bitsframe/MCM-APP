@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:medicineapp/Splashscreen.dart';
 import 'package:medicineapp/appointments.dart';
 import 'package:medicineapp/firebase_options.dart';
 
@@ -77,7 +78,7 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Arial', // You can use a custom font if needed
       ),
       // home: const MyHomePage(),
-      home: MyHomePage(),
+      home: splashscreen(),
     );
   }
 }
@@ -93,16 +94,31 @@ class MyHomePage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Container(
+             Container(
               child: Image.asset(
-                'assets/images/medicineimage.png',
-                height: 300,
+                'assets/images/Group.png',
+                height: 200,
               ),
             ),
+            SizedBox(height: 50,),
+            Text('MyClinic MD',style: TextStyle(fontSize: 24,fontWeight: FontWeight.w900),),
+            SizedBox(height: 10,),
+            Text('A Comprehensive Clinic Care',style: TextStyle(fontSize: 15,fontWeight: FontWeight.w500,color: Colors.grey),),
+       
+            Text('Management Services',style: TextStyle(fontSize: 15,fontWeight: FontWeight.w500,color: Colors.grey),),
+            // Container(
+            //   child: Image.asset(
+            //     'assets/images/medicineimage.png',
+            //     height: 300,
+            //   ),
+            // ),
 
             SizedBox(height: 40),
 
-            ElevatedButton(
+            SizedBox(
+  width: 250, // Set desired width
+  height: 50, // Set desired height
+  child:ElevatedButton(
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
@@ -110,7 +126,8 @@ class MyHomePage extends StatelessWidget {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
+                backgroundColor: const Color(0xFF0057FF),
+               
                 padding: const EdgeInsets.symmetric(
                   horizontal: 40,
                   vertical: 15,
@@ -123,7 +140,7 @@ class MyHomePage extends StatelessWidget {
                 "Let's Get In",
                 style: TextStyle(fontSize: 18, color: Colors.white),
               ),
-            ),
+            ),)
           ],
         ),
       ),

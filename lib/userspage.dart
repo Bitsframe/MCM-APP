@@ -67,41 +67,41 @@ class _UserPageState extends State<UserPage> {
           child: Column(
             children: [
               // Top Logo and Profile Icon
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Image.asset('assets/images/medicineicon.png', height: 80),
-                  Row(
-                    children: [
-                      Text(
-                        AppData.selectedLocation ?? 'No location selected',
-                        style: const TextStyle(
-                          decoration: TextDecoration.underline,
-                          fontSize: 12,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(width: 10),
-                      GestureDetector(
-                        onTap: () async {
-                          final result = await showLocationBottomSheet(
-                            context,
-                            widget.userId,
-                          );
-                          if (result != null) {
-                            setState(() {
-                              selectedLocation = AppData.selectedLocation!;
-                            });
-                          }
-                        },
-                        child: const Icon(Icons.location_pin, size: 30),
-                      ),
-                      const SizedBox(width: 10),
-                      const Icon(Icons.person, size: 30),
-                    ],
-                  ),
-                ],
-              ),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //   children: [
+              //     // Image.asset('assets/images/medicineicon.png', height: 80),
+              //     Row(
+              //       // children: [
+              //       //   Text(
+              //       //     AppData.selectedLocation ?? 'No location selected',
+              //       //     style: const TextStyle(
+              //       //       decoration: TextDecoration.underline,
+              //       //       fontSize: 12,
+              //       //     ),
+              //       //     overflow: TextOverflow.ellipsis,
+              //       //   ),
+              //       //   const SizedBox(width: 10),
+              //       //   GestureDetector(
+              //       //     onTap: () async {
+              //       //       final result = await showLocationBottomSheet(
+              //       //         context,
+              //       //         widget.userId,
+              //       //       );
+              //       //       if (result != null) {
+              //       //         setState(() {
+              //       //           selectedLocation = AppData.selectedLocation!;
+              //       //         });
+              //       //       }
+              //       //     },
+              //       //     child: const Icon(Icons.location_pin, size: 30),
+              //       //   ),
+              //       //   const SizedBox(width: 10),
+              //       //   const Icon(Icons.person, size: 30),
+              //       // ],
+              //     ),
+              //   ],
+              // ),
 
               // Title and Buttons Row
               Row(
@@ -112,17 +112,21 @@ class _UserPageState extends State<UserPage> {
                       IconButton(
                         icon: Icon(
                           Icons.arrow_back,
-                          size: 24,
+                          size: 28,
                           color: Colors.black,
                         ),
-                        onPressed: () => Navigator.pop(context),
+
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
                       ),
-                      SizedBox(width: 6),
+                      Text('Back', style: TextStyle(color: Colors.black)),
+                      SizedBox(width: 80),
                       Text(
                         "Users",
                         style: TextStyle(
                           fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ],
@@ -647,7 +651,7 @@ class _UserPageState extends State<UserPage> {
                                                             passwordController
                                                                 .text
                                                                 .trim(),
-                                                                
+
                                                         data: {
                                                           'full_name':
                                                               usernameController
@@ -922,45 +926,6 @@ class _UserPageState extends State<UserPage> {
                               ],
                             ),
                           ),
-
-                          IconButton(
-                            icon: Icon(Icons.delete, color: Colors.red),
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: Text("Confirm Delete"),
-                                  content: Text(
-                                    "Are you sure you want to delete this user?",
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () =>
-                                          Navigator.of(context).pop(),
-                                      child: Text("Cancel"),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () async {
-                                        final id = userData['id']!;
-                                        await supabase
-                                            .from('profiles')
-                                            .delete()
-                                            .eq('id', id);
-                                        Navigator.pop(context);
-                                        fetchUserProfile();
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.black,
-                                        foregroundColor: Colors.white,
-                                      ),
-                                      child: Text("Delete"),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-
                           IconButton(
                             icon: Icon(
                               Icons.edit,
@@ -1006,6 +971,7 @@ class _UserPageState extends State<UserPage> {
 
                               // SHOW BOTTOM SHEET
                               showModalBottomSheet(
+
                                 context: context,
                                 isScrollControlled: true,
                                 shape: RoundedRectangleBorder(
@@ -1021,31 +987,49 @@ class _UserPageState extends State<UserPage> {
                                           left: 16,
                                           right: 16,
                                           top: 20,
-                                          bottom:
-                                              MediaQuery.of(
-                                                context,
-                                              ).viewInsets.bottom +
-                                              20,
+                                       
+  
+    bottom: MediaQuery.of(context).viewInsets.bottom + 20,
                                         ),
                                         child: SingleChildScrollView(
                                           child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              Text(
-                                                "Edit User",
-                                                style: TextStyle(
-                                                  fontSize: 20,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              SizedBox(height: 12),
+                                              
+                                               Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Edit User",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+                ),
+                IconButton(
+                  icon: Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const Divider(),
+            const SizedBox(height: 25),
+                                              const Text('Username',textAlign: TextAlign.left,style: TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),),
                                               TextField(
                                                 controller: usernameController,
                                                 decoration: InputDecoration(
-                                                  hintText: "Username",
+                                                  hintText: "Enter name",
                                                   border: OutlineInputBorder(),
                                                 ),
                                               ),
                                               SizedBox(height: 12),
+                                               const Text('Role',textAlign: TextAlign.left,style: TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),),
                                               DropdownButtonFormField<String>(
                                                 value: selectedRole,
                                                 decoration: InputDecoration(
@@ -1067,25 +1051,40 @@ class _UserPageState extends State<UserPage> {
                                                     ),
                                               ),
                                               SizedBox(height: 12),
+                                              const Text('Email',textAlign: TextAlign.left,style: TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),),
                                               TextField(
                                                 controller: emailController,
                                                 decoration: InputDecoration(
-                                                  hintText: "Email",
+                                                  hintText: "Enter Email",
                                                   border: OutlineInputBorder(),
                                                 ),
                                               ),
                                               SizedBox(height: 12),
+                                              const Text('Password',textAlign: TextAlign.left,style: TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),),
                                               TextField(
                                                 controller: passwordController,
                                                 obscureText: true,
                                                 decoration: InputDecoration(
-                                                  hintText: "Password",
+                                                  hintText: "Enter Password",
                                                   border: OutlineInputBorder(),
                                                 ),
                                               ),
                                               SizedBox(height: 12),
 
                                               /// LOCATIONS DROPDOWN WITH MULTI-SELECT
+                                              const Text('Location',textAlign: TextAlign.left,style: TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),),
                                               TextField(
                                                 controller: locationController,
                                                 readOnly: true,
@@ -1096,62 +1095,170 @@ class _UserPageState extends State<UserPage> {
                                                     Icons.arrow_drop_down,
                                                   ),
                                                 ),
-                                                onTap: () {
-                                                  showDialog(
-                                                    context: context,
-                                                    builder: (context) {
-                                                      return StatefulBuilder(
-                                                        builder: (context, setDialogState) {
-                                                          return AlertDialog(
-                                                            title: Text(
-                                                              "Select Locations",
-                                                            ),
-                                                            content: SizedBox(
-                                                              width: double
-                                                                  .maxFinite,
-                                                              child: ListView(
-                                                                shrinkWrap:
-                                                                    true,
-                                                                children: allLocations.map((
-                                                                  location,
-                                                                ) {
-                                                                  final isSelected =
-                                                                      selectedLocations
-                                                                          .contains(
-                                                                            location,
-                                                                          );
-                                                                  return CheckboxListTile(
-                                                                    title: Text(
-                                                                      location,
-                                                                    ),
-                                                                    value:
-                                                                        isSelected,
-                                                                    onChanged: (checked) {
-                                                                      setDialogState(() {
-                                                                        if (checked ==
-                                                                            true) {
-                                                                          selectedLocations.add(
-                                                                            location,
-                                                                          );
-                                                                        } else {
-                                                                          selectedLocations.remove(
-                                                                            location,
-                                                                          );
-                                                                        }
-                                                                      });
-                                                                    },
-                                                                  );
-                                                                }).toList(),
-                                                              ),
-                                                            ),
-                                                            actions: [
+                                              //   onTap: () {
+                                              //     showDialog(
+                                              //       context: context,
+                                              //       builder: (context) {
+                                              //         return StatefulBuilder(
+                                              //           builder: (context, setDialogState) {
+                                                          
+                                              //             return AlertDialog(
+                                              //               title: Text(
+                                              //                 "Select Locations",style: TextStyle(fontWeight: FontWeight.w800)
+                                              //               ),
+                                              //               content: SizedBox(
+                                              //                 width: double
+                                              //                     .maxFinite,
+                                              //                 child: ListView(
+                                              //                   shrinkWrap:
+                                              //                       true,
+                                              //                   children: allLocations.map((
+                                              //                     location,
+                                              //                   ) {
+                                              //                     final isSelected =
+                                              //                         selectedLocations
+                                              //                             .contains(
+                                              //                               location,
+                                              //                             );
+                                              //                     return CheckboxListTile(
+                                              //                       tileColor: Colors.blue,
+                                              //                       activeColor: Colors.blue,
+                                              //                       title: Text(
+                                              //                         location,
+                                              //                       ),
+                                              //                       value:
+                                              //                           isSelected,
+                                              //                       onChanged: (checked) {
+                                              //                         setDialogState(() {
+                                              //                           if (checked ==
+                                              //                               true) {
+                                              //                             selectedLocations.add(
+                                              //                               location,
+                                              //                             );
+                                              //                           } else {
+                                              //                             selectedLocations.remove(
+                                              //                               location,
+                                              //                             );
+                                              //                           }
+                                              //                         });
+                                              //                       },
+                                              //                     );
+                                              //                   }).toList(),
+                                              //                 ),
+                                              //               ),
+                                              //               actions: [
+                                              //                 TextButton(
+                                              //                   onPressed: () =>
+                                              //                       Navigator.pop(
+                                              //                         context,
+                                              //                       ),
+                                              //                   child: Text(
+                                              //                     "Cancel",style: TextStyle(color: Colors.blue),
+                                              //                   ),
+                                              //                 ),
+                                              //                 ElevatedButton(
+                                              //                   onPressed: () {
+                                              //                     Navigator.pop(
+                                              //                       context,
+                                              //                     );
+                                              //                     setModalState(() {
+                                              //                       locationController
+                                              //                           .text = selectedLocations
+                                              //                           .join(
+                                              //                             ", ",
+                                              //                           );
+                                              //                     });
+                                              //                   },
+                                              //                   child: Text(
+                                              //                     "Done",style: TextStyle(color: Colors.blue)
+                                              //                   ),
+                                              //                 ),
+                                              //               ],
+                                              //             );
+                                              //           },
+                                              //         );
+                                              //       },
+                                              //     );
+                                              //   },
+                                              onTap: () {
+  showDialog(
+    context: context,
+    builder: (context) {
+      // Local state for search query and filtered list
+      String searchQuery = '';
+      List<String> filteredLocations = List.from(allLocations);
+
+      return StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            title: Text(
+              "Select Locations",
+              style: TextStyle(fontWeight: FontWeight.w800),
+            ),
+            
+            content: SizedBox(
+              width: double.maxFinite,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // 🔍 Search bar
+                  TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Search locations...',
+                      prefixIcon: Icon(Icons.search),
+                    ),
+                    onChanged: (value) {
+                      setDialogState(() {
+                        searchQuery = value.toLowerCase();
+                        filteredLocations = allLocations
+                            .where((location) => location
+                                .toLowerCase()
+                                .contains(searchQuery))
+                            .toList();
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  const Divider(),
+
+                  // 📄 List of filtered checkboxes
+                  Expanded(
+                    child: ListView(
+                      shrinkWrap: true,
+                      children: filteredLocations.map((location) {
+                        final isSelected =
+                            selectedLocations.contains(location);
+                        return CheckboxListTile(
+                         activeColor: const Color(0xFF0057FF),
+                    
+                          title: Text(location),
+                          value: isSelected,
+                          onChanged: (checked) {
+                            setDialogState(() {
+                              if (checked == true) {
+                                selectedLocations.add(location);
+                              } else {
+                                selectedLocations.remove(location);
+                              }
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                  
+                ],
+                
+              ),
+            ),
+             actions: [
                                                               TextButton(
                                                                 onPressed: () =>
                                                                     Navigator.pop(
                                                                       context,
                                                                     ),
                                                                 child: Text(
-                                                                  "Cancel",
+                                                                  "Cancel",style: TextStyle(color: const Color(0xFF0057FF),)
                                                                 ),
                                                               ),
                                                               ElevatedButton(
@@ -1168,20 +1275,26 @@ class _UserPageState extends State<UserPage> {
                                                                   });
                                                                 },
                                                                 child: Text(
-                                                                  "Done",
+                                                                  "Done",style: TextStyle(color: const Color(0xFF0057FF),)
                                                                 ),
                                                               ),
                                                             ],
-                                                          );
-                                                        },
-                                                      );
-                                                    },
-                                                  );
-                                                },
+          );
+        },
+        
+      );
+    },
+  );
+},
+
                                               ),
 
-                                              SizedBox(height: 20),
-                                              ElevatedButton(
+                                              SizedBox(height: 20,width: 300,),
+                                              Row(
+                                                crossAxisAlignment: CrossAxisAlignment.end,
+                                                children: [
+SizedBox(width: 250,),
+ElevatedButton(
                                                 onPressed: () async {
                                                   print(
                                                     "Username: ${usernameController.text}",
@@ -1289,15 +1402,62 @@ class _UserPageState extends State<UserPage> {
                                                     context,
                                                   ); // Close bottom sheet here
                                                 },
-                                                child: Text("Edit User"),
+                                                child: Text("Edit User",style: TextStyle(color: Colors.blue),),
                                               ),
-                                            ],
+                                    
+
+                                                ],
+                                              )
+                                                      ],
                                           ),
                                         ),
                                       );
                                     },
                                   );
                                 },
+                              );
+                            },
+                          ),
+
+                          IconButton(
+                            icon: Icon(Icons.delete, color: Colors.red),
+
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: Text("Confirm Delete",style: TextStyle(fontWeight: FontWeight.w800),),
+                                  content: Text(
+                                    "Are you sure you want to delete this user?",
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(),
+                                      child: Text(
+                                        "Cancel",
+                                        style: TextStyle(color: Colors.blue),
+                                      ),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () async {
+                                        final id = userData['id']!;
+                                        await supabase
+                                            .from('profiles')
+                                            .delete()
+                                            .eq('id', id);
+                                        Navigator.pop(context);
+                                        fetchUserProfile();
+                                      },
+
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:const Color.fromARGB(255, 211, 55, 44),
+                                        foregroundColor: Colors.white,
+                                      ),
+                                      child: Text("Delete"),
+                                    ),
+                                  ],
+                                ),
                               );
                             },
                           ),

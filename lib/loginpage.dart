@@ -32,111 +32,373 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  @override
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       backgroundColor: Colors.white,
+//       appBar: AppBar(
+//         leading: BackButton(
+//           onPressed: () {
+//             Navigator.pushReplacement(
+//               context,
+//               MaterialPageRoute(builder: (context) => MyHomePage()),
+//             );
+//           },
+//         ),
+//       ),
+//       body: SingleChildScrollView(
+//         child: Padding(
+//           padding: const EdgeInsets.all(24.0),
+//           child: Form(
+//             // ✅ Wrap everything in Form
+//             key: _formKey,
+//             child: Column(
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 Container(
+//                   child: Image.asset(
+//                     'assets/images/medicineicon.png',
+//                     height: 100,
+//                   ),
+//                 ),
+//                 const SizedBox(height: 80),
+//                 // Welcome back text
+//                 const Text(
+//                   'Welcome back!',
+//                   style: TextStyle(
+//                     fontSize: 30,
+//                     fontWeight: FontWeight.bold,
+//                     color: Colors.black,
+//                   ),
+//                 ),
+//                 const Text(
+//                   'Glad to see you, Again!',
+//                   style: TextStyle(
+//                     fontSize: 24,
+//                     fontWeight: FontWeight.normal,
+//                     color: Colors.black54,
+//                   ),
+//                 ),
+//                 const SizedBox(height: 40),
+
+//                 // Email field
+//                 TextFormField(
+//                   controller: _emailController,
+//                   decoration: const InputDecoration(
+//                     labelText: 'Enter your email',
+//                     border: OutlineInputBorder(),
+//                     prefixIcon: Icon(Icons.email),
+//                   ),
+//                   keyboardType: TextInputType.emailAddress,
+//                   validator: (value) {
+//                     if (value == null || value.isEmpty) {
+//                       return 'Please enter your email';
+//                     }
+//                     return null;
+//                   },
+//                 ),
+//                 const SizedBox(height: 20),
+
+//                 TextFormField(
+//                   controller: _passwordController,
+//                   obscureText: _obscure,
+//                   decoration: InputDecoration(
+//                     labelText: 'Enter your password',
+//                     border: OutlineInputBorder(),
+//                     prefixIcon: Icon(Icons.lock),
+//                     suffixIcon: IconButton(
+//                       icon: Icon(
+//                         _obscure ? Icons.visibility_off : Icons.visibility,
+//                       ),
+//                       onPressed: () {
+//                         setState(() {
+//                           _obscure = !_obscure; // Toggle visibility
+//                         });
+//                       },
+//                     ),
+//                   ),
+//                   validator: (value) {
+//                     if (value == null || value.isEmpty) {
+//                       return 'Please enter your password';
+//                     }
+//                     return null;
+//                   },
+//                 ),
+//                 // Forgot password
+//                 // Align(
+//                 //   alignment: Alignment.centerRight,
+//                 //   child: TextButton(
+//                 //     onPressed: () {
+//                 //       // Add forgot password logic
+//                 //     },
+//                 //     child: const Text('Forgot Password?'),
+//                 //   ),
+//                 // ),
+//                 const SizedBox(height: 30),
+
+//                 // Login button
+//                 SizedBox(
+//                   width: double.infinity,
+//                   child: ElevatedButton(
+//                     onPressed: () async {
+//                       if (_formKey.currentState!.validate()) {
+//                         final email = _emailController.text.trim();
+//                         final password = _passwordController.text.trim();
+//                         print(email);
+//                         print(password);
+
+//                         try {
+//                           final response = await Supabase.instance.client.auth
+//                               .signInWithPassword(
+//                                 email: email,
+//                                 password: password,
+//                               );
+
+//                           if (response.user != null) {
+//                             final userId = response.user!.id;
+//                             print(userId);
+
+//                             final userEmail = email;
+
+//                             print("User ID: $userId");
+//                             print("User Email: $userEmail");
+
+//                             // ✅ Send login email using Edge Function
+//                             final emailResponse = await Supabase
+//                                 .instance
+//                                 .client
+//                                 .functions
+//                                 .invoke(
+//                                   'send-email',
+//                                  body: {
+//   "to": userEmail,
+//   "subject": "Welcome Back",
+//   "html": "<p>Hello,</p><p>You have successfully logged in.</p>",
+// },
+                                    
+//                                 );
+
+//                             print("Email response: ${emailResponse.data}");
+
+//                             saveFcmToken(userId);
+                          
+//                             final profileData = await Supabase.instance.client
+//                                 .from('profiles')
+//                                 .select()
+//                                 .eq('id', userId)
+//                                 .single();
+
+//                             Navigator.pushReplacement(
+//                               context,
+//                               MaterialPageRoute(
+//                                 builder: (context) => DashboardPage(
+//                                   userId: userId,
+//                                   // or profileData: profileData,
+//                                 ),
+//                               ),
+//                             );
+//                           } else {
+//                             // ❌ Sign-in failed (user is null)
+//                             ScaffoldMessenger.of(context).showSnackBar(
+//                               SnackBar(
+//                                 content: Text(
+//                                   "Sign-in failed. Please check your credentials.",
+//                                 ),
+//                               ),
+//                             );
+//                           }
+//                         } catch (error) {
+//                           print(error);
+//                           // ❌ Error during sign-in
+//                           ScaffoldMessenger.of(context).showSnackBar(
+//                             SnackBar(
+//                               content: Text(
+//                                 "Error: User Not found ${error.toString()}",
+//                               ),
+//                             ),
+//                           );
+//                         }
+//                       }
+//                     },
+
+//                     style: ElevatedButton.styleFrom(
+//                       backgroundColor: Colors.black,
+//                       padding: const EdgeInsets.symmetric(vertical: 16),
+//                       shape: RoundedRectangleBorder(
+//                         borderRadius: BorderRadius.circular(8),
+//                       ),
+//                     ),
+//                     child: const Text(
+//                       'Login',
+//                       style: TextStyle(fontSize: 18, color: Colors.white),
+//                     ),
+//                   ),
+//                 ),
+//                 const SizedBox(height: 20),
+
+//                 // Sign up option
+//                 // Row(
+//                 //   mainAxisAlignment: MainAxisAlignment.center,
+//                 //   children: [
+//                 //     const Text("Don't have an account?"),
+//                 //     TextButton(
+//                 //       onPressed: () {
+//                 //         // Add navigation to sign up
+//                 //       },
+//                 //       child: const Text('Sign Up'),
+//                 //     ),
+//                 //   ],
+//                 // ),
+//               ],
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
+@override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF2F5FB),
       appBar: AppBar(
-        leading: BackButton(
-          onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => MyHomePage()),
-            );
-          },
-        ),
+        backgroundColor: const Color(0xFFF2F5FB),
+        elevation: 0,
+        // leading: Padding(
+        //   padding: const EdgeInsets.only(left: 16.0),
+         
+        // ),
+        toolbarHeight: 80,
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Form(
-            // ✅ Wrap everything in Form
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+            
               children: [
-                Container(
-                  child: Image.asset(
-                    'assets/images/medicineicon.png',
-                    height: 100,
+
+               Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+             
+                // Logo on the left
+                Image.asset(
+                  'assets/images/medicineicon1.png',
+                  height: 80,
+                ),
+SizedBox(width: 20,),
+                // Back button on the right
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MyHomePage()),
+                    );
+                  },
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  label: const Text("Back", style: TextStyle(color: Colors.white)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0057FF),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    elevation: 4,
                   ),
                 ),
-                const SizedBox(height: 80),
-                // Welcome back text
+               
+              ],
+              
+              
+            ),
+            
+          
+ const SizedBox(height: 50), 
+Column(
+  mainAxisAlignment: MainAxisAlignment.start,
+  crossAxisAlignment: CrossAxisAlignment.start,
+  
+  children: [
+SizedBox(height: 10,),
+ 
+                // Welcome Text
                 const Text(
-                  'Welcome back!',
+                  'Welcome Back!',
                   style: TextStyle(
-                    fontSize: 30,
+                    fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    color: Color(0xFF0057FF),
                   ),
                 ),
+                const SizedBox(height: 6),
                 const Text(
                   'Glad to see you, Again!',
                   style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.normal,
-                    color: Colors.black54,
+                    fontSize: 20,
+                    color: Color(0xFF8BA3CB),
                   ),
                 ),
                 const SizedBox(height: 40),
 
-                // Email field
+                // Email Field
                 TextFormField(
                   controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Enter your email',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.email),
-                  ),
                   keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    }
-                    return null;
-                  },
+                  decoration: InputDecoration(
+                    hintText: 'email@gmail.com',
+                    labelText: 'Email',
+                    prefixIcon: const Icon(Icons.email, color: Color(0xFF0057FF)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      borderSide: const BorderSide(color: Color(0xFF0057FF)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      borderSide: const BorderSide(color: Color(0xFF0057FF)),
+                    ),
+                  ),
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'Please enter your email' : null,
                 ),
                 const SizedBox(height: 20),
 
+                // Password Field
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscure,
                   decoration: InputDecoration(
-                    labelText: 'Enter your password',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.lock),
+                    hintText: 'Enter your password',
+                    labelText: 'Password',
+                    prefixIcon: const Icon(Icons.lock, color: Color(0xFF0057FF)),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscure ? Icons.visibility_off : Icons.visibility,
+                        color: const Color(0xFF0057FF),
                       ),
                       onPressed: () {
                         setState(() {
-                          _obscure = !_obscure; // Toggle visibility
+                          _obscure = !_obscure;
                         });
                       },
                     ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      borderSide: const BorderSide(color: Color(0xFF0057FF)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      borderSide: const BorderSide(color: Color(0xFF0057FF)),
+                    ),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your password';
-                    }
-                    return null;
-                  },
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'Please enter your password' : null,
                 ),
-                // Forgot password
-                // Align(
-                //   alignment: Alignment.centerRight,
-                //   child: TextButton(
-                //     onPressed: () {
-                //       // Add forgot password logic
-                //     },
-                //     child: const Text('Forgot Password?'),
-                //   ),
-                // ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 40),
 
-                // Login button
+                // Login Button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -144,44 +406,24 @@ class _LoginPageState extends State<LoginPage> {
                       if (_formKey.currentState!.validate()) {
                         final email = _emailController.text.trim();
                         final password = _passwordController.text.trim();
-                        print(email);
-                        print(password);
 
                         try {
                           final response = await Supabase.instance.client.auth
-                              .signInWithPassword(
-                                email: email,
-                                password: password,
-                              );
+                              .signInWithPassword(email: email, password: password);
 
                           if (response.user != null) {
                             final userId = response.user!.id;
-                            print(userId);
 
-                            final userEmail = email;
+                            await Supabase.instance.client.functions.invoke(
+                              'send-email',
+                              body: {
+                                "to": email,
+                                "subject": "Welcome Back",
+                                "html": "<p>Hello,</p><p>You have successfully logged in.</p>",
+                              },
+                            );
+                             //saveFcmToken(userId);
 
-                            print("User ID: $userId");
-                            print("User Email: $userEmail");
-
-                            // ✅ Send login email using Edge Function
-                            final emailResponse = await Supabase
-                                .instance
-                                .client
-                                .functions
-                                .invoke(
-                                  'send-email',
-                                 body: {
-  "to": userEmail,
-  "subject": "Welcome Back",
-  "html": "<p>Hello,</p><p>You have successfully logged in.</p>",
-},
-                                    
-                                );
-
-                            print("Email response: ${emailResponse.data}");
-
-                            saveFcmToken(userId);
-                          
                             final profileData = await Supabase.instance.client
                                 .from('profiles')
                                 .select()
@@ -191,64 +433,38 @@ class _LoginPageState extends State<LoginPage> {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => DashboardPage(
-                                  userId: userId,
-                                  // or profileData: profileData,
-                                ),
+                                builder: (context) => DashboardPage(userId: userId),
                               ),
                             );
                           } else {
-                            // ❌ Sign-in failed (user is null)
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  "Sign-in failed. Please check your credentials.",
-                                ),
+                              const SnackBar(
+                                content: Text("Sign-in failed. Please check your credentials."),
                               ),
                             );
                           }
-                        } catch (error) {
-                          print(error);
-                          // ❌ Error during sign-in
+                        } catch (e) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                "Error: User Not found ${error.toString()}",
-                              ),
-                            ),
+                            SnackBar(content: Text("Error: ${e.toString()}")),
                           );
                         }
                       }
                     },
-
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
+                      backgroundColor: const Color(0xFF0057FF),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(30),
                       ),
                     ),
                     child: const Text(
-                      'Login',
+                      'Log In',
                       style: TextStyle(fontSize: 18, color: Colors.white),
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
-
-                // Sign up option
-                // Row(
-                //   mainAxisAlignment: MainAxisAlignment.center,
-                //   children: [
-                //     const Text("Don't have an account?"),
-                //     TextButton(
-                //       onPressed: () {
-                //         // Add navigation to sign up
-                //       },
-                //       child: const Text('Sign Up'),
-                //     ),
-                //   ],
-                // ),
+                 ],
+)
               ],
             ),
           ),

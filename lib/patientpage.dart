@@ -14,7 +14,7 @@ class PatientsPage extends StatefulWidget {
 }
 
 class _PatientsPageState extends State<PatientsPage> {
-  int _selectedIndex = 1;
+  int _selectedIndex = 2;
   bool isLoading = true;
   String? permissionError;
 
@@ -105,12 +105,12 @@ void showPatientDrawer(BuildContext context, int id) {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              color: Colors.green.shade100,
+                              color: const Color(0xFFBED8FF),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: const Text(
                               'On-site Patient',
-                              style: TextStyle(color: Colors.green),
+                              style: TextStyle(color: Colors.blueAccent),
                             ),
                           ),
                         const SizedBox(height: 10),
@@ -159,7 +159,7 @@ Widget infoRow(String title, String value) {
       text: TextSpan(
         text: "$title\n",
         style: const TextStyle(
-            color: Colors.black54, fontSize: 12, fontWeight: FontWeight.w400),
+            color: Colors.black54, fontSize: 16, fontWeight: FontWeight.w400),
         children: [
           TextSpan(
             text: value,
@@ -223,30 +223,47 @@ Widget infoRow(String title, String value) {
                     ),
                   ],
                 ),
+                const Divider(),
                 const SizedBox(height: 4),
                 const Text(
                   "Enter the patient's information below. Click save when you're done.",
                 ),
                 const SizedBox(height: 16),
+Container(
+  width: double.infinity,
+decoration: BoxDecoration(
+  borderRadius: BorderRadius.circular(20),
+      color: const Color(0xFFF1F6FF),
+),
 
                 /// LOCATION
-                Row(
-                  children: const [
-                    Icon(Icons.location_on_outlined, size: 20),
+               child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    
+                    Row(
+                      children: [
+
+                   
+                    Icon(Icons.location_on_outlined, size: 25,color: Colors.blue,),
                     SizedBox(width: 4),
                     Text(
                       "Location",
                       style: TextStyle(fontWeight: FontWeight.w600),
                     ),
+                 ],),
+                
+                Text(
+                    AppData.selectedLocation ?? 'No location selected',
+                    style: const TextStyle(fontWeight: FontWeight.bold),textAlign: TextAlign.left,
+                  ),
+                
                   ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Text(
-                    AppData.selectedLocation ?? 'No location selected',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
+),
+                
+                
                 const SizedBox(height: 12),
 
                 /// First & Last Name
@@ -296,23 +313,51 @@ Widget infoRow(String title, String value) {
                 /// Dropdown
                 const Text("Treatment Type"),
                 const SizedBox(height: 6),
+                // DropdownButtonFormField<String>(
+                //   decoration: InputDecoration(
+                //     hintText: "Select treatment type",
+                //     border: OutlineInputBorder(),
+                //     fillColor: Colors.grey.shade100,
+                //     filled: true,
+                //   ),
+                //   value: selectedTreatment,
+                //   items: services
+                //       .map(
+                //         (type) =>
+                //             DropdownMenuItem(value: type, child: Text(type)),
+                //       )
+                //       .toList(),
+                //   onChanged: (value) => selectedTreatment = value,
+                // ),
+                
                 DropdownButtonFormField<String>(
-                  decoration: InputDecoration(
-                    hintText: "Select treatment type",
-                    border: OutlineInputBorder(),
-                    fillColor: Colors.grey.shade100,
-                    filled: true,
-                  ),
-                  value: selectedTreatment,
-                  items: services
-                      .map(
-                        (type) =>
-                            DropdownMenuItem(value: type, child: Text(type)),
-                      )
-                      .toList(),
-                  onChanged: (value) => selectedTreatment = value,
-                ),
-                const SizedBox(height: 12),
+  decoration: InputDecoration(
+    hintText: "Select treatment type",
+    border: OutlineInputBorder(),
+    fillColor: Colors.grey.shade100,
+    filled: true,
+  ),
+  value: selectedTreatment,
+  items: services.map((type) {
+    return DropdownMenuItem(
+      value: type,
+      child: Container(
+      width: 300,
+        decoration: const BoxDecoration(
+          border: Border(
+            bottom: BorderSide(color: Colors.grey, width: 0.5)
+          ),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Text(type),
+      ),
+    );
+  }).toList(),
+  onChanged: (value) => selectedTreatment = value,
+),
+
+                
+                 SizedBox(height: 12),
 
                 /// Gender & Location
                 LayoutBuilder(
@@ -332,6 +377,7 @@ Widget infoRow(String title, String value) {
                               ),
                               const SizedBox(height: 10),
                               _buildRadioGroup(
+                                
                                 "Location",
                                 ["On site", "Off site"],
                                 selectedVisitType,
@@ -392,7 +438,7 @@ Widget infoRow(String title, String value) {
                   children: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text("Cancel"),
+                      child: const Text("Cancel",style: TextStyle(color: const Color(0xFF0057FF),),),
                     ),
                     const SizedBox(width: 10),
                     ElevatedButton(
@@ -459,10 +505,10 @@ Widget infoRow(String title, String value) {
                       },
 
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue.shade300,
+                       
                         foregroundColor: Colors.white,
                       ),
-                      child: const Text("Save"),
+                      child: const Text("Save",style:TextStyle(color:const Color(0xFF0057FF),)),
                     ),
                   ],
                 ),
@@ -483,7 +529,7 @@ Widget infoRow(String title, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label),
+        Text(label,style: TextStyle(fontWeight: FontWeight.w800,fontSize: 16),),
         const SizedBox(height: 4),
         TextField(
           controller: controller,
@@ -680,93 +726,54 @@ Widget infoRow(String title, String value) {
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Column(
             children: [
-              /// Header Section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Flexible(
-                    flex: 1,
-                    child: Image.asset(
-                      'assets/images/medicineicon.png',
-                      height: 60,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            AppData.selectedLocation ?? 'No location selected',
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                            style: const TextStyle(
-                              decoration: TextDecoration.underline,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        GestureDetector(
-                          onTap: () async {
-                            final result = await showLocationBottomSheet(
-                              context,
-                              widget.userId,
-                            );
-                            if (result != null) {
-                              setState(() => AppData.selectedLocation!);
-                            }
-                            fetchPatients();
-                          },
-                          child: const Icon(Icons.location_pin, size: 30),
-                        ),
-                        const SizedBox(width: 10),
-                        const Icon(Icons.person, size: 30),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-
-              /// Title and Action Buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.arrow_back, size: 28),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                  const Text(
-                    "Patients",
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  Row(
+               Row(
                     children: [
-                      // GestureDetector(
-                      //   onTap: () => _showAddPatientBottomSheet(context),
-                      //   child: Row(
-                      //     children: const [
-                      //       Icon(Icons.add_circle_outline, color: Colors.blue),
-                      //       SizedBox(width: 4),
-                      //       Text(
-                      //         "Add New",
-                      //         style: TextStyle(color: Colors.blue),
-                      //       ),
-                      //     ],
-                      //   ),
-                      // ),
-                     
-                     
-                      const SizedBox(width: 12),
-                      const Icon(Icons.filter_alt_outlined, size: 30),
+                      IconButton(
+                        icon: Icon(
+                          Icons.arrow_back,
+                          size: 28,
+                          color: Colors.black,
+                        ),
+
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                      Text('Back', style: TextStyle(color: Colors.black)),
+                      SizedBox(width: 50),
+                      Text(
+                        "Patients",
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      SizedBox(width: 24,),
+                      GestureDetector(
+                        onTap: () => _showAddPatientBottomSheet(context),
+                         child: Container(
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    decoration: BoxDecoration(
+      border: Border.all(color:Colors.blue ), // Blue outline
+      borderRadius: BorderRadius.circular(20), // Optional: rounded corners
+    ),
+                        child: Row(
+                          children: const [
+                            Icon(Icons.add_circle_outline, color: Colors.blue ,),
+                            SizedBox(width: 4),
+                            Text(
+                              "Add New",
+                              style: TextStyle(color:  Colors.blue,),
+                            ),
+                          ],
+                        ),
+                      ),
+                      )
                     ],
                   ),
-                ],
-              ),
-
+            
+                     
+          
               const SizedBox(height: 16),
 
               /// Patient Grid
@@ -775,7 +782,7 @@ Widget infoRow(String title, String value) {
                   itemCount: patients.length,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: width < 400 ? 1 : 2,
-                    childAspectRatio: 3 / 2,
+                   childAspectRatio: width < 400 ? 2.2 : 3.2,
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
                   ),
@@ -785,104 +792,154 @@ Widget infoRow(String title, String value) {
                         "${patient['firstname'] ?? ''} ${patient['lastname'] ?? ''}";
                     final isOnsite = patient['onsite'] == true;
 
-                    return Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFEAF4FB),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          /// Header
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "P${patient['id'] ?? ''}", // patient ID
-                                style: const TextStyle(
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue.shade100,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  isOnsite ? "On-site" : "Off-site",
-                                  style: const TextStyle(
-                                    color: Colors.blue,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-
-                          // Name
-                          Text(
-                            fullName,
-                            style: const TextStyle(fontWeight: FontWeight.w500),
-                          ),
-
-                          // Gender
-                          Text(
-                            patient['gender'] ?? '',
-                            style: const TextStyle(color: Colors.blue),
-                          ),
-
-                          // Treatment
-                          Text(
-                            patient['treatmenttype'] ?? '',
-                            style: const TextStyle(color: Colors.black54),
-                          ),
-
-                          const Spacer(),
-                          IconButton(
-                            onPressed: () async {
-                              final supabase = Supabase.instance.client;
-                              final id = patient['id'];
-                              print(id);
-                              await supabase
-                                  .from('allpatients')
-                                  .delete()
-                                  .eq('id', id);
-
-                              fetchPatients();
-                            },
-                            icon: Icon(Icons.delete, color: Colors.red),
-                          ),
-                          // Bottom arrow
-                         Align(
-  alignment: Alignment.bottomRight,
-  child: IconButton(
-    icon: const Icon(Icons.arrow_forward, color: Colors.blue),
-    onPressed: () {
-      showPatientDrawer(context, patient['id']);
-    },
+                   return Container(
+  padding: const EdgeInsets.all(12),
+  decoration: BoxDecoration(
+        color: const Color(0xFFF1F6FF),
+    borderRadius: BorderRadius.circular(16),
   ),
-),
-                        ],
-                      ),
-                    );
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      // Left Column: Patient info
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Text(
+            "P${patient['id'] ?? ''}",
+            style: const TextStyle(
+              color: Colors.blue,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            fullName,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 15,
+            ),
+          ),
+          Text(
+            patient['gender'] ?? '',
+            style: const TextStyle(color: Colors.blue),
+          ),
+          Text(
+            patient['treatmenttype'] ?? '',
+            style: const TextStyle(color: Colors.black54),
+          ),
+        ],
+      ),
+
+      // Right Column: Status and Buttons
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // On-site / Off-site badge
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF1F6FF),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                width: 1,
+                color: const Color(0xFF0066FF),
+              )
+            ),
+            child: Text(
+              isOnsite ? "On-site" : "Off-site",
+              style: const TextStyle(
+                color:const Color(0xFF0066FF),
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+              ),
+            ),
+          ),
+          const SizedBox(height: 30),
+
+          // Action buttons in a row
+          Row(
+            children: [
+             ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        shape: const CircleBorder(),
+        padding: const EdgeInsets.all(12),
+        backgroundColor: Colors.white, // optional: set background
+        elevation: 1,
+      ),
+      onPressed: () async {
+  final supabase = Supabase.instance.client;
+  final id = patient['id'];
+
+  try {
+    final response = await supabase
+        .from('allpatients')
+        .delete()
+        .eq('id', id);
+
+    // Check if deletion was successful
+    if (response == null) {
+      fetchPatients();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Could not delete patient: ${response.error!.message}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Error deleting patient.'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+},
+
+      child: const Icon(Icons.delete, color: Colors.red),
+    ),
+
+    const SizedBox(width: 1), // space between buttons
+
+    // Forward Button
+    ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        shape: const CircleBorder(),
+        padding: const EdgeInsets.all(12),
+        backgroundColor: Colors.white,
+        elevation: 1,
+      ),
+      onPressed: () {
+        showPatientDrawer(context, patient['id']);
+      },
+      child: const Icon(Icons.arrow_forward, color: Colors.blue),
+    ),
+            ],
+          ),
+        ],
+      ),
+    ],
+  ),
+);
+
+                  
+                  
                   },
                 ),
               ),
+            
+            
+            
             ],
           ),
         ),
       ),
       bottomNavigationBar: NavigatorBar(
         userId: widget.userId,
-        currentIndex: _selectedIndex,
+        currentIndex: 2,
         onTap: (index) {
           setState(() => _selectedIndex = index);
         },

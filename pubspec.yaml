@@ -43,6 +43,7 @@ dependencies:
   flutter_local_notifications: ^19.1.0
   timezone: ^0.10.1
   permission_handler: ^11.3.1
+  dropdown_search: ^6.0.2
 
 
 dev_dependencies:
@@ -76,6 +77,9 @@ flutter:
   assets:
    - assets/images/medicineimage.png
    - assets/images/medicineicon.png
+   - assets/images/medicineicon1.png
+   - assets/images/Group.png
+   - assets/images/stethoscope.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

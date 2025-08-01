@@ -93,7 +93,7 @@ class _WarehousePageState extends State<WarehousePage>
       builder: (context) => Padding(
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom,
-          top: 20,
+          top: 30,
           left: 20,
           right: 20,
         ),
@@ -103,8 +103,8 @@ class _WarehousePageState extends State<WarehousePage>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "Create Category",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  "Add Category",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
                 ),
                 IconButton(
                   icon: Icon(Icons.close),
@@ -112,13 +112,19 @@ class _WarehousePageState extends State<WarehousePage>
                 ),
               ],
             ),
-            SizedBox(height: 16),
-            Text("Category", style: TextStyle(fontWeight: FontWeight.w600)),
-            SizedBox(height: 8),
+            const Divider(),
+            const SizedBox(height: 25),
+            Text("Category", style: TextStyle(fontWeight: FontWeight.w700,fontSize: 18)),
+            const SizedBox(height: 25),
+      
             Container(
               decoration: BoxDecoration(
                 color: Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  width: 1,
+                  color: const Color.fromARGB(255, 183, 182, 182)
+                )
               ),
               child: TextField(
                 controller: _categoryController,
@@ -126,7 +132,7 @@ class _WarehousePageState extends State<WarehousePage>
                   border: InputBorder.none,
                   label: Text('Add Category'),
                   contentPadding: EdgeInsets.symmetric(
-                    horizontal: 12,
+                    horizontal: 10,
                     vertical: 14,
                   ),
                 ),
@@ -136,12 +142,12 @@ class _WarehousePageState extends State<WarehousePage>
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                OutlinedButton(
+                TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text("Cancel"),
+                  child: Text("Cancel",style: TextStyle(color:const Color(0xFF0057FF),),),
                 ),
                 SizedBox(width: 12),
-                ElevatedButton(
+                OutlinedButton(
                   onPressed: () async {
                     final newCategory = _categoryController.text.trim();
                     if (newCategory.isNotEmpty) {
@@ -153,10 +159,15 @@ class _WarehousePageState extends State<WarehousePage>
                       fetchCategories(); // Refresh
                     }
                   },
-                  child: Text("Create"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    foregroundColor: Colors.white,
+                  child: Text("Create",style:TextStyle(color:const Color(0xFF0057FF),)),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(
+                      color: const Color.fromARGB(255, 183, 182, 182)
+                    ),
+
+                    
+                backgroundColor: Colors.white,
+                    foregroundColor: const Color.fromARGB(255, 244, 241, 241),
                   ),
                 ),
               ],
@@ -176,8 +187,8 @@ class _WarehousePageState extends State<WarehousePage>
       ),
       child: Row(
         children: [
-          Expanded(flex: 1, child: Text(id)),
-          Expanded(flex: 3, child: Text(name)),
+          Expanded(flex: 2, child: Text(id)),
+          Expanded(flex:3 , child: Text(name)),
           TextButton.icon(
             onPressed: () async {
               await Supabase.instance.client
@@ -188,14 +199,14 @@ class _WarehousePageState extends State<WarehousePage>
             },
             icon: Icon(
               showArchived ? Icons.unarchive : Icons.archive,
-              color: Colors.white,
+              color:showArchived ? Colors.green : Colors.red ,
             ),
             label: Text(
               showArchived ? "Unarchive" : "Archive",
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: showArchived ? Colors.green : Colors.red,),
             ),
             style: TextButton.styleFrom(
-              backgroundColor: Colors.black,
+              backgroundColor: showArchived ? Color(0xFFDCFCE7) : Color.fromARGB(255, 253, 178, 180),
               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             ),
           ),
@@ -211,6 +222,7 @@ class _WarehousePageState extends State<WarehousePage>
           padding: const EdgeInsets.all(12.0),
           child: Row(
             children: [
+             
               Expanded(
                 child: TextField(
                   controller: _searchController,
@@ -219,6 +231,7 @@ class _WarehousePageState extends State<WarehousePage>
                     applyFilters();
                   },
                   decoration: InputDecoration(
+                    
                     hintText: "Search By Category",
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(6),
@@ -227,17 +240,13 @@ class _WarehousePageState extends State<WarehousePage>
                   ),
                 ),
               ),
-              SizedBox(width: 12),
-              ElevatedButton.icon(
-                onPressed: () => _showAddCategorySheet(context),
-                icon: Icon(Icons.add),
-                label: Text("Add Category"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                ),
-              ),
+              
+              
+              
+              
+              
+             
+              
             ],
           ),
         ),
@@ -253,8 +262,8 @@ class _WarehousePageState extends State<WarehousePage>
                 icon: Icon(Icons.shield),
                 label: Text("Active"),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: !showArchived ? Colors.black : Colors.grey,
-                  foregroundColor: Colors.white,
+                  backgroundColor: !showArchived ?  const Color(0xFF0057FF): const Color(0xFFF1F4F9),
+                  foregroundColor: !showArchived ?  Colors.white:Colors.grey,
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
               ),
@@ -264,9 +273,29 @@ class _WarehousePageState extends State<WarehousePage>
                   showArchived = true;
                   applyFilters();
                 },
-                icon: Icon(Icons.delete_outline),
-                label: Text("Archive"),
                 style: OutlinedButton.styleFrom(
+                  backgroundColor: showArchived ?  const Color(0xFF0057FF):const Color(0xFFF1F4F9) ,
+                  foregroundColor: showArchived ? Colors.white :Colors.grey,
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+                icon: Icon(Icons.folder_zip_sharp),
+                label: Text("Archived"),
+                // style: OutlinedButton.styleFrom(
+                //   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                // ),
+              ),
+               SizedBox(width: 4),
+              ElevatedButton.icon(
+                onPressed: () => _showAddCategorySheet(context),
+                icon: Icon(Icons.add),
+                label: Text("Add Category"),
+                style: ElevatedButton.styleFrom(
+                  side: BorderSide(
+                    width: 1,
+                    color:  const Color(0xFF0057FF),
+                  ),
+                  backgroundColor: const Color(0xFFE4E8F3),
+                  foregroundColor:  const Color(0xFF0057FF),
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
               ),
@@ -275,13 +304,13 @@ class _WarehousePageState extends State<WarehousePage>
         ),
         Container(
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          color: Colors.grey.shade100,
+          color: const Color(0xFFE4E8F3),
           child: Row(
             children: const [
               Expanded(
-                flex: 1,
+                flex: 2,
                 child: Text(
-                  "Category ID",
+                  "Category \n ID",
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
@@ -313,22 +342,44 @@ class _WarehousePageState extends State<WarehousePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFF1F4F9),
       appBar: AppBar(
-        title: Text("Warehouse", style: TextStyle(color: Colors.black)),
+        leading: Row(
+          children: [
+            IconButton(
+                        icon: Icon(
+                          Icons.arrow_back,
+                          size: 28,
+                          color: Colors.black,
+                          
+                        ),
+
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                      //  Text('Back', style: TextStyle(color: Colors.black,fontSize: 10)),
+                     
+
+          ],
+        ),
+        centerTitle: true,
+          title: Text("Warehouse", style: TextStyle(color: Colors.black,fontWeight: FontWeight.w900)),
         backgroundColor: Colors.white,
         elevation: 1,
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: Colors.black,
-          labelColor: Colors.black,
-          unselectedLabelColor: Colors.grey,
+          labelColor: Color(0xFF0057FF), // Blue when selected
+  unselectedLabelColor: Colors.grey, // Grey when unselected
+  indicatorColor: Color(0xFF0057FF), // Optional underline indicator color
+          
           tabs: [
             Tab(
-              icon: Icon(Icons.folder, color: Colors.black),
+              icon: Icon(Icons.folder, ),
               text: "Categories",
             ),
             Tab(
-              icon: Icon(Icons.widgets_outlined, color: Colors.black),
+              icon: Icon(Icons.shopping_cart_checkout_sharp,),
               text: "Products",
             ),
           ],
