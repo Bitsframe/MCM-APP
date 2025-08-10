@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -73,27 +74,41 @@ Future<String?> showLocationBottomSheet(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
                       children: [
-                        const Text(
-                          "Select Location",
+                        Text(
+                          "Select Location".tr(),
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                        IconButton(
-                          
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          icon: Icon(Icons.close),
-                        ),
+  onPressed: () {
+    Navigator.pop(context);
+  },
+  padding: EdgeInsets.zero, // removes extra padding
+  constraints: const BoxConstraints(), // keeps size compact
+  icon: Container(
+    width: 24,
+    height: 24,
+    decoration: const BoxDecoration(
+      color: Color(0xFFE8EAF6), // light grey circle background
+      shape: BoxShape.circle,
+    ),
+    child: const Icon(
+      Icons.close,
+      size: 16,
+      color: Colors.black54, // X color
+    ),
+  ),
+)
+
                       ],
                     ),
                     const SizedBox(height: 10), // Search Bar
                     TextField(
                       controller: searchController,
                       decoration: InputDecoration(
-                        hintText: "Search location...",
+                        hintText: "Search location...".tr(),
                         prefixIcon: const Icon(Icons.search),
                         suffixIcon: searchController.text.isNotEmpty
                             ? IconButton(
@@ -106,7 +121,7 @@ Future<String?> showLocationBottomSheet(
                               )
                             : null,
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(30),
                         ),
                       ),
                       onChanged: (value) {

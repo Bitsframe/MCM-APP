@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:medicineapp/dashboard.dart';
@@ -84,8 +85,8 @@ void showPatientDrawer(BuildContext context, int id) {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
-                              'Patient Details',
+                          Text(
+                              'Patient Details'.tr(),
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
@@ -98,7 +99,7 @@ void showPatientDrawer(BuildContext context, int id) {
                           ],
                         ),
                         const Divider(height: 20),
-                        infoRow("Patient ID", patient['id'].toString()),
+                        infoRow("Patient ID".tr(), patient['id'].toString()),
                         if (patient['onsite'] == true)
                           Container(
                             margin: const EdgeInsets.symmetric(vertical: 10),
@@ -108,28 +109,28 @@ void showPatientDrawer(BuildContext context, int id) {
                               color: const Color(0xFFBED8FF),
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: const Text(
-                              'On-site Patient',
+                            child: Text(
+                              'On-site Patient'.tr(),
                               style: TextStyle(color: Colors.blueAccent),
                             ),
                           ),
                         const SizedBox(height: 10),
-                        infoRow("Full Name",
+                        infoRow("Full Name".tr(),
                             "${patient['firstname'] ?? ''} ${patient['lastname'] ?? ''}"),
-                        infoRow("Phone", patient['phone'] ?? 'N/A'),
-                        infoRow("Email", patient['email'] ?? 'N/A'),
-                        infoRow("Treatment Type",
+                        infoRow("Phone".tr(), patient['phone'] ?? 'N/A'),
+                        infoRow("Email".tr(), patient['email'] ?? 'N/A'),
+                        infoRow("Treatment Type".tr(),
                             patient['treatmenttype'] ?? 'N/A'),
-                        infoRow("Gender", patient['gender'] ?? 'N/A'),
-                        infoRow("Note", patient['note'] ?? 'No note'),
-                        infoRow("Text Opt-in",
+                        infoRow("Gender".tr(), patient['gender'] ?? 'N/A'),
+                        infoRow("Note".tr(), patient['note'] ?? 'No note'),
+                        infoRow("Text Opt-in".tr(),
                             (patient['text_opt'] ?? false) ? 'Yes' : 'No'),
-                        infoRow("Email Opt-in",
+                        infoRow("Email Opt-in".tr(),
                             (patient['email_opt'] ?? false) ? 'Yes' : 'No'),
-                        infoRow("Location ID", patient['locationid'].toString()),
-                        infoRow("Created At",
+                        infoRow("Location ID".tr(), patient['locationid'].toString()),
+                        infoRow("Created At".tr(),
                             formatter.format(DateTime.parse(patient['created_at']))),
-                        infoRow("Last Visit",
+                        infoRow("Last Visit".tr(),
                             formatter.format(DateTime.parse(patient['lastvisit']))),
                         const SizedBox(height: 30),
                         // ElevatedButton.icon(
@@ -720,57 +721,84 @@ decoration: BoxDecoration(
      
     }
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Column(
-            children: [
-               Row(
-                    children: [
-                      IconButton(
+      backgroundColor: const Color(0xFFF1F4F9),
+      appBar: AppBar(
+        leading: Row(
+          children: [
+            IconButton(
                         icon: Icon(
                           Icons.arrow_back,
                           size: 28,
                           color: Colors.black,
+                          
                         ),
 
                         onPressed: () {
                           Navigator.pop(context);
                         },
                       ),
-                      Text('Back', style: TextStyle(color: Colors.black)),
-                      SizedBox(width: 50),
-                      Text(
-                        "Patients",
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      SizedBox(width: 24,),
-                      GestureDetector(
-                        onTap: () => _showAddPatientBottomSheet(context),
-                         child: Container(
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-    decoration: BoxDecoration(
-      border: Border.all(color:Colors.blue ), // Blue outline
-      borderRadius: BorderRadius.circular(20), // Optional: rounded corners
-    ),
-                        child: Row(
-                          children: const [
-                            Icon(Icons.add_circle_outline, color: Colors.blue ,),
-                            SizedBox(width: 4),
-                            Text(
-                              "Add New",
-                              style: TextStyle(color:  Colors.blue,),
-                            ),
-                          ],
-                        ),
-                      ),
-                      )
-                    ],
-                  ),
+                      //  Text('Back', style: TextStyle(color: Colors.black,fontSize: 10)),
+                     
+
+          ],
+        ),
+        centerTitle: true,
+          title: Text("Patients".tr(), style: TextStyle(color: Colors.black,fontWeight: FontWeight.w900)),
+        backgroundColor: Colors.white,
+        elevation: 1,), 
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            children: [
+    //            Row(
+    //                 children: [
+    //                   IconButton(
+    //                     icon: Icon(
+    //                       Icons.arrow_back,
+    //                       size: 28,
+    //                       color: Colors.black,
+    //                     ),
+
+    //                     onPressed: () {
+    //                       Navigator.pop(context);
+    //                     },
+    //                   ),
+    //                   Text('Back'.tr(), style: TextStyle(color: Colors.black)),
+    //                   SizedBox(width: 60),
+    //                   Center(
+    //                   child:Text(
+    //                     "Patients".tr(),
+    //                     style: TextStyle(
+    //                       fontSize: 24,
+    //                       fontWeight: FontWeight.w800,
+    //                     ),
+    //                   ),),
+    //                   SizedBox(width: 24,),
+    // //                   GestureDetector(
+    // //                     onTap: () => _showAddPatientBottomSheet(context),
+    // //                      child: Container(
+    // // padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    // // decoration: BoxDecoration(
+    // //   border: Border.all(color:Colors.blue ), // Blue outline
+    // //   borderRadius: BorderRadius.circular(20), // Optional: rounded corners
+    // // ),
+    // //                     child: Row(
+    // //                       // children: const [
+    // //                       //   Icon(Icons.add_circle_outline, color: Colors.blue ,),
+    // //                       //   SizedBox(width: 4),
+    // //                       //   Text(
+    // //                       //     "Add New",
+    // //                       //     style: TextStyle(color:  Colors.blue,),
+    // //                       //   ),
+    // //                       // ],
+    // //                     ),
+    // //                   ),
+    // //                   )
+                   
+                   
+    //                 ],
+    //               ),
             
                      
           
@@ -795,7 +823,7 @@ decoration: BoxDecoration(
                    return Container(
   padding: const EdgeInsets.all(12),
   decoration: BoxDecoration(
-        color: const Color(0xFFF1F6FF),
+        color: Colors.white,
     borderRadius: BorderRadius.circular(16),
   ),
   child: Row(

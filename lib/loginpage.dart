@@ -259,8 +259,9 @@ class _LoginPageState extends State<LoginPage> {
 // }
 @override
   Widget build(BuildContext context) {
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F5FB),
+     backgroundColor: const Color(0xFFF1F4F9),
       appBar: AppBar(
         backgroundColor: const Color(0xFFF2F5FB),
         elevation: 0,
@@ -268,7 +269,7 @@ class _LoginPageState extends State<LoginPage> {
         //   padding: const EdgeInsets.only(left: 16.0),
          
         // ),
-        toolbarHeight: 80,
+        toolbarHeight: 30,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -298,15 +299,17 @@ SizedBox(width: 20,),
                       MaterialPageRoute(builder: (context) => const MyHomePage()),
                     );
                   },
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  label: const Text("Back", style: TextStyle(color: Colors.white)),
+                  icon: const Icon(Icons.arrow_back, color: const Color(0xFF0066FF),),
+                  label: const Text("Back", style: TextStyle(color: const Color(0xFF0066FF),)),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0057FF),
+                    backgroundColor:const Color(0xFFF1F4F9),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
+                    
                     ),
+                    side: BorderSide(color:const Color(0xFF0066FF),width: 1),
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    elevation: 4,
+                   
                   ),
                 ),
                
@@ -338,7 +341,8 @@ SizedBox(height: 10,),
                   'Glad to see you, Again!',
                   style: TextStyle(
                     fontSize: 20,
-                    color: Color(0xFF8BA3CB),
+                    color: Color(0xFF79808B),
+                    fontWeight: FontWeight.w500
                   ),
                 ),
                 const SizedBox(height: 40),
@@ -350,14 +354,14 @@ SizedBox(height: 10,),
                   decoration: InputDecoration(
                     hintText: 'email@gmail.com',
                     labelText: 'Email',
-                    prefixIcon: const Icon(Icons.email, color: Color(0xFF0057FF)),
+                    prefixIcon: const Icon(Icons.email, color:Color(0xFF4F4F4F),),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(30),
-                      borderSide: const BorderSide(color: Color(0xFF0057FF)),
+                      borderSide: const BorderSide(color:  Color(0xFF4F4F4F),),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(30),
-                      borderSide: const BorderSide(color: Color(0xFF0057FF)),
+                      borderSide: const BorderSide(color: Color(0xFF4F4F4F),),
                     ),
                   ),
                   validator: (value) =>
@@ -372,11 +376,11 @@ SizedBox(height: 10,),
                   decoration: InputDecoration(
                     hintText: 'Enter your password',
                     labelText: 'Password',
-                    prefixIcon: const Icon(Icons.lock, color: Color(0xFF0057FF)),
+                    prefixIcon: const Icon(Icons.lock,color: Color(0xFF4F4F4F),),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscure ? Icons.visibility_off : Icons.visibility,
-                        color: const Color(0xFF0057FF),
+                       color: Color(0xFF4F4F4F),
                       ),
                       onPressed: () {
                         setState(() {
@@ -386,11 +390,11 @@ SizedBox(height: 10,),
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(30),
-                      borderSide: const BorderSide(color: Color(0xFF0057FF)),
+                      borderSide: const BorderSide(color: Color(0xFF4F4F4F),),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(30),
-                      borderSide: const BorderSide(color: Color(0xFF0057FF)),
+                      borderSide: const BorderSide(color: Color(0xFF4F4F4F)),
                     ),
                   ),
                   validator: (value) =>

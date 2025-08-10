@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:medicineapp/location.dart';
 import 'package:medicineapp/loginpage.dart';
@@ -35,12 +36,12 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   String getTimeAgoText() {
-    if (lastUpdatedTime == null) return "Refresh";
+    if (lastUpdatedTime == null) return "refresh".tr();
 
     final now = DateTime.now();
     final difference = now.difference(lastUpdatedTime!);
 
-    if (difference.inMinutes < 1) return "Just now";
+    if (difference.inMinutes < 1) return "just_now".tr();
     if (difference.inMinutes < 10) return "${difference.inMinutes} mins ago";
     if (difference.inHours < 24) return "${difference.inHours} hours ago";
 
@@ -275,7 +276,10 @@ class _DashboardPageState extends State<DashboardPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('Cancel', style: TextStyle(color: const Color(0xFF0057FF),)),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: const Color(0xFF0057FF)),
+              ),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -320,7 +324,10 @@ class _DashboardPageState extends State<DashboardPage> {
                   );
                 }
               },
-              child: Text('Save', style: TextStyle(color: Colors.blue)),
+              child: Text(
+                'Save',
+                style: TextStyle(color: const Color(0xFF0057FF)),
+              ),
             ),
           ],
         ),
@@ -382,20 +389,42 @@ class _DashboardPageState extends State<DashboardPage> {
                   const Icon(Icons.drag_handle, color: Colors.grey),
                   const SizedBox(height: 8),
                   Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Account Settings",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
-                ),
-                IconButton(
-                  icon: Icon(Icons.close),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
-            ),
-            const Divider(),
-            const SizedBox(height: 25),
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Account Settings".tr(),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        padding: EdgeInsets.zero, // removes extra padding
+                        constraints:
+                            const BoxConstraints(), // keeps size compact
+                        icon: Container(
+                          width: 24,
+                          height: 24,
+                          decoration: const BoxDecoration(
+                            color: Color(
+                              0xFFE8EAF6,
+                            ), // light grey circle background
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            size: 16,
+                            color: Colors.black54, // X color
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Divider(),
+                  const SizedBox(height: 25),
 
                   // Notification toggle
                   SwitchListTile(
@@ -404,7 +433,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     onChanged: (value) {
                       _updatePreference(value);
                     },
-                    title: const Text("Notifications"),
+                    title:  Text("Notifications".tr()),
                     secondary: const Icon(
                       Icons.notifications,
                       color: const Color(0xFF0057FF),
@@ -413,20 +442,40 @@ class _DashboardPageState extends State<DashboardPage> {
                   const SizedBox(height: 8),
                   ListTile(
                     onTap: () => _showChangePasswordDialog(context),
-                    title: const Text('Change Password'),
-                    leading: Icon(Icons.lock_open, color: const Color(0xFF0057FF),),
+                    title: Text('Change Password'.tr()),
+                    leading: Icon(
+                      Icons.lock_open,
+                      color: const Color(0xFF0057FF),
+                    ),
                   ),
                   // ElevatedButton(
                   //   onPressed: () => _showChangePasswordDialog(context),
                   //   child: const Text('Change Password'),
                   // ),
                   const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          context.setLocale(Locale('en'));
+                        },
+                        child: const Text('English'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          context.setLocale(Locale('es'));
+                        },
+                        child: const Text('Español'),
+                      ),
+                    ],
+                  ),
 
                   // Logout button
                   ListTile(
                     leading: const Icon(Icons.logout, color: Colors.red),
-                    title: const Text(
-                      "Logout",
+                    title: Text(
+                      "logout".tr(),
                       style: TextStyle(color: Colors.red),
                     ),
                     onTap: () async {
@@ -451,7 +500,7 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF1F4F9),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) => SingleChildScrollView(
@@ -470,19 +519,23 @@ class _DashboardPageState extends State<DashboardPage> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-
-                        
-                          Text("\n Hello,", style: TextStyle(fontSize: 24,fontWeight: FontWeight.w500)),
-                    isLoading
-                        ? CircularProgressIndicator()
-                        : Text(
-                            userName,
-                            style: TextStyle(
-                              fontSize: 35,
-                              fontWeight: FontWeight.bold,
+                            Text(
+                              "hello".tr(),
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                          ),
-                            ],
+                            isLoading
+                                ? CircularProgressIndicator()
+                                : Text(
+                                    userName,
+                                    style: TextStyle(
+                                      fontSize: 35,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                          ],
                         ),
                         // Image.asset(
                         //   'assets/images/medicineicon1.png',
@@ -497,21 +550,19 @@ class _DashboardPageState extends State<DashboardPage> {
 
                             if (result != null) {
                               setState(() {
-                                 
                                 selectedLocation = AppData.selectedLocation!;
-                                 Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => DashboardPage(userId: widget.userId),
-        ),
-      );
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        DashboardPage(userId: widget.userId),
+                                  ),
+                                );
                               });
                             }
-                           
                           },
                           child: Row(
                             children: [
-
                               // Text(
                               //   AppData.selectedLocation ??
                               //       'No location selected',
@@ -524,28 +575,28 @@ class _DashboardPageState extends State<DashboardPage> {
                               // ),
                               SizedBox(width: 8),
                               Container(
-  padding: const EdgeInsets.all(3),
-  decoration: BoxDecoration(
-    color: Colors.white,
-     border: Border.all(
-      color: Color(0xFF0057FF),
-      width: 1,
-    ),
-    borderRadius: BorderRadius.circular(8),
-    boxShadow: [
-      BoxShadow(
-        color: Colors.blue.withOpacity(0.2),
-        blurRadius: 6,
-        offset: Offset(0, 4),
-      ),
-    ],
-  ),
-  child: Icon(
-    Icons.location_pin,
-    size: 24,
-    color: Color(0xFF0057FF),
-  ),
-),
+                                padding: const EdgeInsets.all(3),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  border: Border.all(
+                                    color: Color(0xFF0057FF),
+                                    width: 1,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                  // boxShadow: [
+                                  //   BoxShadow(
+                                  //     color: Colors.blue.withOpacity(0.2),
+                                  //     blurRadius: 6,
+                                  //     offset: Offset(0, 4),
+                                  //   ),
+                                  // ],
+                                ),
+                                child: Icon(
+                                  Icons.location_on_outlined,
+                                  size: 24,
+                                  color: Color(0xFF0057FF),
+                                ),
+                              ),
                               // Icon(
                               //   Icons.location_pin,
                               //   size: 24,
@@ -553,34 +604,31 @@ class _DashboardPageState extends State<DashboardPage> {
                               // ),
                               const SizedBox(width: 12),
                               InkWell(
-                                onTap:()=>   _showProfileOptions(context),
-                                child: 
-                            
-                    Container(
-  padding: const EdgeInsets.all(3),
-  decoration: BoxDecoration(
-    color: Colors.white,
-     border: Border.all(
-      color: Color(0xFF0057FF),
-      width: 1,
-    ),
-    borderRadius: BorderRadius.circular(8),
-    boxShadow: [
-      BoxShadow(
-        color: Colors.blue.withOpacity(0.2),
-        blurRadius: 6,
-        offset: Offset(0, 4),
-      ),
-    ],
-  ),
-  child: Icon(
-      Icons.person,
-      color: Color(0xFF0057FF),
-    ),
-   
-  ),
-),
-                          
+                                onTap: () => _showProfileOptions(context),
+                                child: Container(
+                                  padding: const EdgeInsets.all(3),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    border: Border.all(
+                                      color: Color(0xFF0057FF),
+                                      width: 1,
+                                    ),
+                                    borderRadius: BorderRadius.circular(8),
+                                    // boxShadow: [
+                                    //   BoxShadow(
+                                    //     color: Colors.blue.withOpacity(0.2),
+                                    //     blurRadius: 6,
+                                    //     offset: Offset(0, 4),
+                                    //   ),
+                                    // ],
+                                  ),
+                                  child: Icon(
+                                    Icons.person_outline,
+                                    color: Color(0xFF0057FF),
+                                  ),
+                                ),
+                              ),
+
                               // IconButton(
                               //   icon: const Icon(
                               //     Icons.person,
@@ -607,51 +655,129 @@ class _DashboardPageState extends State<DashboardPage> {
                     //           fontWeight: FontWeight.bold,
                     //         ),
                     //       ),
-
                     SizedBox(height: 16),
+                    Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: const Color(0xFFF1F6FF),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Custom Icon Stack
+          Padding(
+            padding: const EdgeInsets.only(top: 4.0),
+            child: Column(
+              children: [
+                const Icon(
+                  Icons.location_on_outlined,
+                  size: 24,
+                  color: Color(0xFF0057FF),
+                ),
+                // This is a simple way to create the horizontal line below the icon
+                Container(
+                  height: 2,
+                  width: 16,
+                  color: const Color(0xFF0057FF),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
 
-               Container(
-  width: double.infinity,
-decoration: BoxDecoration(
-  borderRadius: BorderRadius.circular(20),
-      color: const Color(0xFFF1F6FF),
-),
-
-                /// LOCATION
-               child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
+          // Text Column
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    
-                    Row(
-                      children: [
-   const SizedBox(width: 3),
-                   
-                    Icon(Icons.location_on,size: 25,color:  const Color(0xFF0057FF),),
-                    SizedBox(width: 4),
                     Text(
-                      "Location",
-                      style: TextStyle(fontWeight: FontWeight.w600,),
+                      "Current Location".tr(),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                        color: Colors.black54,
+                      ),
                     ),
-                 ],),
-                  const  SizedBox(width: 4),
-                Text(' '),
-                Text(  
-                    AppData.selectedLocation ?? '  No location selected',
-                    style: const TextStyle(fontWeight: FontWeight.bold),textAlign: TextAlign.left,
-                  ),
-                SizedBox(height: 3,)
+                    const Icon(
+                      Icons.keyboard_arrow_down,
+                      size: 20,
+                      color: Colors.black54,
+                    ),
                   ],
                 ),
-),
-            SizedBox(height: 16),
+                const SizedBox(height: 4),
+                Text(
+                  AppData.selectedLocation ?? 'no_location_selected'.tr(),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.black,
+                  ),
+                  textAlign: TextAlign.left,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+
+                    // Container(
+                    //   width: double.infinity,
+                    //   decoration: BoxDecoration(
+                    //     borderRadius: BorderRadius.circular(20),
+                    //     color: const Color(0xFFF1F6FF),
+                    //   ),
+
+                    //   /// LOCATION
+                    //   child: Column(
+                    //     mainAxisAlignment: MainAxisAlignment.start,
+                    //     crossAxisAlignment: CrossAxisAlignment.start,
+                    //     children: [
+                    //       Row(
+                    //         children: [
+                    //           const SizedBox(width: 3),
+
+                    //           Icon(
+                    //             Icons.location_on,
+                    //             size: 25,
+                    //             color: const Color(0xFF0057FF),
+                    //           ),
+                    //           SizedBox(width: 4),
+                    //           Text(
+                    //             "location".tr(),
+
+                    //             style: TextStyle(fontWeight: FontWeight.w600),
+                    //           ),
+                    //         ],
+                    //       ),
+                    //       const SizedBox(width: 4),
+                    //       Text(' '),
+                    //       Text(
+                    //         AppData.selectedLocation ??
+                    //             'no_location_selected'.tr(),
+                    //         style: const TextStyle(fontWeight: FontWeight.bold),
+                    //         textAlign: TextAlign.left,
+                    //       ),
+                    //       SizedBox(height: 3),
+                    //     ],
+                    //   ),
+                    // ),
+                    
+                    
+                    SizedBox(height: 16),
 
                     // New Location Multi-Select Button
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        side: BorderSide(
-                          color: const Color(0xFF0057FF),
-                        )
+                        side: BorderSide(color: const Color(0xFF0057FF)),
                       ),
                       onPressed: () async {
                         final supabase = Supabase.instance.client;
@@ -722,23 +848,48 @@ decoration: BoxDecoration(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Select Locations",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
-                ),
-                IconButton(
-                  icon: Icon(Icons.close),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
-            ),
-            const Divider(),
-            const SizedBox(height: 25),
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              "select_locations".tr(),
+                                              style: TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.w900,
+                                              ),
+                                            ),
+                                            IconButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                              },
+                                              padding: EdgeInsets
+                                                  .zero, // removes extra padding
+                                              constraints:
+                                                  const BoxConstraints(), // keeps size compact
+                                              icon: Container(
+                                                width: 24,
+                                                height: 24,
+                                                decoration: const BoxDecoration(
+                                                  color: Color(
+                                                    0xFFE8EAF6,
+                                                  ), // light grey circle background
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: const Icon(
+                                                  Icons.close,
+                                                  size: 16,
+                                                  color:
+                                                      Colors.black54, // X color
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const Divider(),
+                                        const SizedBox(height: 25),
 
                                         CheckboxListTile(
-                                          title: const Text("Select All"),
+                                          title: Text("select_all".tr()),
                                           value: selectAll,
                                           onChanged: (value) {
                                             setModalState(() {
@@ -777,35 +928,44 @@ decoration: BoxDecoration(
                                               });
                                             },
 
-                                            activeColor: const Color(0xFF0057FF),
-  controlAffinity: ListTileControlAffinity.trailing,
+                                            activeColor: const Color(
+                                              0xFF0057FF,
+                                            ),
+                                            controlAffinity:
+                                                ListTileControlAffinity
+                                                    .trailing,
                                           );
                                         }).toList(),
 
                                         SizedBox(height: 16),
                                         Row(
-                                            mainAxisAlignment: MainAxisAlignment.end,
-                                            children: [
-                                        ElevatedButton(
-                                          onPressed: () async {
-                                            setState(() {
-                                              selectedLocationIds = List.from(
-                                                tempSelected,
-                                              );
-                                            });
-                                            await fetchAppointmentsCount();
-                                            await fetchPatientsCount();
-                                            await fetchInventoryQuantity();
-                                            await fetchTotalSalesAmount();
-                                            Navigator.pop(context);
-                                          },
-                                         
-                                              
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            ElevatedButton(
+                                              onPressed: () async {
+                                                setState(() {
+                                                  selectedLocationIds =
+                                                      List.from(tempSelected);
+                                                });
+                                                await fetchAppointmentsCount();
+                                                await fetchPatientsCount();
+                                                await fetchInventoryQuantity();
+                                                await fetchTotalSalesAmount();
+                                                Navigator.pop(context);
+                                              },
 
-child:Text("Done",style: TextStyle(color: const Color(0xFF0057FF),),),),
-                                          ] 
+                                              child: Text(
+                                                "done".tr(),
+                                                style: TextStyle(
+                                                  color: const Color(
+                                                    0xFF0057FF,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                        
                                       ],
                                     ),
                                   );
@@ -822,8 +982,14 @@ child:Text("Done",style: TextStyle(color: const Color(0xFF0057FF),),),),
                           );
                         }
                       },
-                      icon: Icon(Icons.location_on_outlined,color:const Color(0xFF0057FF),),
-                      label: Text("Select Locations",style: TextStyle(color:  const Color(0xFF0057FF)),),
+                      icon: Icon(
+                        Icons.location_on_outlined,
+                        color: const Color(0xFF0057FF),
+                      ),
+                      label: Text(
+                        "select_locations".tr(),
+                        style: TextStyle(color: const Color(0xFF0057FF)),
+                      ),
                     ),
 
                     SizedBox(height: 16),
@@ -869,48 +1035,49 @@ child:Text("Done",style: TextStyle(color: const Color(0xFF0057FF),),),),
                               )
                             : GestureDetector(
                                 onTap: _refreshDashboardData,
-                                child: Icon(Icons.refresh,color:const Color(0xFF0057FF) ,),
+                                child: Icon(
+                                  Icons.refresh,
+                                  color: const Color(0xFF0057FF),
+                                ),
                               ),
                       ],
                     ),
 
                     SizedBox(height: 20),
-                   GridView.count(
-          crossAxisCount: 2,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          children: [
-            _buildDashboardTile(
-              label: "Patients",
-              icon: Icons.person_outline,
-              value: "$patientsCount",
-              onTap: () => _onTileTapped("Patients"),
-            ),
-            _buildDashboardTile(
-              label: "Sales",
-              icon: Icons.attach_money,
-              value: "\$ ${formatNumberCompact(totalSalesAmount)}",
-              onTap: () => _onTileTapped("Sales"),
-            ),
-            _buildDashboardTile(
-              label: "Appointments",
-              icon: Icons.calendar_today_outlined,
-              value: "$appointmentsCount",
-              onTap: () => _onTileTapped("Appointments"),
-            ),
-            _buildDashboardTile(
-              label: "Products",
-              icon: Icons.shopping_basket_outlined,
-              value: "\$ ${formatNumberCompact(totalInventoryQuantity)}",
-              onTap: () => _onTileTapped("Products"),
-            ),
-          ],
-        ),
-      
-   
-
+                    GridView.count(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      children: [
+                        _buildDashboardTile(
+                          label: "Patients".tr(),
+                          icon: Icons.person_outline,
+                          value: "$patientsCount",
+                          onTap: () => _onTileTapped("Patients"),
+                        ),
+                        _buildDashboardTile(
+                          label: "Sales".tr(),
+                          icon: Icons.attach_money,
+                          value: "\$ ${formatNumberCompact(totalSalesAmount)}",
+                          onTap: () => _onTileTapped("Sales"),
+                        ),
+                        _buildDashboardTile(
+                          label: "Appointments".tr(),
+                          icon: Icons.calendar_today_outlined,
+                          value: "$appointmentsCount",
+                          onTap: () => _onTileTapped("Appointments"),
+                        ),
+                        _buildDashboardTile(
+                          label: "Products".tr(),
+                          icon: Icons.shopping_basket_outlined,
+                          value:
+                              "\$ ${formatNumberCompact(totalInventoryQuantity)}",
+                          onTap: () => _onTileTapped("Products"),
+                        ),
+                      ],
+                    ),
 
                     // GridView.count(
                     //   crossAxisCount: 2,
@@ -956,8 +1123,6 @@ child:Text("Done",style: TextStyle(color: const Color(0xFF0057FF),),),),
                     //     ),
                     //   ],
                     // ),
-                
-                
                   ],
                 ),
               ),
@@ -976,7 +1141,8 @@ child:Text("Done",style: TextStyle(color: const Color(0xFF0057FF),),),),
       ),
     );
   }
-   Widget _buildDashboardTile({
+
+  Widget _buildDashboardTile({
     required String label,
     required IconData icon,
     required String value,
@@ -990,55 +1156,54 @@ child:Text("Done",style: TextStyle(color: const Color(0xFF0057FF),),),),
           color: Color(0xFFEAF2FD), // Soft pastel blue background
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
-           BoxShadow(
-        color: Colors.blue.withOpacity(0.2),
-        blurRadius: 6,
-        offset: Offset(0, 4),
-      ),
+            BoxShadow(
+              color: const Color.fromARGB(255, 148, 149, 150).withOpacity(0.2),
+              blurRadius: 6,
+              offset: Offset(0, 1),
+            ),
           ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
+          clipBehavior: Clip.none,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    value,
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF0A4DD5), // Strong blue
-                    ),
-                  ),
+            // Positioned Icon at top-right
+            Positioned(
+              top: -16, // move upward by 10px
+              right: -15,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(255, 175, 205, 246),
+                  borderRadius: BorderRadius.circular(250),
                 ),
-               Container(
-  decoration: BoxDecoration(
-    color: const Color.fromARGB(255, 175, 205, 246), // Blue background
-    borderRadius: BorderRadius.circular(250), // Rounded corners
-  ),
-  child:
-                IconButton(
-                  icon:Icon(icon,
-                  color: Color(0xFF0A4DD5),
-                  size: 24,
-                  
-                  
-                  ),
-                  
-                  onPressed: (){},
+                child: IconButton(
+                  icon: Icon(icon, color: Color(0xFF0A4DD5), size: 24),
+                  onPressed: () {},
                 ),
-               )
-              ],
-            ),
-            Spacer(),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 14,
-                color: Color(0xFF0A4DD5),
-                fontWeight: FontWeight.w500,
               ),
+            ),
+
+            // Main content
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF0A4DD5),
+                  ),
+                ),
+                Spacer(),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF0A4DD5),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -1047,7 +1212,75 @@ child:Text("Done",style: TextStyle(color: const Color(0xFF0057FF),),),),
   }
 }
 
+//   Widget _buildDashboardTile({
+//     required String label,
+//     required IconData icon,
+//     required String value,
+//     required VoidCallback onTap,
+//   }) {
+//     return GestureDetector(
+//       onTap: onTap,
+//       child: Container(
+//         padding: EdgeInsets.all(16),
+//         decoration: BoxDecoration(
+//           color: Color(0xFFEAF2FD), // Soft pastel blue background
+//           borderRadius: BorderRadius.circular(20),
+//           boxShadow: [
+//             BoxShadow(
+//               color: Colors.blue.withOpacity(0.2),
+//               blurRadius: 6,
+//               offset: Offset(0, 2),
+//             ),
+//           ],
+//         ),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             Row(
+//               children: [
+//                 Expanded(
+//                   child: Text(
+//                     value,
+//                     style: TextStyle(
+//                       fontSize: 24,
+//                       fontWeight: FontWeight.w800,
+//                       color: Color(0xFF0A4DD5), // Strong blue
+//                     ),
+//                   ),
+//                 ),
+//                 Container(
+//                   decoration: BoxDecoration(
+//                     color: const Color.fromARGB(
+//                       255,
+//                       175,
+//                       205,
+//                       246,
+//                     ), // Blue background
+//                     borderRadius: BorderRadius.circular(250), // Rounded corners
+//                   ),
+//                   child: IconButton(
+//                     icon: Icon(icon, color: Color(0xFF0A4DD5), size: 24),
 
+//                     onPressed: () {},
+//                   ),
+//                 ),
+//               ],
+//             ),
+//             Spacer(),
+//             Text(
+//               label,
+//               style: TextStyle(
+//                 fontSize: 14,
+//                 color: Color(0xFF0A4DD5),
+//                 fontWeight: FontWeight.w500,
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 //   Widget _buildDashboardTile({
 //     required String label,

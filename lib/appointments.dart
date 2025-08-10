@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -48,7 +49,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
         return Align(
           alignment: Alignment.centerRight,
           child: FractionallySizedBox(
-            widthFactor: 0.7, // Drawer width (70% of screen)
+            widthFactor: 0.8, // Drawer width (70% of screen)
             child: Material(
               color: Colors.white,
               child: FutureBuilder(
@@ -72,46 +73,63 @@ class _AppointmentPageState extends State<AppointmentPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
-                                "Appointment Details",
+                             Text(
+                                "Appointment Details".tr(),
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                               IconButton(
-                                icon: const Icon(Icons.close),
-                                onPressed: () => Navigator.pop(context),
-                              ),
+  onPressed: () {
+    Navigator.pop(context);
+  },
+  padding: EdgeInsets.zero, // removes extra padding
+  constraints: const BoxConstraints(), // keeps size compact
+  icon: Container(
+    width: 24,
+    height: 24,
+    decoration: const BoxDecoration(
+      color: Color(0xFFE8EAF6), // light grey circle background
+      shape: BoxShape.circle,
+    ),
+    child: const Icon(
+      Icons.close,
+      size: 16,
+      color: Colors.black54, // X color
+    ),
+  ),
+)
+
                             ],
                           ),
                           const Divider(),
                           const SizedBox(height: 16),
-                          infoLabel("First Name", appointment['first_name']),
-                          infoLabel("Last Name", appointment['last_name']),
-                          infoLabel("Email", appointment['email_address']),
-                          infoLabel("Sex", appointment['sex']),
-                          infoLabel("Service", appointment['service']),
+                          infoLabel("First Name".tr(), appointment['first_name']),
+                          infoLabel("Last Name".tr(), appointment['last_name']),
+                          infoLabel("Email".tr(), appointment['email_address']),
+                          infoLabel("Sex".tr(), appointment['sex']),
+                          infoLabel("Service".tr(), appointment['service']),
                           infoLabel(
-                            "Locations",
+                            "Locations".tr(),
                             appointment['location_id'].toString(),
                           ),
-                          infoLabel("Phone number", appointment['phone']),
-                          infoLabel("Address", appointment['address']),
+                          infoLabel("Phone number".tr(), appointment['phone']),
+                          infoLabel("Address".tr(), appointment['address']),
                           infoLabel(
-                            "Date of Birth",
+                            "Date of Birth".tr(),
                             appointment['dob'] ?? 'N/A',
                           ),
                           infoLabel(
-                            "Date Slot",
+                            "Date Slot".tr(),
                             appointment['date_slot'] ?? 'N/A',
                           ),
                           infoLabel(
-                            "Time Slot",
+                            "Time Slot".tr(),
                             appointment['date_and_time'] ?? 'N/A',
                           ),
                           infoLabel(
-                            "Created at",
+                            "Created at".tr(),
                             DateFormat(
                               'MMMM dd, yyyy h:mm a',
                             ).format(DateTime.parse(appointment['created_at'])),
@@ -410,817 +428,864 @@ class _AppointmentPageState extends State<AppointmentPage> {
       //   ],
 
       // ),
+       backgroundColor: const Color(0xFFF1F4F9),
+            appBar: AppBar(
+        leading: Row(
+          children: [
+            IconButton(
+                        icon: Icon(
+                          Icons.arrow_back,
+                          size: 28,
+                          color: Colors.black,
+                          
+                        ),
+
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                      //  Text('Back', style: TextStyle(color: Colors.black,fontSize: 10)),
+                     
+
+          ],
+        ),
+        centerTitle: true,
+          title: Text("Appointments".tr(), style: TextStyle(color: Colors.black,fontWeight: FontWeight.w900)),
+        backgroundColor: Colors.white,
+        elevation: 1,),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(
-                        Icons.arrow_back,
-                        size: 24,
-                        color: Colors.black,
-                      ),
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //   children: [
+            //     Row(
+            //       children: [
+            //         IconButton(
+            //           icon: Icon(
+            //             Icons.arrow_back,
+            //             size: 24,
+            //             color: Colors.black,
+            //           ),
 
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                    Text('Back', style: TextStyle(color: Colors.black)),
+            //           onPressed: () {
+            //             Navigator.pop(context);
+            //           },
+            //         ),
+            //         Text('Back'.tr(), style: TextStyle(color: Colors.black)),
 
-                    SizedBox(width: 145),
+                    
+            // SizedBox(width: 20),
+            // Center(
+            //   child: Text(
+            //     "Appointments".tr(),
+            //     textAlign: TextAlign.center,
+            //     style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
+            //   ),
+            // ),
 
-                    // TextButton.icon(
-                    //   onPressed: () async {
-                    //     final services =
-                    //         await fetchServices(); // ⬅️ wait for the list
-                    //     if (mounted) {
-                    //       showAddAppointmentBottomSheet(context, services);
-                    //       fetchAppointments();
-                    //     }
-                    //   },
+            //         // TextButton.icon(
+            //         //   onPressed: () async {
+            //         //     final services =
+            //         //         await fetchServices(); // ⬅️ wait for the list
+            //         //     if (mounted) {
+            //         //       showAddAppointmentBottomSheet(context, services);
+            //         //       fetchAppointments();
+            //         //     }
+            //         //   },
 
-                    //   icon: Icon(Icons.add_circle_outline, color: Colors.blue),
-                    //   label: Text(
-                    //     "Add New",
-                    //     style: TextStyle(color: Colors.blue),
-                    //   ),
-                    // ),
-                    TextButton.icon(
-                      onPressed: () async {
-                        final services = await fetchServices();
-                        if (mounted) {
-                          showAddAppointmentBottomSheet(context, services);
-                          fetchAppointments();
-                        }
-                      },
-                      style: TextButton.styleFrom(
-                        backgroundColor: const Color(0xFFF1F6FF),
-                        side: BorderSide(
-                          color: Colors.blue, // or any dynamic condition
-                          width: 1,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                      ),
-                      icon: Icon(Icons.add_circle_outline, color: Colors.blue),
-                      label: Text(
-                        "Add New",
-                        style: TextStyle(color: Colors.blue),
-                      ),
-                    ),
-                  ],
-                ),
+            //         //   icon: Icon(Icons.add_circle_outline, color: Colors.blue),
+            //         //   label: Text(
+            //         //     "Add New",
+            //         //     style: TextStyle(color: Colors.blue),
+            //         //   ),
+            //         // // ),
+            //         // TextButton.icon(
+            //         //   onPressed: () async {
+            //         //     final services = await fetchServices();
+            //         //     if (mounted) {
+            //         //       showAddAppointmentBottomSheet(context, services);
+            //         //       fetchAppointments();
+            //         //     }
+            //         //   },
+            //         //   style: TextButton.styleFrom(
+            //         //     backgroundColor: const Color(0xFFF1F6FF),
+            //         //     side: BorderSide(
+            //         //       color: Colors.blue, // or any dynamic condition
+            //         //       width: 1,
+            //         //     ),
+            //         //     shape: RoundedRectangleBorder(
+            //         //       borderRadius: BorderRadius.circular(24),
+            //         //     ),
+            //         //   ),
+            //         //   icon: Icon(Icons.add_circle_outline, color: Colors.blue),
+            //         //   label: Text(
+            //         //     "Add New",
+            //         //     style: TextStyle(color: Colors.blue),
+            //         //   ),
+            //         // ),
+                
+                
+            //       ],
+            //     ),
 
-                SizedBox(width: 10),
-                Padding(
-                  padding: EdgeInsets.all(3),
+            //     SizedBox(width: 10),
+            //     Padding(
+            //       padding: EdgeInsets.all(3),
 
-                  child: Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () async {
-                          final supabase = Supabase.instance.client;
-                          final TextEditingController roleController =
-                              TextEditingController();
+            //       child: Row(
+            //         children: [
+            //           GestureDetector(
+            //             onTap: () async {
+            //               final supabase = Supabase.instance.client;
+            //               final TextEditingController roleController =
+            //                   TextEditingController();
 
-                          // Step 1: Fetch permissions from the Permissions table
-                          final response = await supabase
-                              .from('permissions')
-                              .select('permission');
+            //               // Step 1: Fetch permissions from the Permissions table
+            //               final response = await supabase
+            //                   .from('permissions')
+            //                   .select('permission');
 
-                          if (response == null || response.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text("No permissions found.")),
-                            );
-                            return;
-                          }
+            //               if (response == null || response.isEmpty) {
+            //                 ScaffoldMessenger.of(context).showSnackBar(
+            //                   SnackBar(content: Text("No permissions found.")),
+            //                 );
+            //                 return;
+            //               }
 
-                          // Step 2: Build dynamic permissions map
-                          final Map<String, bool> permissions = {
-                            for (var item in response)
-                              item['permission'] as String: false,
-                          };
-                          Future<void> saveRoleWithPermissions({
-                            required String roleName,
-                            required Map<String, bool> permissionToggles,
-                          }) async {
-                            final supabase = Supabase.instance.client;
+            //               // Step 2: Build dynamic permissions map
+            //               final Map<String, bool> permissions = {
+            //                 for (var item in response)
+            //                   item['permission'] as String: false,
+            //               };
+            //               Future<void> saveRoleWithPermissions({
+            //                 required String roleName,
+            //                 required Map<String, bool> permissionToggles,
+            //               }) async {
+            //                 final supabase = Supabase.instance.client;
 
-                            if (roleName.trim().isEmpty) {
-                              throw Exception('Role name cannot be empty');
-                            }
+            //                 if (roleName.trim().isEmpty) {
+            //                   throw Exception('Role name cannot be empty');
+            //                 }
 
-                            final roleInsert = await supabase
-                                .from('roles')
-                                .insert({'name': roleName.trim()})
-                                .select('id')
-                                .single();
+            //                 final roleInsert = await supabase
+            //                     .from('roles')
+            //                     .insert({'name': roleName.trim()})
+            //                     .select('id')
+            //                     .single();
 
-                            final int roleId = roleInsert['id'] as int;
-                            print('roleid: $roleId');
+            //                 final int roleId = roleInsert['id'] as int;
+            //                 print('roleid: $roleId');
 
-                            final enabledLabels = permissionToggles.entries
-                                .where((entry) => entry.value) // ON only
-                                .map((entry) => entry.key)
-                                .toList();
-                            print(enabledLabels);
-                            if (enabledLabels.isEmpty) {
-                              // No permissions checked – nothing more to do
-                              return;
-                            }
+            //                 final enabledLabels = permissionToggles.entries
+            //                     .where((entry) => entry.value) // ON only
+            //                     .map((entry) => entry.key)
+            //                     .toList();
+            //                 print(enabledLabels);
+            //                 if (enabledLabels.isEmpty) {
+            //                   // No permissions checked – nothing more to do
+            //                   return;
+            //                 }
 
-                            final permsQuery = await supabase
-                                .from('permissions')
-                                .select('id, permission')
-                                .inFilter('permission', enabledLabels);
+            //                 final permsQuery = await supabase
+            //                     .from('permissions')
+            //                     .select('id, permission')
+            //                     .inFilter('permission', enabledLabels);
 
-                            final Map<String, int> labelToId = {
-                              for (final row in permsQuery)
-                                row['permission'] as String: row['id'] as int,
-                            };
+            //                 final Map<String, int> labelToId = {
+            //                   for (final row in permsQuery)
+            //                     row['permission'] as String: row['id'] as int,
+            //                 };
 
-                            final rowsToInsert = <Map<String, dynamic>>[];
-                            for (final label in enabledLabels) {
-                              final permId = labelToId[label];
-                              if (permId != null) {
-                                rowsToInsert.add({
-                                  'roles': roleId,
-                                  'permissions': permId,
-                                });
-                              }
-                            }
-                            print(rowsToInsert);
-                            await supabase
-                                .from('user_permissions')
-                                .upsert(
-                                  rowsToInsert,
-                                  onConflict: 'roles,permissions',
-                                  ignoreDuplicates: true,
-                                );
-                          }
+            //                 final rowsToInsert = <Map<String, dynamic>>[];
+            //                 for (final label in enabledLabels) {
+            //                   final permId = labelToId[label];
+            //                   if (permId != null) {
+            //                     rowsToInsert.add({
+            //                       'roles': roleId,
+            //                       'permissions': permId,
+            //                     });
+            //                   }
+            //                 }
+            //                 print(rowsToInsert);
+            //                 await supabase
+            //                     .from('user_permissions')
+            //                     .upsert(
+            //                       rowsToInsert,
+            //                       onConflict: 'roles,permissions',
+            //                       ignoreDuplicates: true,
+            //                     );
+            //               }
 
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.vertical(
-                                top: Radius.circular(24),
-                              ),
-                            ),
-                            builder: (context) {
-                              return Padding(
-                                padding: EdgeInsets.only(
-                                  bottom: MediaQuery.of(
-                                    context,
-                                  ).viewInsets.bottom,
-                                  left: 16,
-                                  right: 16,
-                                  top: 24,
-                                ),
-                                child: StatefulBuilder(
-                                  builder: (context, setState) {
-                                    return SingleChildScrollView(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Center(
-                                            child: Container(
-                                              width: 40,
-                                              height: 6,
-                                              decoration: BoxDecoration(
-                                                color: Colors.grey[400],
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(height: 20),
-                                          Text(
-                                            "Add New Role",
-                                            style: TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          SizedBox(height: 16),
-                                          TextField(
-                                            controller: roleController,
-                                            decoration: InputDecoration(
-                                              labelText: "User roles",
-                                              hintText: "Enter user role",
-                                              border: OutlineInputBorder(),
-                                            ),
-                                          ),
-                                          SizedBox(height: 16),
-                                          Text(
-                                            "Permissions",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                          SizedBox(height: 8),
-                                          Column(
-                                            children: permissions.keys.map((
-                                              key,
-                                            ) {
-                                              return SwitchListTile(
-                                                title: Text(key),
-                                                value: permissions[key]!,
-                                                onChanged: (val) {
-                                                  setState(() {
-                                                    permissions[key] = val;
-                                                  });
-                                                },
-                                              );
-                                            }).toList(),
-                                          ),
-                                          SizedBox(height: 12),
-                                          SizedBox(
-                                            width: double.infinity,
-                                            child: ElevatedButton(
-                                              onPressed: () async {
-                                                try {
-                                                  await saveRoleWithPermissions(
-                                                    roleName:
-                                                        roleController.text,
-                                                    permissionToggles:
-                                                        permissions,
-                                                  );
-                                                  ScaffoldMessenger.of(
-                                                    context,
-                                                  ).showSnackBar(
-                                                    const SnackBar(
-                                                      content: Text(
-                                                        'Role saved successfully!',
-                                                        style: TextStyle(
-                                                          color: Colors.black,
-                                                        ),
-                                                      ),
-                                                      backgroundColor:
-                                                          Colors.green,
-                                                    ),
-                                                  );
-                                                  Navigator.pop(context);
-                                                } catch (e) {
-                                                  ScaffoldMessenger.of(
-                                                    context,
-                                                  ).showSnackBar(
-                                                    SnackBar(
-                                                      content: Text(
-                                                        'Error: \$e',
-                                                      ),
-                                                    ),
-                                                  );
-                                                }
-                                              },
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor: Colors.black,
-                                                foregroundColor: Colors.white,
-                                                padding: EdgeInsets.symmetric(
-                                                  vertical: 14,
-                                                ),
-                                              ),
-                                              child: Text("Add Role"),
-                                            ),
-                                          ),
-                                          SizedBox(height: 12),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                ),
-                              );
-                            },
-                          );
-                        },
+            //               showModalBottomSheet(
+            //                 context: context,
+            //                 isScrollControlled: true,
+            //                 shape: const RoundedRectangleBorder(
+            //                   borderRadius: BorderRadius.vertical(
+            //                     top: Radius.circular(24),
+            //                   ),
+            //                 ),
+            //                 builder: (context) {
+            //                   return Padding(
+            //                     padding: EdgeInsets.only(
+            //                       bottom: MediaQuery.of(
+            //                         context,
+            //                       ).viewInsets.bottom,
+            //                       left: 16,
+            //                       right: 16,
+            //                       top: 24,
+            //                     ),
+            //                     child: StatefulBuilder(
+            //                       builder: (context, setState) {
+            //                         return SingleChildScrollView(
+            //                           child: Column(
+            //                             crossAxisAlignment:
+            //                                 CrossAxisAlignment.start,
+            //                             children: [
+            //                               Center(
+            //                                 child: Container(
+            //                                   width: 40,
+            //                                   height: 6,
+            //                                   decoration: BoxDecoration(
+            //                                     color: Colors.grey[400],
+            //                                     borderRadius:
+            //                                         BorderRadius.circular(8),
+            //                                   ),
+            //                                 ),
+            //                               ),
+            //                               SizedBox(height: 20),
+            //                               Text(
+            //                                 "Add New Role",
+            //                                 style: TextStyle(
+            //                                   fontSize: 20,
+            //                                   fontWeight: FontWeight.bold,
+            //                                 ),
+            //                               ),
+            //                               SizedBox(height: 16),
+            //                               TextField(
+            //                                 controller: roleController,
+            //                                 decoration: InputDecoration(
+            //                                   labelText: "User roles",
+            //                                   hintText: "Enter user role",
+            //                                   border: OutlineInputBorder(),
+            //                                 ),
+            //                               ),
+            //                               SizedBox(height: 16),
+            //                               Text(
+            //                                 "Permissions",
+            //                                 style: TextStyle(
+            //                                   fontWeight: FontWeight.w600,
+            //                                   fontSize: 16,
+            //                                 ),
+            //                               ),
+            //                               SizedBox(height: 8),
+            //                               Column(
+            //                                 children: permissions.keys.map((
+            //                                   key,
+            //                                 ) {
+            //                                   return SwitchListTile(
+            //                                     title: Text(key),
+            //                                     value: permissions[key]!,
+            //                                     onChanged: (val) {
+            //                                       setState(() {
+            //                                         permissions[key] = val;
+            //                                       });
+            //                                     },
+            //                                   );
+            //                                 }).toList(),
+            //                               ),
+            //                               SizedBox(height: 12),
+            //                               SizedBox(
+            //                                 width: double.infinity,
+            //                                 child: ElevatedButton(
+            //                                   onPressed: () async {
+            //                                     try {
+            //                                       await saveRoleWithPermissions(
+            //                                         roleName:
+            //                                             roleController.text,
+            //                                         permissionToggles:
+            //                                             permissions,
+            //                                       );
+            //                                       ScaffoldMessenger.of(
+            //                                         context,
+            //                                       ).showSnackBar(
+            //                                         const SnackBar(
+            //                                           content: Text(
+            //                                             'Role saved successfully!',
+            //                                             style: TextStyle(
+            //                                               color: Colors.black,
+            //                                             ),
+            //                                           ),
+            //                                           backgroundColor:
+            //                                               Colors.green,
+            //                                         ),
+            //                                       );
+            //                                       Navigator.pop(context);
+            //                                     } catch (e) {
+            //                                       ScaffoldMessenger.of(
+            //                                         context,
+            //                                       ).showSnackBar(
+            //                                         SnackBar(
+            //                                           content: Text(
+            //                                             'Error: \$e',
+            //                                           ),
+            //                                         ),
+            //                                       );
+            //                                     }
+            //                                   },
+            //                                   style: ElevatedButton.styleFrom(
+            //                                     backgroundColor: Colors.black,
+            //                                     foregroundColor: Colors.white,
+            //                                     padding: EdgeInsets.symmetric(
+            //                                       vertical: 14,
+            //                                     ),
+            //                                   ),
+            //                                   child: Text("Add Role"),
+            //                                 ),
+            //                               ),
+            //                               SizedBox(height: 12),
+            //                             ],
+            //                           ),
+            //                         );
+            //                       },
+            //                     ),
+            //                   );
+            //                 },
+            //               );
+            //             },
 
-                        child: Column(
-                          children: [
-                            // Icon(Icons.person_4_outlined, color: Colors.blue),
-                            // SizedBox(width: 4),
-                            // Text(
-                            //   "Add New Role",
-                            //   style: TextStyle(color: Colors.blue),
-                            // ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(width: 5, height: 4),
-                      GestureDetector(
-                        onTap: () async {
-                          final TextEditingController usernameController =
-                              TextEditingController();
-                          final TextEditingController emailController =
-                              TextEditingController();
-                          final TextEditingController passwordController =
-                              TextEditingController();
-                          final TextEditingController locationController =
-                              TextEditingController();
-                          List<String> roles = [];
-                          List<String> selectedLocations = [];
-                          List<String> allLocations = [];
-                          String? selectedRole;
-                          final supabase = Supabase.instance.client;
+            //             child: Column(
+            //               children: [
+            //                 // Icon(Icons.person_4_outlined, color: Colors.blue),
+            //                 // SizedBox(width: 4),
+            //                 // Text(
+            //                 //   "Add New Role",
+            //                 //   style: TextStyle(color: Colors.blue),
+            //                 // ),
+            //               ],
+            //             ),
+            //           ),
+            //           SizedBox(width: 5, height: 4),
+            //           GestureDetector(
+            //             onTap: () async {
+            //               final TextEditingController usernameController =
+            //                   TextEditingController();
+            //               final TextEditingController emailController =
+            //                   TextEditingController();
+            //               final TextEditingController passwordController =
+            //                   TextEditingController();
+            //               final TextEditingController locationController =
+            //                   TextEditingController();
+            //               List<String> roles = [];
+            //               List<String> selectedLocations = [];
+            //               List<String> allLocations = [];
+            //               String? selectedRole;
+            //               final supabase = Supabase.instance.client;
 
-                          final response = await supabase
-                              .from('roles')
-                              .select('name');
+            //               final response = await supabase
+            //                   .from('roles')
+            //                   .select('name');
 
-                          if (response != null) {
-                            setState(() {
-                              roles = response
-                                  .map<String>((item) => item['name'] as String)
-                                  .toList();
-                            });
-                          }
-                          final locResponse = await supabase
-                              .from('Locations')
-                              .select('title');
-                          allLocations = (locResponse as List<dynamic>)
-                              .map((e) => e['title'].toString())
-                              .toList();
+            //               if (response != null) {
+            //                 setState(() {
+            //                   roles = response
+            //                       .map<String>((item) => item['name'] as String)
+            //                       .toList();
+            //                 });
+            //               }
+            //               final locResponse = await supabase
+            //                   .from('Locations')
+            //                   .select('title');
+            //               allLocations = (locResponse as List<dynamic>)
+            //                   .map((e) => e['title'].toString())
+            //                   .toList();
 
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.vertical(
-                                top: Radius.circular(24),
-                              ),
-                            ),
-                            builder: (context) {
-                              return Padding(
-                                padding: EdgeInsets.only(
-                                  left: 16,
-                                  right: 16,
-                                  top: 20,
-                                  bottom:
-                                      MediaQuery.of(context).viewInsets.bottom +
-                                      20,
-                                ),
-                                child: SingleChildScrollView(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Center(
-                                        child: Container(
-                                          width: 40,
-                                          height: 6,
-                                          decoration: BoxDecoration(
-                                            color: Colors.grey[400],
-                                            borderRadius: BorderRadius.circular(
-                                              8,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      SizedBox(height: 16),
+            //               showModalBottomSheet(
+            //                 context: context,
+            //                 isScrollControlled: true,
+            //                 shape: RoundedRectangleBorder(
+            //                   borderRadius: BorderRadius.vertical(
+            //                     top: Radius.circular(24),
+            //                   ),
+            //                 ),
+            //                 builder: (context) {
+            //                   return Padding(
+            //                     padding: EdgeInsets.only(
+            //                       left: 16,
+            //                       right: 16,
+            //                       top: 20,
+            //                       bottom:
+            //                           MediaQuery.of(context).viewInsets.bottom +
+            //                           20,
+            //                     ),
+            //                     child: SingleChildScrollView(
+            //                       child: Column(
+            //                         crossAxisAlignment:
+            //                             CrossAxisAlignment.start,
+            //                         children: [
+            //                           Center(
+            //                             child: Container(
+            //                               width: 40,
+            //                               height: 6,
+            //                               decoration: BoxDecoration(
+            //                                 color: Colors.grey[400],
+            //                                 borderRadius: BorderRadius.circular(
+            //                                   8,
+            //                                 ),
+            //                               ),
+            //                             ),
+            //                           ),
+            //                           SizedBox(height: 16),
 
-                                      Text(
-                                        "Add New User",
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      SizedBox(height: 16),
+            //                           Text(
+            //                             "Add New User",
+            //                             style: TextStyle(
+            //                               fontSize: 20,
+            //                               fontWeight: FontWeight.bold,
+            //                             ),
+            //                           ),
+            //                           SizedBox(height: 16),
 
-                                      TextField(
-                                        controller: usernameController,
+            //                           TextField(
+            //                             controller: usernameController,
 
-                                        decoration: InputDecoration(
-                                          hintText: "Username",
+            //                             decoration: InputDecoration(
+            //                               hintText: "Username",
 
-                                          fillColor: Colors.grey.shade100,
-                                          border: OutlineInputBorder(),
-                                        ),
-                                      ),
-                                      SizedBox(height: 12),
+            //                               fillColor: Colors.grey.shade100,
+            //                               border: OutlineInputBorder(),
+            //                             ),
+            //                           ),
+            //                           SizedBox(height: 12),
 
-                                      DropdownButtonFormField<String>(
-                                        value: selectedRole,
-                                        decoration: InputDecoration(
-                                          hintText: "Select Role",
-                                          border: OutlineInputBorder(),
-                                        ),
-                                        items: roles
-                                            .map(
-                                              (role) =>
-                                                  DropdownMenuItem<String>(
-                                                    value: role,
-                                                    child: Text(role),
-                                                  ),
-                                            )
-                                            .toList(),
-                                        onChanged: (value) {
-                                          selectedRole = value;
-                                        },
-                                      ),
-                                      SizedBox(height: 12),
+            //                           DropdownButtonFormField<String>(
+            //                             value: selectedRole,
+            //                             decoration: InputDecoration(
+            //                               hintText: "Select Role",
+            //                               border: OutlineInputBorder(),
+            //                             ),
+            //                             items: roles
+            //                                 .map(
+            //                                   (role) =>
+            //                                       DropdownMenuItem<String>(
+            //                                         value: role,
+            //                                         child: Text(role),
+            //                                       ),
+            //                                 )
+            //                                 .toList(),
+            //                             onChanged: (value) {
+            //                               selectedRole = value;
+            //                             },
+            //                           ),
+            //                           SizedBox(height: 12),
 
-                                      // Email
-                                      TextField(
-                                        controller: emailController,
-                                        decoration: InputDecoration(
-                                          hintText: "Email",
-                                          border: OutlineInputBorder(),
-                                        ),
-                                      ),
-                                      SizedBox(height: 12),
+            //                           // Email
+            //                           TextField(
+            //                             controller: emailController,
+            //                             decoration: InputDecoration(
+            //                               hintText: "Email",
+            //                               border: OutlineInputBorder(),
+            //                             ),
+            //                           ),
+            //                           SizedBox(height: 12),
 
-                                      // Password
-                                      TextField(
-                                        controller: passwordController,
-                                        obscureText: true,
-                                        decoration: InputDecoration(
-                                          hintText: "Password",
-                                          border: OutlineInputBorder(),
-                                        ),
-                                      ),
-                                      SizedBox(height: 12),
+            //                           // Password
+            //                           TextField(
+            //                             controller: passwordController,
+            //                             obscureText: true,
+            //                             decoration: InputDecoration(
+            //                               hintText: "Password",
+            //                               border: OutlineInputBorder(),
+            //                             ),
+            //                           ),
+            //                           SizedBox(height: 12),
 
-                                      TextField(
-                                        controller: locationController,
-                                        readOnly: true,
-                                        decoration: InputDecoration(
-                                          hintText: "Select Locations",
-                                          border: OutlineInputBorder(),
-                                          suffixIcon: Icon(
-                                            Icons.arrow_drop_down,
-                                          ),
-                                        ),
-                                        onTap: () {
-                                          showDialog(
-                                            context: context,
-                                            builder: (context) {
-                                              return StatefulBuilder(
-                                                builder: (context, setDialogState) {
-                                                  return AlertDialog(
-                                                    title: Text(
-                                                      "Select Locations",
-                                                    ),
-                                                    content: SizedBox(
-                                                      width: double.maxFinite,
-                                                      child: ListView(
-                                                        shrinkWrap: true,
-                                                        children: allLocations.map((
-                                                          location,
-                                                        ) {
-                                                          final isSelected =
-                                                              selectedLocations
-                                                                  .contains(
-                                                                    location,
-                                                                  );
-                                                          return CheckboxListTile(
-                                                            title: Text(
-                                                              location,
-                                                            ),
-                                                            value: isSelected,
-                                                            onChanged: (checked) {
-                                                              setDialogState(() {
-                                                                if (checked ==
-                                                                    true) {
-                                                                  selectedLocations
-                                                                      .add(
-                                                                        location,
-                                                                      );
-                                                                } else {
-                                                                  selectedLocations
-                                                                      .remove(
-                                                                        location,
-                                                                      );
-                                                                }
-                                                              });
-                                                            },
-                                                          );
-                                                        }).toList(),
-                                                      ),
-                                                    ),
-                                                    actions: [
-                                                      TextButton(
-                                                        onPressed: () =>
-                                                            Navigator.pop(
-                                                              context,
-                                                            ),
-                                                        child: Text("Cancel"),
-                                                      ),
-                                                      ElevatedButton(
-                                                        onPressed: () {
-                                                          Navigator.pop(
-                                                            context,
-                                                          );
-                                                          setState(() {
-                                                            locationController
-                                                                    .text =
-                                                                selectedLocations
-                                                                    .join(", ");
-                                                          });
-                                                        },
-                                                        child: Text("Done"),
-                                                      ),
-                                                    ],
-                                                  );
-                                                },
-                                              );
-                                            },
-                                          );
-                                        },
-                                      ),
+            //                           TextField(
+            //                             controller: locationController,
+            //                             readOnly: true,
+            //                             decoration: InputDecoration(
+            //                               hintText: "Select Locations",
+            //                               border: OutlineInputBorder(),
+            //                               suffixIcon: Icon(
+            //                                 Icons.arrow_drop_down,
+            //                               ),
+            //                             ),
+            //                             onTap: () {
+            //                               showDialog(
+            //                                 context: context,
+            //                                 builder: (context) {
+            //                                   return StatefulBuilder(
+            //                                     builder: (context, setDialogState) {
+            //                                       return AlertDialog(
+            //                                         title: Text(
+            //                                           "Select Locations",
+            //                                         ),
+            //                                         content: SizedBox(
+            //                                           width: double.maxFinite,
+            //                                           child: ListView(
+            //                                             shrinkWrap: true,
+            //                                             children: allLocations.map((
+            //                                               location,
+            //                                             ) {
+            //                                               final isSelected =
+            //                                                   selectedLocations
+            //                                                       .contains(
+            //                                                         location,
+            //                                                       );
+            //                                               return CheckboxListTile(
+            //                                                 title: Text(
+            //                                                   location,
+            //                                                 ),
+            //                                                 value: isSelected,
+            //                                                 onChanged: (checked) {
+            //                                                   setDialogState(() {
+            //                                                     if (checked ==
+            //                                                         true) {
+            //                                                       selectedLocations
+            //                                                           .add(
+            //                                                             location,
+            //                                                           );
+            //                                                     } else {
+            //                                                       selectedLocations
+            //                                                           .remove(
+            //                                                             location,
+            //                                                           );
+            //                                                     }
+            //                                                   });
+            //                                                 },
+            //                                               );
+            //                                             }).toList(),
+            //                                           ),
+            //                                         ),
+            //                                         actions: [
+            //                                           TextButton(
+            //                                             onPressed: () =>
+            //                                                 Navigator.pop(
+            //                                                   context,
+            //                                                 ),
+            //                                             child: Text("Cancel"),
+            //                                           ),
+            //                                           ElevatedButton(
+            //                                             onPressed: () {
+            //                                               Navigator.pop(
+            //                                                 context,
+            //                                               );
+            //                                               setState(() {
+            //                                                 locationController
+            //                                                         .text =
+            //                                                     selectedLocations
+            //                                                         .join(", ");
+            //                                               });
+            //                                             },
+            //                                             child: Text("Done"),
+            //                                           ),
+            //                                         ],
+            //                                       );
+            //                                     },
+            //                                   );
+            //                                 },
+            //                               );
+            //                             },
+            //                           ),
 
-                                      SizedBox(height: 24),
+            //                           SizedBox(height: 24),
 
-                                      // Buttons
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.pop(context),
-                                            child: Text("Cancel"),
-                                          ),
-                                          SizedBox(width: 10),
-                                          ElevatedButton(
-                                            onPressed: () async {
-                                              final supabase =
-                                                  Supabase.instance.client;
+            //                           // Buttons
+            //                           Row(
+            //                             mainAxisAlignment:
+            //                                 MainAxisAlignment.end,
+            //                             children: [
+            //                               TextButton(
+            //                                 onPressed: () =>
+            //                                     Navigator.pop(context),
+            //                                 child: Text("Cancel"),
+            //                               ),
+            //                               SizedBox(width: 10),
+            //                               ElevatedButton(
+            //                                 onPressed: () async {
+            //                                   final supabase =
+            //                                       Supabase.instance.client;
 
-                                              if (emailController
-                                                      .text
-                                                      .isEmpty ||
-                                                  passwordController
-                                                      .text
-                                                      .isEmpty ||
-                                                  selectedRole == null) {
-                                                ScaffoldMessenger.of(
-                                                  context,
-                                                ).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      "Please fill all fields.",
-                                                    ),
-                                                  ),
-                                                );
-                                                return;
-                                              }
+            //                                   if (emailController
+            //                                           .text
+            //                                           .isEmpty ||
+            //                                       passwordController
+            //                                           .text
+            //                                           .isEmpty ||
+            //                                       selectedRole == null) {
+            //                                     ScaffoldMessenger.of(
+            //                                       context,
+            //                                     ).showSnackBar(
+            //                                       SnackBar(
+            //                                         content: Text(
+            //                                           "Please fill all fields.",
+            //                                         ),
+            //                                       ),
+            //                                     );
+            //                                     return;
+            //                                   }
 
-                                              try {
-                                                print('email:$emailController');
-                                                print(
-                                                  'password:$passwordController',
-                                                );
-                                                print('working');
+            //                                   try {
+            //                                     print('email:$emailController');
+            //                                     print(
+            //                                       'password:$passwordController',
+            //                                     );
+            //                                     print('working');
 
-                                                final signUpRes = await supabase
-                                                    .auth
-                                                    .signUp(
-                                                      email: emailController
-                                                          .text
-                                                          .trim(),
-                                                      password:
-                                                          passwordController
-                                                              .text
-                                                              .trim(),
+            //                                     final signUpRes = await supabase
+            //                                         .auth
+            //                                         .signUp(
+            //                                           email: emailController
+            //                                               .text
+            //                                               .trim(),
+            //                                           password:
+            //                                               passwordController
+            //                                                   .text
+            //                                                   .trim(),
 
-                                                      data: {
-                                                        'full_name':
-                                                            usernameController
-                                                                .text
-                                                                .trim(),
-                                                      },
-                                                    );
-                                                print(signUpRes);
-                                                Future<int?>
-                                                getRoleIdFromRoleName(
-                                                  String roleName,
-                                                ) async {
-                                                  final supabase =
-                                                      Supabase.instance.client;
+            //                                           data: {
+            //                                             'full_name':
+            //                                                 usernameController
+            //                                                     .text
+            //                                                     .trim(),
+            //                                           },
+            //                                         );
+            //                                     print(signUpRes);
+            //                                     Future<int?>
+            //                                     getRoleIdFromRoleName(
+            //                                       String roleName,
+            //                                     ) async {
+            //                                       final supabase =
+            //                                           Supabase.instance.client;
 
-                                                  final response =
-                                                      await supabase
-                                                          .from('roles')
-                                                          .select('id')
-                                                          .eq('name', roleName)
-                                                          .maybeSingle();
-                                                  print(response);
-                                                  if (response != null &&
-                                                      response['id'] != null) {
-                                                    return response['id']
-                                                        as int;
-                                                  }
+            //                                       final response =
+            //                                           await supabase
+            //                                               .from('roles')
+            //                                               .select('id')
+            //                                               .eq('name', roleName)
+            //                                               .maybeSingle();
+            //                                       print(response);
+            //                                       if (response != null &&
+            //                                           response['id'] != null) {
+            //                                         return response['id']
+            //                                             as int;
+            //                                       }
 
-                                                  return null;
-                                                }
+            //                                       return null;
+            //                                     }
 
-                                                final roleId =
-                                                    await getRoleIdFromRoleName(
-                                                      selectedRole!,
-                                                    );
-                                                print(roleId);
-                                                if (signUpRes.user != null) {
-                                                  final uuid =
-                                                      signUpRes.user!.id;
-                                                  print(uuid);
-                                                  final profileResponse =
-                                                      await supabase
-                                                          .from('profiles')
-                                                          .insert({
-                                                            'id': uuid,
-                                                            'active': false,
-                                                            'profile_pictures':
-                                                                'https://vsvueqtgulraaczqnnvh.supabase.co/storage/v1/object/public/profile-pictures//user.png',
-                                                            'full_name':
-                                                                usernameController
-                                                                    .text
-                                                                    .trim(),
-                                                            'role_id': roleId,
-                                                            'email':
-                                                                emailController
-                                                                    .text
-                                                                    .trim(),
-                                                          });
+            //                                     final roleId =
+            //                                         await getRoleIdFromRoleName(
+            //                                           selectedRole!,
+            //                                         );
+            //                                     print(roleId);
+            //                                     if (signUpRes.user != null) {
+            //                                       final uuid =
+            //                                           signUpRes.user!.id;
+            //                                       print(uuid);
+            //                                       final profileResponse =
+            //                                           await supabase
+            //                                               .from('profiles')
+            //                                               .insert({
+            //                                                 'id': uuid,
+            //                                                 'active': false,
+            //                                                 'profile_pictures':
+            //                                                     'https://vsvueqtgulraaczqnnvh.supabase.co/storage/v1/object/public/profile-pictures//user.png',
+            //                                                 'full_name':
+            //                                                     usernameController
+            //                                                         .text
+            //                                                         .trim(),
+            //                                                 'role_id': roleId,
+            //                                                 'email':
+            //                                                     emailController
+            //                                                         .text
+            //                                                         .trim(),
+            //                                               });
 
-                                                  if (profileResponse.error !=
-                                                      null) {
-                                                    print(
-                                                      "Error inserting profile: ${profileResponse.error!.message}",
-                                                    );
-                                                    ScaffoldMessenger.of(
-                                                      context,
-                                                    ).showSnackBar(
-                                                      SnackBar(
-                                                        content: Text(
-                                                          "Failed to insert profile",
-                                                        ),
-                                                      ),
-                                                    );
-                                                    return;
-                                                  }
+            //                                       if (profileResponse.error !=
+            //                                           null) {
+            //                                         print(
+            //                                           "Error inserting profile: ${profileResponse.error!.message}",
+            //                                         );
+            //                                         ScaffoldMessenger.of(
+            //                                           context,
+            //                                         ).showSnackBar(
+            //                                           SnackBar(
+            //                                             content: Text(
+            //                                               "Failed to insert profile",
+            //                                             ),
+            //                                           ),
+            //                                         );
+            //                                         return;
+            //                                       }
 
-                                                  // 👇 Insert into user_locations here
-                                                  final locationIds =
-                                                      locationController.text
-                                                          .split(
-                                                            ',',
-                                                          ) // or however your app stores multiple IDs
-                                                          .map(
-                                                            (id) =>
-                                                                int.tryParse(
-                                                                  id.trim(),
-                                                                ),
-                                                          )
-                                                          .where(
-                                                            (id) => id != null,
-                                                          )
-                                                          .toList();
+            //                                       // 👇 Insert into user_locations here
+            //                                       final locationIds =
+            //                                           locationController.text
+            //                                               .split(
+            //                                                 ',',
+            //                                               ) // or however your app stores multiple IDs
+            //                                               .map(
+            //                                                 (id) =>
+            //                                                     int.tryParse(
+            //                                                       id.trim(),
+            //                                                     ),
+            //                                               )
+            //                                               .where(
+            //                                                 (id) => id != null,
+            //                                               )
+            //                                               .toList();
 
-                                                  final locationEntries =
-                                                      locationIds
-                                                          .map(
-                                                            (locationId) => {
-                                                              'profile_id':
-                                                                  uuid,
-                                                              'location_id':
-                                                                  locationId,
-                                                            },
-                                                          )
-                                                          .toList();
+            //                                       final locationEntries =
+            //                                           locationIds
+            //                                               .map(
+            //                                                 (locationId) => {
+            //                                                   'profile_id':
+            //                                                       uuid,
+            //                                                   'location_id':
+            //                                                       locationId,
+            //                                                 },
+            //                                               )
+            //                                               .toList();
 
-                                                  final userLocationsRes =
-                                                      await supabase
-                                                          .from(
-                                                            'user_locations',
-                                                          )
-                                                          .insert(
-                                                            locationEntries,
-                                                          );
+            //                                       final userLocationsRes =
+            //                                           await supabase
+            //                                               .from(
+            //                                                 'user_locations',
+            //                                               )
+            //                                               .insert(
+            //                                                 locationEntries,
+            //                                               );
 
-                                                  if (userLocationsRes.error !=
-                                                      null) {
-                                                    print(
-                                                      "Error inserting user_locations: ${userLocationsRes.error!.message}",
-                                                    );
-                                                    ScaffoldMessenger.of(
-                                                      context,
-                                                    ).showSnackBar(
-                                                      SnackBar(
-                                                        content: Text(
-                                                          "Failed to insert user locations",
-                                                        ),
-                                                      ),
-                                                    );
-                                                    return;
-                                                  }
+            //                                       if (userLocationsRes.error !=
+            //                                           null) {
+            //                                         print(
+            //                                           "Error inserting user_locations: ${userLocationsRes.error!.message}",
+            //                                         );
+            //                                         ScaffoldMessenger.of(
+            //                                           context,
+            //                                         ).showSnackBar(
+            //                                           SnackBar(
+            //                                             content: Text(
+            //                                               "Failed to insert user locations",
+            //                                             ),
+            //                                           ),
+            //                                         );
+            //                                         return;
+            //                                       }
 
-                                                  ScaffoldMessenger.of(
-                                                    context,
-                                                  ).showSnackBar(
-                                                    SnackBar(
-                                                      content: Text(
-                                                        "User added successfully.",
-                                                      ),
-                                                    ),
-                                                  );
-                                                  Navigator.pop(context);
-                                                }
-                                              } catch (e) {
-                                                print("Error adding user: $e");
-                                                ScaffoldMessenger.of(
-                                                  context,
-                                                ).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      "Failed to add user.",
-                                                    ),
-                                                  ),
-                                                );
-                                              }
+            //                                       ScaffoldMessenger.of(
+            //                                         context,
+            //                                       ).showSnackBar(
+            //                                         SnackBar(
+            //                                           content: Text(
+            //                                             "User added successfully.",
+            //                                           ),
+            //                                         ),
+            //                                       );
+            //                                       Navigator.pop(context);
+            //                                     }
+            //                                   } catch (e) {
+            //                                     print("Error adding user: $e");
+            //                                     ScaffoldMessenger.of(
+            //                                       context,
+            //                                     ).showSnackBar(
+            //                                       SnackBar(
+            //                                         content: Text(
+            //                                           "Failed to add user.",
+            //                                         ),
+            //                                       ),
+            //                                     );
+            //                                   }
 
-                                              print(
-                                                "Username: ${usernameController.text}",
-                                              );
-                                              print("Role: $selectedRole");
-                                              print(
-                                                "Email: ${emailController.text}",
-                                              );
-                                              print(
-                                                "Password: ${passwordController.text}",
-                                              );
-                                              print(
-                                                "Location: ${locationController.text}",
-                                              );
+            //                                   print(
+            //                                     "Username: ${usernameController.text}",
+            //                                   );
+            //                                   print("Role: $selectedRole");
+            //                                   print(
+            //                                     "Email: ${emailController.text}",
+            //                                   );
+            //                                   print(
+            //                                     "Password: ${passwordController.text}",
+            //                                   );
+            //                                   print(
+            //                                     "Location: ${locationController.text}",
+            //                                   );
 
-                                              Navigator.pop(context);
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.black,
-                                              foregroundColor: Colors.white,
-                                              padding: EdgeInsets.symmetric(
-                                                horizontal: 24,
-                                                vertical: 14,
-                                              ),
-                                            ),
-                                            child: Text("Add User"),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          );
-                        },
+            //                                   Navigator.pop(context);
+            //                                 },
+            //                                 style: ElevatedButton.styleFrom(
+            //                                   backgroundColor: Colors.black,
+            //                                   foregroundColor: Colors.white,
+            //                                   padding: EdgeInsets.symmetric(
+            //                                     horizontal: 24,
+            //                                     vertical: 14,
+            //                                   ),
+            //                                 ),
+            //                                 child: Text("Add User"),
+            //                               ),
+            //                             ],
+            //                           ),
+            //                         ],
+            //                       ),
+            //                     ),
+            //                   );
+            //                 },
+            //               );
+            //             },
 
-                        child: Column(
-                          children: [
-                            // Icon(
-                            //   Icons.add_circle_outline,
-                            //   color: Colors.blue,
-                            // ),
-                            // SizedBox(width: 4),
-                            // Text(
-                            //   "Add New User",
-                            //   style: TextStyle(color: Colors.blue),
-                            // ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+            //             child: Column(
+            //               children: [
+            //                 // Icon(
+            //                 //   Icons.add_circle_outline,
+            //                 //   color: Colors.blue,
+            //                 // ),
+            //                 // SizedBox(width: 4),
+            //                 // Text(
+            //                 //   "Add New User",
+            //                 //   style: TextStyle(color: Colors.blue),
+            //                 // ),
+            //               ],
+            //             ),
+            //           ),
+            //         ],
+            //       ),
+            //     ),
+            //   ],
+            // ),
 
-            SizedBox(width: 20),
-            Center(
-              child: Text(
-                "Appointments",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
-              ),
-            ),
-            SizedBox(height: 20),
+            // SizedBox(width: 20),
+            // Center(
+            //   child: Text(
+            //     "Appointments".tr(),
+            //     textAlign: TextAlign.center,
+            //     style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
+            //   ),
+            // ),
+            SizedBox(height: 5),
+            Center(child: 
+           
+           
+Container(
+height: 44,
+  margin: EdgeInsets.all(3),
+  decoration: BoxDecoration(
+    borderRadius: BorderRadius.circular(18),
+    color: Colors.white,
+  ),
+              child:
+            
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildStatusChip("Approved", showApproved, true),
-                SizedBox(width: 12),
-                _buildStatusChip("Need Approval", showApproved, false),
+                _buildStatusChip("Approved".tr(), showApproved, true),
+                SizedBox(width: 2),
+                _buildStatusChip("Need Approval".tr(), showApproved, false),
               ],
-            ),
+            ),), ),
             SizedBox(height: 24),
 
             Padding(
@@ -1238,10 +1303,10 @@ class _AppointmentPageState extends State<AppointmentPage> {
                       });
                     },
                     decoration: InputDecoration(
-                      labelText: 'Search by first name',
+                      labelText: 'Search by first name'.tr(),
                       prefixIcon: Icon(Icons.search),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(18),
+                       borderRadius: BorderRadius.circular(30),
                       ),
                     ),
                   ),
@@ -1273,7 +1338,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                 final match = RegExp(r'\|\s*(.*)').firstMatch(raw);
                 String displayDate = match != null ? match.group(1)! : raw;
                 return Card(
-                  color: const Color(0xFFF1F6FF),
+                  color: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -1430,17 +1495,17 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                       builder: (context) {
                                         return StatefulBuilder(
                                           builder: (context, setState) => AlertDialog(
-                                            title: Text("Confirm Delete"),
+                                            title: Text("Confirm Delete".tr(),style: TextStyle(fontWeight: FontWeight.w600),),
                                             content: Column(
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
                                                 Text(
-                                                  "Are you sure you want to delete this appointment?",
+                                                  "Are you sure you want to delete this appointment?".tr(),
                                                 ),
                                                 SizedBox(height: 16),
                                                 DropdownButtonFormField<String>(
                                                   decoration: InputDecoration(
-                                                    labelText: 'Select reason',
+                                                    labelText: 'Select reason'.tr(),
                                                     border:
                                                         OutlineInputBorder(),
                                                   ),
@@ -1470,7 +1535,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                                 onPressed: () =>
                                                     Navigator.of(context).pop(),
                                                 child: Text(
-                                                  "Cancel",
+                                                  "Cancel".tr(),
                                                   style: TextStyle(
                                                     color: Colors.blue,
                                                   ),
@@ -1538,7 +1603,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                                   foregroundColor: Colors.white,
                                                 ),
 
-                                                child: Text("Delete"),
+                                                child: Text("Delete".tr()),
                                               ),
                                             ],
                                           ),
@@ -1571,7 +1636,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                             content: Text(
                                               "Appointment approved.",
                                             ),
-                                            backgroundColor: Colors.green,
+                                            backgroundColor: Color(0xFF0C8D38),
                                           ),
                                         );
 
@@ -1593,14 +1658,14 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                       }
                                     },
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.green,
+                                      backgroundColor: Color(0xFF0C8D38),
                                       foregroundColor: Colors.white,
                                       padding: EdgeInsets.symmetric(
                                         horizontal: 24,
                                         vertical: 6,
                                       ),
                                     ),
-                                    child: Text("Approve"),
+                                    child: Text("Approve".tr()),
                                   ),
                                 ),
                               ),
@@ -1628,35 +1693,40 @@ class _AppointmentPageState extends State<AppointmentPage> {
     );
   }
 
-  Widget _buildStatusChip(String label, bool current, bool match) {
-    final isSelected = current == match;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          showApproved = match;
-          fetchAppointments();
-        });
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFF1F6FF) : Colors.grey.shade200,
-          border: Border.all(
-            color: isSelected ? Colors.blue : Colors.grey,
-            width: 1,
-          ),
-          borderRadius: BorderRadius.circular(24),
+Widget _buildStatusChip(String label, bool current, bool match) {
+  final isSelected = current == match;
+  return GestureDetector(
+    onTap: () {
+      setState(() {
+        showApproved = match;
+        fetchAppointments();
+      });
+    },
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 6),
+      decoration: BoxDecoration(
+        color: isSelected ? const Color(0xFFF1F6FF) : Colors.transparent,
+        border: Border.all(
+          color: isSelected ? Color(0XFF0066FF)  : Colors.transparent,
+          width: 1,
         ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.blue : Colors.grey,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        borderRadius: BorderRadius.circular(24),
       ),
-    );
-  }
+      child: Text(
+        label,
+        style: TextStyle(
+          color: isSelected ? Color(0XFF0066FF) : Colors.grey.shade600,
+          fontWeight: FontWeight.w500,
+          fontSize: 13,
+          
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    ),
+  );
+}
+
 }
 
 void showAddAppointmentBottomSheet(
@@ -1845,10 +1915,27 @@ void showAddAppointmentBottomSheet(
                           fontWeight: FontWeight.w900,
                         ),
                       ),
-                      IconButton(
-                        icon: Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                      ),
+                     IconButton(
+  onPressed: () {
+    Navigator.pop(context);
+  },
+  padding: EdgeInsets.zero, // removes extra padding
+  constraints: const BoxConstraints(), // keeps size compact
+  icon: Container(
+    width: 24,
+    height: 24,
+    decoration: const BoxDecoration(
+      color: Color(0xFFE8EAF6), // light grey circle background
+      shape: BoxShape.circle,
+    ),
+    child: const Icon(
+      Icons.close,
+      size: 16,
+      color: Colors.black54, // X color
+    ),
+  ),
+)
+
                     ],
                   ),
                   const Divider(),
@@ -2604,22 +2691,39 @@ void showEditAppointmentBottomSheet(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "Edit Appointment",
+                        "Edit Appointment".tr(),
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w900,
                         ),
                       ),
-                      IconButton(
-                        icon: Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                      ),
+                     IconButton(
+  onPressed: () {
+    Navigator.pop(context);
+  },
+  padding: EdgeInsets.zero, // removes extra padding
+  constraints: const BoxConstraints(), // keeps size compact
+  icon: Container(
+    width: 24,
+    height: 24,
+    decoration: const BoxDecoration(
+      color: Color(0xFFE8EAF6), // light grey circle background
+      shape: BoxShape.circle,
+    ),
+    child: const Icon(
+      Icons.close,
+      size: 16,
+      color: Colors.black54, // X color
+    ),
+  ),
+)
+
                     ],
                   ),
                   const Divider(),
                   const SizedBox(height: 25),
-                  const Text(
-                    'New Date',
+                  Text(
+                    'New Date'.tr(),
                     textAlign: TextAlign.left,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                   ),
@@ -2630,7 +2734,7 @@ void showEditAppointmentBottomSheet(
                     readOnly: true,
                     cursorColor: const Color(0xFF0057FF),
                     decoration: InputDecoration(
-                      labelText: "New Date",
+                      labelText: "New Date".tr(),
                       border: OutlineInputBorder(),
                       suffixIcon: Icon(Icons.calendar_today),
                     ),
@@ -2672,8 +2776,8 @@ void showEditAppointmentBottomSheet(
                     },
                   ),
                   SizedBox(height: 12),
-                  const Text(
-                    'New Time',
+                 Text(
+                    'New Time'.tr(),
                     textAlign: TextAlign.left,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                   ),
@@ -2688,7 +2792,7 @@ void showEditAppointmentBottomSheet(
                     onChanged: (val) =>
                         setModalState(() => timeController.text = val ?? ''),
                     decoration: InputDecoration(
-                      labelText: "New Time",
+                      labelText: "New Time".tr(),
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -2702,7 +2806,7 @@ void showEditAppointmentBottomSheet(
                       TextButton(
                         onPressed: () => Navigator.pop(context),
                         child: Text(
-                          "Cancel",
+                          "Cancel".tr(),
                           style: TextStyle(color: const Color(0xFF0057FF)),
                         ),
                       ),
@@ -2777,7 +2881,7 @@ void showEditAppointmentBottomSheet(
                           foregroundColor: Colors.white,
                         ),
                         child: Text(
-                          "Update Appointment",
+                          "Update Appointment".tr(),
                           style: TextStyle(color: const Color(0xFF0057FF)),
                         ),
                       ),

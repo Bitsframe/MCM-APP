@@ -44,6 +44,7 @@ dependencies:
   timezone: ^0.10.1
   permission_handler: ^11.3.1
   dropdown_search: ^6.0.2
+  easy_localization: ^3.0.8
 
 
 dev_dependencies:
@@ -75,6 +76,8 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+   - assets/lang/en.json
+   - assets/lang/es.json
    - assets/images/medicineimage.png
    - assets/images/medicineicon.png
    - assets/images/medicineicon1.png

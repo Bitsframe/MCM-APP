@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:medicineapp/location.dart';
@@ -206,17 +207,34 @@ class _EmailTemplateScreenState extends State<EmailTemplateScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      "Select Patients",
+                  Text(
+                      "Select Patients".tr(),
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(context),
-                    ),
+                   IconButton(
+  onPressed: () {
+    Navigator.pop(context);
+  },
+  padding: EdgeInsets.zero, // removes extra padding
+  constraints: const BoxConstraints(), // keeps size compact
+  icon: Container(
+    width: 24,
+    height: 24,
+    decoration: const BoxDecoration(
+      color: Color(0xFFE8EAF6), // light grey circle background
+      shape: BoxShape.circle,
+    ),
+    child: const Icon(
+      Icons.close,
+      size: 16,
+      color: Colors.black54, // X color
+    ),
+  ),
+)
+
                   ],
                 ),
                 const Divider(),
@@ -239,19 +257,19 @@ class _EmailTemplateScreenState extends State<EmailTemplateScreen> {
                       selectAll = selectedEmails.length == filteredPatients.length;
                     });
                   },
-                  decoration: const InputDecoration(
-                    labelText: "Search by email",
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Color(0xFF0057FF)),
+                  decoration: InputDecoration(
+                    labelText: "Search by email".tr(),
+                    
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
                     ),
-                    border: OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 16),
 
                 // Select All
                 CheckboxListTile(
-                  title: const Text("Select All"),
+                  title: Text("select_all".tr()),
                   value: selectAll,
                   onChanged: (checked) {
                     setState(() {
@@ -316,8 +334,8 @@ class _EmailTemplateScreenState extends State<EmailTemplateScreen> {
                     style: ElevatedButton.styleFrom(
                       // backgroundColor: const Color(0xFF0057FF),
                     ),
-                    child: const Text(
-                      "Done",
+                    child:  Text(
+                      "Done".tr(),
                       style: TextStyle(color: const Color(0xFF0057FF),),
                     ),
                   ),
@@ -336,34 +354,61 @@ class _EmailTemplateScreenState extends State<EmailTemplateScreen> {
 }
 
     return Scaffold(
+       backgroundColor: const Color(0xFFF1F4F9),
+            appBar: AppBar(
+        leading: Row(
+          children: [
+            IconButton(
+                        icon: Icon(
+                          Icons.arrow_back,
+                          size: 28,
+                          color: Colors.black,
+                          
+                        ),
+
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                      //  Text('Back', style: TextStyle(color: Colors.black,fontSize: 10)),
+                     
+
+          ],
+        ),
+        centerTitle: true,
+          title: Text("Broadcast".tr(), style: TextStyle(color: Colors.black,fontWeight: FontWeight.w900)),
+        backgroundColor: Colors.white,
+        elevation: 1,),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 50),
-              Row(
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.arrow_back, size: 28, color: Colors.black),
+              
+              // Row(
+              //   children: [
+              //     IconButton(
+              //       icon: Icon(Icons.arrow_back, size: 28, color: Colors.black),
 
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                  Text('Back', style: TextStyle(color: Colors.black)),
-                  SizedBox(width: 55, height: 10),
-                  Text(
-                    "Broadcast",
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 30),
+              //       onPressed: () {
+              //         Navigator.pop(context);
+              //       },
+              //     ),
+              //     Text('Back'.tr(), style: TextStyle(color: Colors.black)),
+              //     SizedBox(width: 55, height: 10),
+              //     Text(
+              //       "Broadcast".tr(),
+              //       style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
+              //     ),
+              //   ],
+              // ),
+              
+              
+              const SizedBox(height: 20),
               // --- FORM SECTION ---
-              const Text(
-                "Target Patients *",
+             Text(
+                'target_patients'.tr(),
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
@@ -377,7 +422,7 @@ class _EmailTemplateScreenState extends State<EmailTemplateScreen> {
                   ),
                   child: Text(
                     selectedEmails.isEmpty
-                        ? 'Select patients'
+                        ? 'select patients'.tr()
                         : '${selectedEmails.length} selected',
                     style: const TextStyle(
                       fontSize: 16,
@@ -389,8 +434,8 @@ class _EmailTemplateScreenState extends State<EmailTemplateScreen> {
 
               const SizedBox(height: 16),
 
-              const Text(
-                "Email Template *",
+               Text(
+                "Email Template".tr(),
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
@@ -413,43 +458,43 @@ class _EmailTemplateScreenState extends State<EmailTemplateScreen> {
               ),
               const SizedBox(height: 16),
 
-              const Text(
-                "Write Subject *",
+              Text(
+                "Write Subject".tr(),
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               TextFormField(
                 controller: subjectController,
-                decoration: const InputDecoration(
-                  hintText: "Run email",
+                decoration:  InputDecoration(
+                  hintText: "Run email".tr(),
                   border: OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 16),
 
-              const Text(
-                "Name",
+               Text(
+                "Name".tr(),
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               TextFormField(
                 controller: nameController,
-                decoration: const InputDecoration(
-                  hintText: "Email Template",
+                decoration:  InputDecoration(
+                  hintText: "Email Template".tr(),
                   border: OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 16),
 
-              const Text(
-                "Price",
+            Text(
+                "Price".tr(),
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               TextFormField(
                 controller: priceController,
-                decoration: const InputDecoration(
-                  hintText: "Run email",
+                decoration:  InputDecoration(
+                  hintText: "Run email".tr(),
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -539,8 +584,8 @@ $sender
                   },
 
                   // Send logic
-                  child: const Text(
-                    "Run email",
+                  child: Text(
+                    "Run email".tr(),
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
@@ -564,61 +609,156 @@ $sender
               //       ),
               //     ),
               //                     ),      // --- PREVIEW SECTION ---
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFF0057FF), width: 2),
+           Padding(
+  padding: const EdgeInsets.only(top: 30), // give extra space
+  child: Stack(
+    clipBehavior: Clip.none, // allow drawing outside bounds
+    alignment: Alignment.center,
+    children: [
+      // Main Email Card
+      Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0xFF0057FF), width: 2),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Image.asset(
+                  "assets/images/medicineicon1.png",
+                  width: 80,
+                  height: 100,
                 ),
-
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Image.asset(
-                          "assets/images/medicineicon1.png",
-                          width: 80,
-                          height: 100,
-                        ),
-                        const SizedBox(width: 150),
-                        const Text(
-                          "Preview",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 20),
-                    Text(
-                      templateContent[selectedTemplate]?['greeting'] ?? '',
-                      style: const TextStyle(fontSize: 18),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      templateContent[selectedTemplate]?['message']!.replaceAll(
-                            "\$0",
-                            "Rs. ${priceController.text.trim().isEmpty ? '0' : priceController.text.trim()}",
-                          ) ??
-                          '',
-                      style: const TextStyle(fontSize: 16, height: 1.5),
-                    ),
-                    const SizedBox(height: 20),
-                    const Divider(),
-                    // Text(
-                    //   "Best Regards,\n${nameController.text.trim().isEmpty ? (templateContent[selectedTemplate]?['sender'] ?? '') : nameController.text.trim()}",
-                    //   style: const TextStyle(fontSize: 16),
-                    // ),
-                    Text(
-                      "Best Regards,\n Clinica San Miguel Team",
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                  ],
+                const SizedBox(width: 150),
+                Text(
+                  "Preview".tr(),
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Text(
+              templateContent[selectedTemplate]?['greeting'] ?? '',
+              style: const TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              templateContent[selectedTemplate]?['message']!.replaceAll(
+                    "\$0",
+                    "Rs. ${priceController.text.trim().isEmpty ? '0' : priceController.text.trim()}",
+                  ) ??
+                  '',
+              style: const TextStyle(fontSize: 16, height: 1.5),
+            ),
+            const SizedBox(height: 20),
+            const Divider(),
+            Text(
+              "Best Regards,\n Clinica San Miguel Team",
+              style: const TextStyle(fontSize: 16),
+            ),
+          ],
+        ),
+      ),
+
+      // Stethoscope Circle
+      Positioned(
+        top: -20,
+        left: 0,
+        right: 0,
+        child: Container(
+          width: 80,
+          height: 80,
+          decoration: BoxDecoration(
+            color: const Color(0xFFF1F6FF),
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: Color(0xFF0057FF),
+              width: 1,
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 4,
+                offset: Offset(2, 2),
               ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Image.asset(
+              'assets/images/stethoscope.png',
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
+      ),
+    ],
+  ),
+)
+
+              // Container(
+              //   width: double.infinity,
+              //   padding: const EdgeInsets.all(20),
+              //   decoration: BoxDecoration(
+              //     color: Colors.grey[100],
+              //     borderRadius: BorderRadius.circular(8),
+              //     border: Border.all(color: const Color(0xFF0057FF), width: 2),
+              //   ),
+
+              //   child: Column(
+              //     crossAxisAlignment: CrossAxisAlignment.start,
+              //     children: [
+              //       Row(
+              //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //         children: [
+              //           Image.asset(
+              //             "assets/images/medicineicon1.png",
+              //             width: 80,
+              //             height: 100,
+              //           ),
+              //           const SizedBox(width: 150),
+              //           const Text(
+              //             "Preview",
+              //             style: TextStyle(fontWeight: FontWeight.bold),
+              //           ),
+              //         ],
+              //       ),
+
+              //       const SizedBox(height: 20),
+              //       Text(
+              //         templateContent[selectedTemplate]?['greeting'] ?? '',
+              //         style: const TextStyle(fontSize: 18),
+              //       ),
+              //       const SizedBox(height: 10),
+              //       Text(
+              //         templateContent[selectedTemplate]?['message']!.replaceAll(
+              //               "\$0",
+              //               "Rs. ${priceController.text.trim().isEmpty ? '0' : priceController.text.trim()}",
+              //             ) ??
+              //             '',
+              //         style: const TextStyle(fontSize: 16, height: 1.5),
+              //       ),
+              //       const SizedBox(height: 20),
+              //       const Divider(),
+              //       // Text(
+              //       //   "Best Regards,\n${nameController.text.trim().isEmpty ? (templateContent[selectedTemplate]?['sender'] ?? '') : nameController.text.trim()}",
+              //       //   style: const TextStyle(fontSize: 16),
+              //       // ),
+              //       Text(
+              //         "Best Regards,\n Clinica San Miguel Team",
+              //         style: const TextStyle(fontSize: 16),
+              //       ),
+              //     ],
+              //   ),
+              // ),
+            
+            
             ],
           ),
         ),

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -60,9 +61,18 @@ await Firebase.initializeApp(
     anonKey:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzdnVlcXRndWxyYWFjenFubnZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDAwNDQ5OTMsImV4cCI6MjAxNTYyMDk5M30.umGVRqypGULFtZUXemNtANCGns-a2o4E8zSbnrZbldg',
   );
+   await EasyLocalization.ensureInitialized();
 
-  // Run your Flutter app
-  runApp(MyApp());
+  runApp(
+    EasyLocalization(
+      supportedLocales: [Locale('en'), Locale('es')],
+      path: 'assets/lang', 
+      fallbackLocale: Locale('en'),
+      child: MyApp(),
+    ),
+  );
+
+  
 }
 
 class MyApp extends StatelessWidget {
@@ -71,6 +81,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      locale: context.locale,
+  supportedLocales: context.supportedLocales,
+  localizationsDelegates: context.localizationDelegates,
       title: 'MyClinicMD',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -89,21 +102,22 @@ class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF1F4F9),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            SizedBox(height: 120,),
              Container(
               child: Image.asset(
                 'assets/images/Group.png',
-                height: 200,
+                height: 250,
               ),
             ),
-            SizedBox(height: 50,),
-            Text('MyClinic MD',style: TextStyle(fontSize: 24,fontWeight: FontWeight.w900),),
-            SizedBox(height: 10,),
-            Text('A Comprehensive Clinic Care',style: TextStyle(fontSize: 15,fontWeight: FontWeight.w500,color: Colors.grey),),
+            SizedBox(height: 130,),
+            Text('MyClinic MD',style: TextStyle(fontSize: 32,fontWeight: FontWeight.w900),),
+            SizedBox(height: 30,),
+            Text('A Comprehensive Clinic Care',style: TextStyle(fontSize: 18,fontWeight: FontWeight.w500,color: Colors.grey),),
        
             Text('Management Services',style: TextStyle(fontSize: 15,fontWeight: FontWeight.w500,color: Colors.grey),),
             // Container(
@@ -113,10 +127,10 @@ class MyHomePage extends StatelessWidget {
             //   ),
             // ),
 
-            SizedBox(height: 40),
+            SizedBox(height: 30),
 
             SizedBox(
-  width: 250, // Set desired width
+  width: 350, // Set desired width
   height: 50, // Set desired height
   child:ElevatedButton(
               onPressed: () {

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -119,6 +120,7 @@ class _ProductWarehouseState extends State<ProductWarehouse> {
                 const SizedBox(height: 10),
                 Row(
                   children: [
+                   
                     ElevatedButton.icon(
                       onPressed: () {
                         _updateProductSheet(
@@ -127,16 +129,17 @@ class _ProductWarehouseState extends State<ProductWarehouse> {
                         ); // updated to pass product
                       },
                       icon: const Icon(Icons.update_outlined),
-                      label: const Text(
-                        "Update",
-                        style: TextStyle(fontSize: 11),
+                      label:  Text(
+                        "Update".tr(),
+                        style: TextStyle(fontSize: 10),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue.shade100,
                         foregroundColor: Colors.blue,
                       ),
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 2),
+                    Expanded(child: 
                     ElevatedButton.icon(
                       onPressed: () async {
                         if (productId == null) return;
@@ -163,7 +166,7 @@ class _ProductWarehouseState extends State<ProductWarehouse> {
                       },
                       icon: Icon(isArchived ? Icons.unarchive : Icons.archive),
                       label: Text(
-                        isArchived ? "Unarchive" : "Archive",
+                        isArchived ? "Unarchive".tr() : "Archive".tr(),
                         style: TextStyle(fontSize: 11),
                       ),
                       style: ElevatedButton.styleFrom(
@@ -172,17 +175,19 @@ class _ProductWarehouseState extends State<ProductWarehouse> {
                             : Color.fromARGB(255, 253, 178, 180),
                         foregroundColor: isArchived ? Colors.green : Colors.red,
                       ),
-                    ),
-                    const SizedBox(width: 4),
+                    ),),
+                    const SizedBox(width: 2),
+                  
+                    
                     ElevatedButton.icon(
                       onPressed: () {
                         _showAssignProductSheet(context, productId);
                         // TODO: Assign logic
                       },
                       icon: const Icon(Icons.add),
-                      label: const Text(
-                        "Assign",
-                        style: TextStyle(fontSize: 11),
+                      label: Text(
+                        "Assign".tr(),
+                        style: TextStyle(fontSize: 10),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xFFDCFCE7),
@@ -249,14 +254,31 @@ class _ProductWarehouseState extends State<ProductWarehouse> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    "Update Product",
+                   Text(
+                    "Update Product".tr(),
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
-                  ),
+  onPressed: () {
+    Navigator.pop(context);
+  },
+  padding: EdgeInsets.zero, // removes extra padding
+  constraints: const BoxConstraints(), // keeps size compact
+  icon: Container(
+    width: 24,
+    height: 24,
+    decoration: const BoxDecoration(
+      color: Color(0xFFE8EAF6), // light grey circle background
+      shape: BoxShape.circle,
+    ),
+    child: const Icon(
+      Icons.close,
+      size: 16,
+      color: Colors.black54, // X color
+    ),
+  ),
+)
+
                 ],
               ),
               const Divider(),
@@ -355,7 +377,7 @@ Column(
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text("Cancel",style: TextStyle(color: const Color(0xFF0057FF),),),
+                    child:  Text("Cancel".tr(),style: TextStyle(color: const Color(0xFF0057FF),),),
                   ),
                   const SizedBox(width: 12),
                   ElevatedButton(
@@ -405,7 +427,7 @@ Column(
                      
                       foregroundColor: Colors.white,
                     ),
-                    child: const Text("Update",style: TextStyle(color:const Color(0xFF0057FF),),),
+                    child:  Text("Update".tr(),style: TextStyle(color:const Color(0xFF0057FF),),),
                   ),
                 ],
               ),
@@ -448,10 +470,10 @@ Column(
       ),
       builder: (context) => Padding(
         padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom +30,
-          left: 30,
-          right: 30,
-          top: 30,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 30,
+        left: 20, // Reduced side padding slightly for more horizontal space
+        right: 20, // Reduced side padding slightly for more horizontal space
+        top: 30,
         ),
         child: StatefulBuilder(
           builder: (context, setState) => Wrap(
@@ -461,13 +483,30 @@ Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "Create Product",
+                  "Create Product".tr(),
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
                 ),
-                IconButton(
-                  icon: Icon(Icons.close),
-                  onPressed: () => Navigator.pop(context),
-                ),
+                 IconButton(
+  onPressed: () {
+    Navigator.pop(context);
+  },
+  padding: EdgeInsets.zero, // removes extra padding
+  constraints: const BoxConstraints(), // keeps size compact
+  icon: Container(
+    width: 24,
+    height: 24,
+    decoration: const BoxDecoration(
+      color: Color(0xFFE8EAF6), // light grey circle background
+      shape: BoxShape.circle,
+    ),
+    child: const Icon(
+      Icons.close,
+      size: 16,
+      color: Colors.black54, // X color
+    ),
+  ),
+)
+
               ],
             ),
             const Divider(),
@@ -507,7 +546,7 @@ Column(
               TextField(
                 controller: _nameController,
                 decoration: InputDecoration(
-                  hintText: "Product Name",
+                  hintText: "Product Name".tr(),
                   filled: true,
                   fillColor: Colors.grey.shade100,
                   border: OutlineInputBorder(
@@ -528,7 +567,7 @@ Column(
                       controller: _priceController,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
-                        hintText: "Price",
+                        hintText: "Price".tr(),
                         filled: true,
                         fillColor: Colors.grey.shade100,
                         border: OutlineInputBorder(
@@ -546,7 +585,7 @@ Column(
                       controller: _unitsController,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
-                        hintText: "Units",
+                        hintText: "Units".tr(),
                         filled: true,
                         fillColor: Colors.grey.shade100,
                         border: OutlineInputBorder(
@@ -569,7 +608,7 @@ Column(
                     onChanged: (value) =>
                         setState(() => transferTo = value ?? false),
                   ),
-                  const Text("to"),
+               Text("to".tr()),
                 ],
               ),
 
@@ -581,7 +620,7 @@ const SizedBox(height: 16),
                 children: [
                  TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text("Cancel",style: TextStyle(color:const Color(0xFF0057FF),),),
+                    child:  Text("Cancel".tr(),style: TextStyle(color:const Color(0xFF0057FF),),),
                   ),
                   const SizedBox(width: 12),
                   ElevatedButton(
@@ -634,7 +673,7 @@ const SizedBox(height: 16),
                       }
                     },
                    
-                    child: const Text("Create",style: TextStyle(color:const Color(0xFF0057FF),),),
+                    child:Text("Create".tr(),style: TextStyle(color:const Color(0xFF0057FF),),),
                   ),
                 ],
               ),
@@ -705,16 +744,33 @@ const SizedBox(height: 16),
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "Assign Product",
+                        "Assign Products".tr(),
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w900,
                         ),
                       ),
                       IconButton(
-                        icon: Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                      ),
+  onPressed: () {
+    Navigator.pop(context);
+  },
+  padding: EdgeInsets.zero, // removes extra padding
+  constraints: const BoxConstraints(), // keeps size compact
+  icon: Container(
+    width: 24,
+    height: 24,
+    decoration: const BoxDecoration(
+      color: Color(0xFFE8EAF6), // light grey circle background
+      shape: BoxShape.circle,
+    ),
+    child: const Icon(
+      Icons.close,
+      size: 16,
+      color: Colors.black54, // X color
+    ),
+  ),
+)
+
                     ],
                   ),
                   const Divider(),
@@ -725,7 +781,7 @@ const SizedBox(height: 16),
                     child: TextField(
                       controller: searchController,
                       decoration: InputDecoration(
-                        hintText: "Search by title",
+                        hintText: "Search by title".tr(),
                         prefixIcon: Icon(Icons.search),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -737,7 +793,7 @@ const SizedBox(height: 16),
                   ),
                   const SizedBox(height: 16),
                   CheckboxListTile(
-                    title: const Text("Select All"),
+                    title: Text( "select_all".tr()),
                     value: selectAll,
                     onChanged: (value) {
                       setState(() {
@@ -803,8 +859,8 @@ const SizedBox(height: 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          "Units",
+                       Text(
+                          "Units".tr(),
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
@@ -865,7 +921,7 @@ const SizedBox(height: 16),
                             TextButton(
                               onPressed: () => Navigator.pop(context),
 
-                              child: const Text("Cancel",style: TextStyle(color: const Color(0xFF0057FF),),),
+                              child:  Text("Cancel".tr(),style: TextStyle(color: const Color(0xFF0057FF),),),
                             ),
                             const SizedBox(width: 12),
                             ElevatedButton(
@@ -955,7 +1011,7 @@ const SizedBox(height: 16),
                                 );
                               },
                              
-                              child: const Text("Assign",style: TextStyle(color:const Color(0xFF0057FF), ),),
+                              child:  Text("Assign".tr(),style: TextStyle(color:const Color(0xFF0057FF), ),),
                             ),
                           ],
                         ),
@@ -1313,46 +1369,46 @@ const SizedBox(height: 16),
   //       ),
   //     );
   //   }
+void _showTransferSheet(BuildContext context) async {
+  final supabase = Supabase.instance.client;
 
-  void _showTransferSheet(BuildContext context) async {
-    final supabase = Supabase.instance.client;
+  final locations = await supabase.from('Locations').select('id, title');
+  final categories = await supabase
+      .from('categories')
+      .select('category_id, category_name')
+      .eq('archived', false);
+  final products = await supabase
+      .from('products')
+      .select('product_id, product_name')
+      .eq('archived', false);
 
-    final locations = await supabase.from('Locations').select('id, title');
-    final categories = await supabase
-        .from('categories')
-        .select('category_id, category_name')
-        .eq('archived', false);
+  if (locations.isEmpty || categories.isEmpty || products.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Required data is missing.")),
+    );
+    return;
+  }
 
-    final products = await supabase
-        .from('products')
-        .select('product_id, product_name')
-        .eq('archived', false);
+  Map<String, dynamic>? selectedFromLocation = locations.first;
+  Map<String, dynamic>? selectedToLocation =
+      locations.length > 1 ? locations[1] : locations.first;
 
-    if (locations.isEmpty || categories.isEmpty || products.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Required data is missing.")),
-      );
-      return;
-    }
+  Map<String, dynamic>? selectedCategory = categories.first;
+  Map<String, dynamic>? selectedProduct = products.first;
 
-    Map<String, dynamic>? selectedFromLocation = locations.first;
-    Map<String, dynamic>? selectedToLocation = locations.length > 1
-        ? locations[1]
-        : locations.first;
-    Map<String, dynamic>? selectedCategory = categories.first;
-    Map<String, dynamic>? selectedProduct = products.first;
+  final unitsController = TextEditingController();
 
-    final unitsController = TextEditingController();
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (context) => Padding(
+  // First Bottom Sheet - Location Selection
+  await showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (context) {
+      return Padding(
         padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom +30,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 30,
           left: 30,
           right: 30,
           top: 34,
@@ -1360,157 +1416,225 @@ const SizedBox(height: 16),
         child: StatefulBuilder(
           builder: (context, setState) => Wrap(
             children: [
-               Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Transfer Units",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
-                ),
-                IconButton(
-                  icon: Icon(Icons.close),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
-            ),
-            const Divider(),
-            const SizedBox(height: 25),
-Column(
-  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  children: [
-Row(
-  children: [
-    Expanded(
-      child: DropdownButtonFormField<Map<String, dynamic>>(
-        isExpanded: true, // Allows full width for dropdown
-        value: selectedFromLocation,
-        items: locations.map((loc) {
-          return DropdownMenuItem(
-            value: loc,
-            child: Text(
-              loc['title'],
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12),
-            ),
-          );
-        }).toList(),
-        onChanged: (val) => setState(() => selectedFromLocation = val),
-        decoration: InputDecoration(
-          hintText: "From",
-          filled: true,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-          fillColor: Colors.grey.shade100,
-          border: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                 Text(
+                    "Transfer Units".tr(),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+                  ),
+                  IconButton(
+  onPressed: () {
+    Navigator.pop(context);
+  },
+  padding: EdgeInsets.zero, // removes extra padding
+  constraints: const BoxConstraints(), // keeps size compact
+  icon: Container(
+    width: 24,
+    height: 24,
+    decoration: const BoxDecoration(
+      color: Color(0xFFE8EAF6), // light grey circle background
+      shape: BoxShape.circle,
+    ),
+    child: const Icon(
+      Icons.close,
+      size: 16,
+      color: Colors.black54, // X color
+    ),
+  ),
+)
+
+                ],
+              ),
+              const Divider(),
+              const SizedBox(height: 25),
+              Row(
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<Map<String, dynamic>>(
+                      isExpanded: true,
+                      value: selectedFromLocation,
+                      items: locations.map((loc) {
+                        return DropdownMenuItem(
+                          value: loc,
+                          child: Text(
+                            loc['title'],
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (val) => setState(() => selectedFromLocation = val),
+                      decoration: InputDecoration(
+                        hintText: "From",
+                        filled: true,
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                        fillColor: Colors.grey.shade100,
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 3),
+                  Column(
+                    children: [
+Icon(Icons.arrow_forward),
+   const SizedBox(height: 3),
+Icon(Icons.arrow_back,       color: Color(0xFF0057FF),),
+                    ],
+                  ),
+                   const SizedBox(width: 3),
+
+                  Expanded(
+                    child: DropdownButtonFormField<Map<String, dynamic>>(
+                      isExpanded: true,
+                      value: selectedToLocation,
+                      items: locations.map((loc) {
+                        return DropdownMenuItem(
+                          value: loc,
+                          child: Text(
+                            loc['title'],
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (val) => setState(() => selectedToLocation = val),
+                      decoration: InputDecoration(
+                        hintText: "To",
+                        filled: true,
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                        fillColor: Colors.grey.shade100,
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text("Cancel".tr(), style: TextStyle(color: Color(0xFF0057FF))),
+                  ),
+                  const SizedBox(width: 12),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (selectedFromLocation?['id'] == selectedToLocation?['id']) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text("Locations must be different.")),
+                        );
+                      } else {
+                        Navigator.pop(context); // close first bottom sheet
+                        _showTransferDetailsSheet(
+                          context,
+                          selectedFromLocation!,
+                          selectedToLocation!,
+                          categories,
+                          products,
+                          selectedCategory,
+                          selectedProduct,
+                          unitsController,
+                        );
+                      }
+                    },
+                    child:
+                        Text("Next".tr(), style: TextStyle(color: Color(0xFF0057FF))),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+            ],
           ),
         ),
-      ),
+      );
+    },
+  );
+}
+
+// Second Bottom Sheet - Category, Product, Units
+void _showTransferDetailsSheet(
+  BuildContext context,
+  Map<String, dynamic> fromLocation,
+  Map<String, dynamic> toLocation,
+  List categories,
+  List products,
+  Map<String, dynamic>? selectedCategory,
+  Map<String, dynamic>? selectedProduct,
+  TextEditingController unitsController,
+) {
+  final supabase = Supabase.instance.client;
+
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
     ),
-    const SizedBox(width: 12),
-    Expanded(
-      child: DropdownButtonFormField<Map<String, dynamic>>(
-        isExpanded: true,
-        value: selectedToLocation,
-        items: locations.map((loc) {
-          return DropdownMenuItem(
-            value: loc,
-            child: Text(
-              loc['title'],
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12),
-            ),
-          );
-        }).toList(),
-        onChanged: (val) => setState(() => selectedToLocation = val),
-        decoration: InputDecoration(
-          hintText: "To",
-          filled: true,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-          fillColor: Colors.grey.shade100,
-          border: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(8),
-          ),
+    builder: (context) {
+      return Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom + 30,
+        left: 20, // Reduced side padding slightly for more horizontal space
+        right: 20, // Reduced side padding slightly for more horizontal space
+        top: 30,
         ),
-      ),
+        child: StatefulBuilder(
+          builder: (context, setState) => Wrap(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                   Text(
+                    "Transfer Units".tr(),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+                  ),
+                   IconButton(
+  onPressed: () {
+    Navigator.pop(context);
+  },
+  padding: EdgeInsets.zero, // removes extra padding
+  constraints: const BoxConstraints(), // keeps size compact
+  icon: Container(
+    width: 24,
+    height: 24,
+    decoration: const BoxDecoration(
+      color: Color(0xFFE8EAF6), // light grey circle background
+      shape: BoxShape.circle,
     ),
-  ],
-),
+    child: const Icon(
+      Icons.close,
+      size: 16,
+      color: Colors.black54, // X color
+    ),
+  ),
+)
 
-  
-    //           // From and To Locations
-    //           Row(
-    //             children: [
-    //               Expanded(
-    //                 child: DropdownButtonFormField<Map<String, dynamic>>(
-    //                   value: selectedFromLocation,
-    //                   items: locations.map((loc) {
-    //                     return DropdownMenuItem(
-    //                       value: loc,
-    //                       child: Text(
-    //                         loc['title'],
-    //                         style: const TextStyle(fontSize: 10),overflow: TextOverflow.ellipsis,softWrap: true,
-    //                       ),
-    //                     );
-    //                   }).toList(),
-    //                   onChanged: (val) =>
-    //                       setState(() => selectedFromLocation = val),
-    //                   decoration: InputDecoration(
-    //                     hintText: "From",
-    //                     filled: true,
-    //                     fillColor: Colors.grey.shade100,
-    //                     border: OutlineInputBorder(
-    //                       borderSide: BorderSide(
-    //                           color: Colors.grey.shade300, // lighter grey border
-    // width: 1.0, // optional: you can make it thinner or thicker
-    //                       ),
-    //                       borderRadius: BorderRadius.circular(8),
-    //                     ),
-    //                   ),
-    //                 ),
-    //               ),
-    //               const SizedBox(width: 12),
-    //               Expanded(
-    //                 child: DropdownButtonFormField<Map<String, dynamic>>(
-    //                   value: selectedToLocation,
-    //                   items: locations.map((loc) {
-    //                     return DropdownMenuItem(
-    //                       value: loc,
-    //                       child: Text(
-    //                         loc['title'],
-    //                         style: const TextStyle(fontSize: 10),overflow: TextOverflow.ellipsis,softWrap: true,
-    //                       ),
-    //                     );
-    //                   }).toList(),
-    //                   onChanged: (val) =>
-    //                       setState(() => selectedToLocation = val),
-    //                   decoration: InputDecoration(
-    //                     hintText: "To",
-    //                     filled: true,
-    //                     fillColor: Colors.grey.shade100,
-    //                     border: OutlineInputBorder(
-    //                       borderSide: BorderSide(
-    //                           color: Colors.grey.shade300, // lighter grey border
-    // width: 1.0, // optional: you can make it thinner or thicker
-    //                       ),
-    //                       borderRadius: BorderRadius.circular(8),
-    //                     ),
-    //                   ),
-    //                 ),
-    //               ),
-    //             ],
-    //           ),
-             
-             
-              const SizedBox(height: 16),
-
-              // Category Dropdown (optional use)
+                ],
+              ),
+              const Divider(),
+              const SizedBox(height: 20),
+             Text('Category'.tr(),textAlign: TextAlign.left,style: TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),),
+                                                    const SizedBox(height: 5),
               DropdownButtonFormField<Map<String, dynamic>>(
                 value: selectedCategory,
-                items: categories.map((cat) {
+                items: categories.map<DropdownMenuItem<Map<String, dynamic>>>((cat) {
                   return DropdownMenuItem(
                     value: cat,
                     child: Text(cat['category_name']),
@@ -1518,24 +1642,28 @@ Row(
                 }).toList(),
                 onChanged: (val) => setState(() => selectedCategory = val),
                 decoration: InputDecoration(
-                  hintText: "Category",
+                  hintText: "Category".tr(),
                   filled: true,
                   fillColor: Colors.grey.shade100,
                   border: OutlineInputBorder(
-                    borderSide: BorderSide(
-                              color: Colors.grey.shade300, // lighter grey border
-    width: 1.0, // optional: you can make it thinner or thicker
-                          ),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Product Dropdown
+             Text('Product Name'.tr(),textAlign: TextAlign.left,style: TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),),
+                                                    const SizedBox(height: 5),
+                                                    Expanded(
+                                                      child: 
+                                                    
               DropdownButtonFormField<Map<String, dynamic>>(
                 value: selectedProduct,
-                items: products.map((prod) {
+                items: products.map<DropdownMenuItem<Map<String, dynamic>>>((prod) {
                   return DropdownMenuItem(
                     value: prod,
                     child: Text(prod['product_name']),
@@ -1547,17 +1675,19 @@ Row(
                   filled: true,
                   fillColor: Colors.grey.shade100,
                   border: OutlineInputBorder(
-                    borderSide: BorderSide(
-                              color: Colors.grey.shade300, // lighter grey border
-    width: 1.0, // optional: you can make it thinner or thicker
-                          ),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
               ),
+                                                    ),
               const SizedBox(height: 16),
-
-             
+                 Text('Units'.tr(),textAlign: TextAlign.left,style: TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),),
+                                                    const SizedBox(height: 5),
               TextField(
                 controller: unitsController,
                 keyboardType: TextInputType.number,
@@ -1565,51 +1695,30 @@ Row(
                   filled: true,
                   fillColor: Colors.grey.shade100,
                   border: OutlineInputBorder(
-                    borderSide: BorderSide(
-                              color: Colors.grey.shade300, // lighter grey border
-    width: 1.0, // optional: you can make it thinner or thicker
-                          ),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
               ),
               const SizedBox(height: 24),
-],
-),
-              // Action Buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text("Cancel",style: TextStyle(color: const Color(0xFF0057FF), ),),
+                    child:  Text("Cancel".tr(), style: TextStyle(color: Color(0xFF0057FF))),
                   ),
                   const SizedBox(width: 12),
                   ElevatedButton(
                     onPressed: () async {
-                      final fromId = selectedFromLocation?['id'];
-                      final toId = selectedToLocation?['id'];
+                      final fromId = fromLocation['id'];
+                      final toId = toLocation['id'];
                       final productId = selectedProduct?['product_id'];
                       final int? units = int.tryParse(unitsController.text);
 
-                      if (fromId == null ||
-                          toId == null ||
-                          productId == null ||
-                          units == null ||
-                          units <= 0) {
+                      if (productId == null || units == null || units <= 0) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Fill all fields properly."),
-                          ),
-                        );
-                        return;
-                      }
-
-                      if (fromId == toId) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Locations must be different."),
-                          ),
+                          const SnackBar(content: Text("Fill all fields properly.")),
                         );
                         return;
                       }
@@ -1630,31 +1739,23 @@ Row(
 
                       if (fromInventory == null ||
                           (fromInventory['quantity'] ?? 0) < units) {
+                             Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text("Not enough stock to transfer."),
-                          ),
+                              content: Text("Not enough stock to transfer.")),
                         );
                         return;
                       }
 
-                      // Subtract from source location
                       await supabase
                           .from('inventory')
-                          .update({
-                            'quantity':
-                                (fromInventory['quantity'] ?? 0) - units,
-                          })
+                          .update({'quantity': (fromInventory['quantity'] ?? 0) - units})
                           .eq('inventory_id', fromInventory['inventory_id']);
 
-                      // Add to destination location
                       if (toInventory != null) {
                         await supabase
                             .from('inventory')
-                            .update({
-                              'quantity':
-                                  (toInventory['quantity'] ?? 0) + units,
-                            })
+                            .update({'quantity': (toInventory['quantity'] ?? 0) + units})
                             .eq('inventory_id', toInventory['inventory_id']);
                       } else {
                         await supabase.from('inventory').insert({
@@ -1666,14 +1767,10 @@ Row(
 
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Units transferred successfully."),
-                        ),
+                        const SnackBar(content: Text("Units transferred successfully.")),
                       );
                     },
-                    
-                    
-                    child: const Text("Transfer",style: TextStyle(color:  const Color(0xFF0057FF),)),
+                    child: Text("Transfer".tr(), style: TextStyle(color: Color(0xFF0057FF))),
                   ),
                 ],
               ),
@@ -1681,13 +1778,386 @@ Row(
             ],
           ),
         ),
-      ),
-    );
-  }
+      );
+    },
+  );
+}
+
+//   void _showTransferSheet(BuildContext context) async {
+//     final supabase = Supabase.instance.client;
+
+//     final locations = await supabase.from('Locations').select('id, title');
+//     final categories = await supabase
+//         .from('categories')
+//         .select('category_id, category_name')
+//         .eq('archived', false);
+
+//     final products = await supabase
+//         .from('products')
+//         .select('product_id, product_name')
+//         .eq('archived', false);
+
+//     if (locations.isEmpty || categories.isEmpty || products.isEmpty) {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         const SnackBar(content: Text("Required data is missing.")),
+//       );
+//       return;
+//     }
+
+//     Map<String, dynamic>? selectedFromLocation = locations.first;
+//     Map<String, dynamic>? selectedToLocation = locations.length > 1
+//         ? locations[1]
+//         : locations.first;
+//     Map<String, dynamic>? selectedCategory = categories.first;
+//     Map<String, dynamic>? selectedProduct = products.first;
+
+//     final unitsController = TextEditingController();
+
+//     showModalBottomSheet(
+//       context: context,
+//       isScrollControlled: true,
+//       shape: const RoundedRectangleBorder(
+//         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+//       ),
+//       builder: (context) => Padding(
+//         padding: EdgeInsets.only(
+//           bottom: MediaQuery.of(context).viewInsets.bottom +30,
+//           left: 30,
+//           right: 30,
+//           top: 34,
+//         ),
+//         child: StatefulBuilder(
+//           builder: (context, setState) => Wrap(
+//             children: [
+//                Row(
+//               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//               children: [
+//                 Text(
+//                   "Transfer Units",
+//                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+//                 ),
+//                 IconButton(
+//                   icon: Icon(Icons.close),
+//                   onPressed: () => Navigator.pop(context),
+//                 ),
+//               ],
+//             ),
+//             const Divider(),
+//             const SizedBox(height: 25),
+// Column(
+//   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//   children: [
+// Row(
+//   children: [
+//     Expanded(
+//       child: DropdownButtonFormField<Map<String, dynamic>>(
+//         isExpanded: true, // Allows full width for dropdown
+//         value: selectedFromLocation,
+//         items: locations.map((loc) {
+//           return DropdownMenuItem(
+//             value: loc,
+//             child: Text(
+//               loc['title'],
+//               maxLines: 1,
+//               overflow: TextOverflow.ellipsis,
+//               style: const TextStyle(fontSize: 12),
+//             ),
+//           );
+//         }).toList(),
+//         onChanged: (val) => setState(() => selectedFromLocation = val),
+//         decoration: InputDecoration(
+//           hintText: "From",
+//           filled: true,
+//           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+//           fillColor: Colors.grey.shade100,
+//           border: OutlineInputBorder(
+//             borderSide: BorderSide(color: Colors.grey.shade300),
+//             borderRadius: BorderRadius.circular(8),
+//           ),
+//         ),
+//       ),
+//     ),
+//     const SizedBox(width: 12),
+//     Expanded(
+//       child: DropdownButtonFormField<Map<String, dynamic>>(
+//         isExpanded: true,
+//         value: selectedToLocation,
+//         items: locations.map((loc) {
+//           return DropdownMenuItem(
+//             value: loc,
+//             child: Text(
+//               loc['title'],
+//               maxLines: 1,
+//               overflow: TextOverflow.ellipsis,
+//               style: const TextStyle(fontSize: 12),
+//             ),
+//           );
+//         }).toList(),
+//         onChanged: (val) => setState(() => selectedToLocation = val),
+//         decoration: InputDecoration(
+//           hintText: "To",
+//           filled: true,
+//           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+//           fillColor: Colors.grey.shade100,
+//           border: OutlineInputBorder(
+//             borderSide: BorderSide(color: Colors.grey.shade300),
+//             borderRadius: BorderRadius.circular(8),
+//           ),
+//         ),
+//       ),
+//     ),
+//   ],
+// ),
+
+  
+//     //           // From and To Locations
+//     //           Row(
+//     //             children: [
+//     //               Expanded(
+//     //                 child: DropdownButtonFormField<Map<String, dynamic>>(
+//     //                   value: selectedFromLocation,
+//     //                   items: locations.map((loc) {
+//     //                     return DropdownMenuItem(
+//     //                       value: loc,
+//     //                       child: Text(
+//     //                         loc['title'],
+//     //                         style: const TextStyle(fontSize: 10),overflow: TextOverflow.ellipsis,softWrap: true,
+//     //                       ),
+//     //                     );
+//     //                   }).toList(),
+//     //                   onChanged: (val) =>
+//     //                       setState(() => selectedFromLocation = val),
+//     //                   decoration: InputDecoration(
+//     //                     hintText: "From",
+//     //                     filled: true,
+//     //                     fillColor: Colors.grey.shade100,
+//     //                     border: OutlineInputBorder(
+//     //                       borderSide: BorderSide(
+//     //                           color: Colors.grey.shade300, // lighter grey border
+//     // width: 1.0, // optional: you can make it thinner or thicker
+//     //                       ),
+//     //                       borderRadius: BorderRadius.circular(8),
+//     //                     ),
+//     //                   ),
+//     //                 ),
+//     //               ),
+//     //               const SizedBox(width: 12),
+//     //               Expanded(
+//     //                 child: DropdownButtonFormField<Map<String, dynamic>>(
+//     //                   value: selectedToLocation,
+//     //                   items: locations.map((loc) {
+//     //                     return DropdownMenuItem(
+//     //                       value: loc,
+//     //                       child: Text(
+//     //                         loc['title'],
+//     //                         style: const TextStyle(fontSize: 10),overflow: TextOverflow.ellipsis,softWrap: true,
+//     //                       ),
+//     //                     );
+//     //                   }).toList(),
+//     //                   onChanged: (val) =>
+//     //                       setState(() => selectedToLocation = val),
+//     //                   decoration: InputDecoration(
+//     //                     hintText: "To",
+//     //                     filled: true,
+//     //                     fillColor: Colors.grey.shade100,
+//     //                     border: OutlineInputBorder(
+//     //                       borderSide: BorderSide(
+//     //                           color: Colors.grey.shade300, // lighter grey border
+//     // width: 1.0, // optional: you can make it thinner or thicker
+//     //                       ),
+//     //                       borderRadius: BorderRadius.circular(8),
+//     //                     ),
+//     //                   ),
+//     //                 ),
+//     //               ),
+//     //             ],
+//     //           ),
+             
+             
+//               const SizedBox(height: 16),
+
+//               // Category Dropdown (optional use)
+//               DropdownButtonFormField<Map<String, dynamic>>(
+//                 value: selectedCategory,
+//                 items: categories.map((cat) {
+//                   return DropdownMenuItem(
+//                     value: cat,
+//                     child: Text(cat['category_name']),
+//                   );
+//                 }).toList(),
+//                 onChanged: (val) => setState(() => selectedCategory = val),
+//                 decoration: InputDecoration(
+//                   hintText: "Category",
+//                   filled: true,
+//                   fillColor: Colors.grey.shade100,
+//                   border: OutlineInputBorder(
+//                     borderSide: BorderSide(
+//                               color: Colors.grey.shade300, // lighter grey border
+//     width: 1.0, // optional: you can make it thinner or thicker
+//                           ),
+//                     borderRadius: BorderRadius.circular(8),
+//                   ),
+//                 ),
+//               ),
+//               const SizedBox(height: 16),
+
+//               // Product Dropdown
+//               DropdownButtonFormField<Map<String, dynamic>>(
+//                 value: selectedProduct,
+//                 items: products.map((prod) {
+//                   return DropdownMenuItem(
+//                     value: prod,
+//                     child: Text(prod['product_name']),
+//                   );
+//                 }).toList(),
+//                 onChanged: (val) => setState(() => selectedProduct = val),
+//                 decoration: InputDecoration(
+//                   hintText: "Product",
+//                   filled: true,
+//                   fillColor: Colors.grey.shade100,
+//                   border: OutlineInputBorder(
+//                     borderSide: BorderSide(
+//                               color: Colors.grey.shade300, // lighter grey border
+//     width: 1.0, // optional: you can make it thinner or thicker
+//                           ),
+//                     borderRadius: BorderRadius.circular(8),
+//                   ),
+//                 ),
+//               ),
+//               const SizedBox(height: 16),
+
+             
+//               TextField(
+//                 controller: unitsController,
+//                 keyboardType: TextInputType.number,
+//                 decoration: InputDecoration(
+//                   filled: true,
+//                   fillColor: Colors.grey.shade100,
+//                   border: OutlineInputBorder(
+//                     borderSide: BorderSide(
+//                               color: Colors.grey.shade300, // lighter grey border
+//     width: 1.0, // optional: you can make it thinner or thicker
+//                           ),
+//                     borderRadius: BorderRadius.circular(8),
+//                   ),
+//                 ),
+//               ),
+//               const SizedBox(height: 24),
+// ],
+// ),
+//               // Action Buttons
+//               Row(
+//                 mainAxisAlignment: MainAxisAlignment.end,
+//                 children: [
+//                   TextButton(
+//                     onPressed: () => Navigator.pop(context),
+//                     child: const Text("Cancel",style: TextStyle(color: const Color(0xFF0057FF), ),),
+//                   ),
+//                   const SizedBox(width: 12),
+//                   ElevatedButton(
+//                     onPressed: () async {
+//                       final fromId = selectedFromLocation?['id'];
+//                       final toId = selectedToLocation?['id'];
+//                       final productId = selectedProduct?['product_id'];
+//                       final int? units = int.tryParse(unitsController.text);
+
+//                       if (fromId == null ||
+//                           toId == null ||
+//                           productId == null ||
+//                           units == null ||
+//                           units <= 0) {
+//                         ScaffoldMessenger.of(context).showSnackBar(
+//                           const SnackBar(
+//                             content: Text("Fill all fields properly."),
+//                           ),
+//                         );
+//                         return;
+//                       }
+
+//                       if (fromId == toId) {
+//                         ScaffoldMessenger.of(context).showSnackBar(
+//                           const SnackBar(
+//                             content: Text("Locations must be different."),
+//                           ),
+//                         );
+//                         return;
+//                       }
+
+//                       final fromInventory = await supabase
+//                           .from('inventory')
+//                           .select('inventory_id, quantity')
+//                           .eq('location_id', fromId)
+//                           .eq('product_id', productId)
+//                           .maybeSingle();
+
+//                       final toInventory = await supabase
+//                           .from('inventory')
+//                           .select('inventory_id, quantity')
+//                           .eq('location_id', toId)
+//                           .eq('product_id', productId)
+//                           .maybeSingle();
+
+//                       if (fromInventory == null ||
+//                           (fromInventory['quantity'] ?? 0) < units) {
+//                         ScaffoldMessenger.of(context).showSnackBar(
+//                           const SnackBar(
+//                             content: Text("Not enough stock to transfer."),
+//                           ),
+//                         );
+//                         return;
+//                       }
+
+//                       // Subtract from source location
+//                       await supabase
+//                           .from('inventory')
+//                           .update({
+//                             'quantity':
+//                                 (fromInventory['quantity'] ?? 0) - units,
+//                           })
+//                           .eq('inventory_id', fromInventory['inventory_id']);
+
+//                       // Add to destination location
+//                       if (toInventory != null) {
+//                         await supabase
+//                             .from('inventory')
+//                             .update({
+//                               'quantity':
+//                                   (toInventory['quantity'] ?? 0) + units,
+//                             })
+//                             .eq('inventory_id', toInventory['inventory_id']);
+//                       } else {
+//                         await supabase.from('inventory').insert({
+//                           'product_id': productId,
+//                           'location_id': toId,
+//                           'quantity': units,
+//                         });
+//                       }
+
+//                       Navigator.pop(context);
+//                       ScaffoldMessenger.of(context).showSnackBar(
+//                         const SnackBar(
+//                           content: Text("Units transferred successfully."),
+//                         ),
+//                       );
+//                     },
+                    
+                    
+//                     child: const Text("Transfer",style: TextStyle(color:  const Color(0xFF0057FF),)),
+//                   ),
+//                 ],
+//               ),
+//               const SizedBox(height: 12),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+       backgroundColor: const Color(0xFFF1F4F9),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -1701,11 +2171,11 @@ Row(
                     child: TextField(
                       controller: searchController,
                       decoration: InputDecoration(
-                        hintText: "Search by Product",
+                        hintText: "Search by Product".tr(),
                         fillColor: Colors.grey.shade100,
                         filled: true,
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(18),
+                          borderRadius: BorderRadius.circular(30),
                         ),
                       ),
                     ),
@@ -1713,11 +2183,11 @@ Row(
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      SizedBox(width: 20),
+                      SizedBox(width: 5),
                       ElevatedButton.icon(
                         onPressed: () => _showAddProductSheet(context),
                         icon: Icon(Icons.add),
-                        label: Text("Add Product"),
+                        label: Text("Add Product".tr()),
                         style: ElevatedButton.styleFrom(
                           side: BorderSide(
                             width: 1,
@@ -1726,7 +2196,7 @@ Row(
                           backgroundColor: const Color(0xFFE4E8F3),
                           foregroundColor: const Color(0xFF0057FF),
                           padding: EdgeInsets.symmetric(
-                            horizontal: 30,
+                            horizontal: 23,
                             vertical: 12,
                           ),
                         ),
@@ -1743,11 +2213,13 @@ Row(
                       //     foregroundColor: Colors.white,
                       //   ),
                       // ),
-                      SizedBox(width: 8),
+                      SizedBox(width: 3),
+                      Expanded(child:
+              
                       ElevatedButton.icon(
                         onPressed: () => _showTransferSheet(context),
                         icon: Icon(Icons.add),
-                        label: Text("Transfer Units"),
+                        label: Text("Transfer Units".tr(),overflow: TextOverflow.ellipsis,softWrap: true,maxLines: 1,),
                         style: ElevatedButton.styleFrom(
                           side: BorderSide(
                             width: 1,
@@ -1756,11 +2228,11 @@ Row(
                           backgroundColor: const Color(0xFFE4E8F3),
                           foregroundColor: const Color(0xFF0057FF),
                           padding: EdgeInsets.symmetric(
-                            horizontal: 30,
+                            horizontal: 23,
                             vertical: 12,
                           ),
                         ),
-                      ),
+                      ),),
                       // ElevatedButton.icon(
                       //   onPressed: () {
                       //     _showTransferSheet(context);
@@ -1846,7 +2318,7 @@ Container(
                             color: showActive ? Colors.white : Colors.grey,
                           ),
                           label: Text(
-                            "Active ",
+                            "Active".tr(),
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: showActive ? Colors.white : Colors.grey,
@@ -1861,7 +2333,7 @@ Container(
                             color: !showActive ? Colors.white : Colors.grey,
                           ),
                           label: Text(
-                            "Archived",
+                            "Archived".tr(),
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: !showActive ? Colors.white : Colors.grey,
@@ -1875,7 +2347,7 @@ Container(
                                 ? Colors.white
                                 : Colors.grey,
                             padding: EdgeInsets.symmetric(
-                              horizontal: 12,
+                              horizontal: 10,
                               vertical: 8,
                             ),
                           ),
