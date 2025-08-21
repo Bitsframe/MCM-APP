@@ -65,9 +65,9 @@ await Firebase.initializeApp(
 
   runApp(
     EasyLocalization(
-      supportedLocales: [Locale('en'), Locale('es')],
+      supportedLocales: [Locale('es'), Locale('en')],
       path: 'assets/lang', 
-      fallbackLocale: Locale('en'),
+      fallbackLocale: Locale('es'),
       child: MyApp(),
     ),
   );
@@ -107,19 +107,19 @@ class MyHomePage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            SizedBox(height: 120,),
+            SizedBox(height: 80,),
              Container(
               child: Image.asset(
                 'assets/images/Group.png',
-                height: 250,
+                height: 220,
               ),
             ),
-            SizedBox(height: 130,),
-            Text('MyClinic MD',style: TextStyle(fontSize: 32,fontWeight: FontWeight.w900),),
-            SizedBox(height: 30,),
-            Text('A Comprehensive Clinic Care',style: TextStyle(fontSize: 18,fontWeight: FontWeight.w500,color: Colors.grey),),
+            SizedBox(height: 70,),
+            Text('MyClinic MD'.tr(),style: TextStyle(fontSize: 32,fontWeight: FontWeight.w900),),
+            SizedBox(height: 20,),
+            Text('A Comprehensive Clinic Care'.tr(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.w500,color: Colors.grey),),
        
-            Text('Management Services',style: TextStyle(fontSize: 15,fontWeight: FontWeight.w500,color: Colors.grey),),
+            Text('Management Services'.tr(),style: TextStyle(fontSize: 15,fontWeight: FontWeight.w500,color: Colors.grey),),
             // Container(
             //   child: Image.asset(
             //     'assets/images/medicineimage.png',
@@ -131,7 +131,7 @@ class MyHomePage extends StatelessWidget {
 
             SizedBox(
   width: 350, // Set desired width
-  height: 50, // Set desired height
+  height: 55, // Set desired height
   child:ElevatedButton(
               onPressed: () {
                 Navigator.pushReplacement(
@@ -150,8 +150,8 @@ class MyHomePage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(30),
                 ),
               ),
-              child: const Text(
-                "Let's Get In",
+              child:  Text(
+                "Let's Get In".tr(),
                 style: TextStyle(fontSize: 18, color: Colors.white),
               ),
             ),)

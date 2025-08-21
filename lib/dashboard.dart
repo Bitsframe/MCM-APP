@@ -561,6 +561,7 @@ class _DashboardPageState extends State<DashboardPage> {
                               });
                             }
                           },
+                         
                           child: Row(
                             children: [
                               // Text(
@@ -574,29 +575,29 @@ class _DashboardPageState extends State<DashboardPage> {
                               //   ),
                               // ),
                               SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.all(3),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  border: Border.all(
-                                    color: Color(0xFF0057FF),
-                                    width: 1,
-                                  ),
-                                  borderRadius: BorderRadius.circular(8),
-                                  // boxShadow: [
-                                  //   BoxShadow(
-                                  //     color: Colors.blue.withOpacity(0.2),
-                                  //     blurRadius: 6,
-                                  //     offset: Offset(0, 4),
-                                  //   ),
-                                  // ],
-                                ),
-                                child: Icon(
-                                  Icons.location_on_outlined,
-                                  size: 24,
-                                  color: Color(0xFF0057FF),
-                                ),
-                              ),
+                              // Container(
+                              //   padding: const EdgeInsets.all(3),
+                              //   decoration: BoxDecoration(
+                              //     color: Colors.white,
+                              //     border: Border.all(
+                              //       color: Color(0xFF0057FF),
+                              //       width: 1,
+                              //     ),
+                              //     borderRadius: BorderRadius.circular(8),
+                              //     // boxShadow: [
+                              //     //   BoxShadow(
+                              //     //     color: Colors.blue.withOpacity(0.2),
+                              //     //     blurRadius: 6,
+                              //     //     offset: Offset(0, 4),
+                              //     //   ),
+                              //     // ],
+                              //   ),
+                              //   child: Icon(
+                              //     Icons.location_on_outlined,
+                              //     size: 24,
+                              //     color: Color(0xFF0057FF),
+                              //   ),
+                              // ),
                               // Icon(
                               //   Icons.location_pin,
                               //   size: 24,
@@ -671,10 +672,31 @@ class _DashboardPageState extends State<DashboardPage> {
             padding: const EdgeInsets.only(top: 4.0),
             child: Column(
               children: [
-                const Icon(
-                  Icons.location_on_outlined,
+                 IconButton(
+                 icon:Icon(Icons.location_on_outlined,
                   size: 24,
-                  color: Color(0xFF0057FF),
+                  color: Color(0xFF0057FF),),
+                       onPressed: () async {
+                            final result = await showLocationBottomSheet(
+                              context,
+                              widget.userId,
+                            );
+
+                            if (result != null) {
+                              setState(() {
+                                selectedLocation = AppData.selectedLocation!;
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        DashboardPage(userId: widget.userId),
+                                  ),
+                                );
+                              });
+                            }
+                          },
+                         
+
                 ),
                 // This is a simple way to create the horizontal line below the icon
                 Container(
@@ -837,7 +859,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                     padding: EdgeInsets.only(
                                       left: 16,
                                       right: 16,
-                                      top: 16,
+                                      top: 20,
                                       bottom:
                                           MediaQuery.of(
                                             context,
@@ -846,11 +868,14 @@ class _DashboardPageState extends State<DashboardPage> {
                                     ),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
+
                                       children: [
+                                           SizedBox(height: 20,),
                                         Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
                                           children: [
+                                         
                                             Text(
                                               "select_locations".tr(),
                                               style: TextStyle(
@@ -1139,6 +1164,7 @@ class _DashboardPageState extends State<DashboardPage> {
           });
         },
       ),
+   
     );
   }
 
