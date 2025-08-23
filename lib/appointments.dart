@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -73,7 +75,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                             Text(
+                              Text(
                                 "Appointment Details".tr(),
                                 style: TextStyle(
                                   fontSize: 20,
@@ -81,31 +83,37 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                 ),
                               ),
                               IconButton(
-  onPressed: () {
-    Navigator.pop(context);
-  },
-  padding: EdgeInsets.zero, // removes extra padding
-  constraints: const BoxConstraints(), // keeps size compact
-  icon: Container(
-    width: 24,
-    height: 24,
-    decoration: const BoxDecoration(
-      color: Color(0xFFE8EAF6), // light grey circle background
-      shape: BoxShape.circle,
-    ),
-    child: const Icon(
-      Icons.close,
-      size: 16,
-      color: Colors.black54, // X color
-    ),
-  ),
-)
-
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                padding:
+                                    EdgeInsets.zero, // removes extra padding
+                                constraints:
+                                    const BoxConstraints(), // keeps size compact
+                                icon: Container(
+                                  width: 24,
+                                  height: 24,
+                                  decoration: const BoxDecoration(
+                                    color: Color(
+                                      0xFFE8EAF6,
+                                    ), // light grey circle background
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.close,
+                                    size: 16,
+                                    color: Colors.black54, // X color
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                           const Divider(),
                           const SizedBox(height: 16),
-                          infoLabel("First Name".tr(), appointment['first_name']),
+                          infoLabel(
+                            "First Name".tr(),
+                            appointment['first_name'],
+                          ),
                           infoLabel("Last Name".tr(), appointment['last_name']),
                           infoLabel("Email".tr(), appointment['email_address']),
                           infoLabel("Sex".tr(), appointment['sex']),
@@ -177,31 +185,93 @@ class _AppointmentPageState extends State<AppointmentPage> {
   @override
   void initState() {
     super.initState();
-    // Location check before proceeding
+
     Future.delayed(Duration.zero, () {
       if (mounted) {
         if (AppData.selectedLocationId == null) {
+          // First dialog (blurred)
           showDialog(
             context: context,
-            builder: (context) => AlertDialog(
-              title: const Text("Location Required"),
-              content: const Text("Please select a location first."),
-              actions: [
-                TextButton(
-                  child: const Text("OK"),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            DashboardPage(userId: widget.userId),
-                      ),
-                    );
-                  },
+            barrierDismissible: false,
+            barrierColor: Colors.white.withOpacity(0.4),
+            builder: (context) {
+              return BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                child: AlertDialog(
+                  title: const Text("Location Required"),
+                  content: const Text("Please select a location first."),
+                  actions: [
+                    TextButton(
+                      child: const Text("OK"),
+                      onPressed: () {
+                        Navigator.pop(context); // close first dialog
+
+                        // Second dialog with location icon
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: const Text("Select Location"),
+                              content: const Text(
+                                "Click the icon to choose a location.",
+                              ),
+                              actions: [
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.location_on_outlined,
+                                    size: 24,
+                                    color: Color(0xFF0057FF),
+                                  ),
+                                  onPressed: () async {
+                                    final result =
+                                        await showLocationBottomSheet(
+                                          context,
+                                          widget.userId,
+                                        );
+
+                                    if (result != null) {
+                                      setState(() {
+                                        selectedLocation = result;
+
+                                      });
+                                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                AppointmentPage(userId: widget.userId),
+                          ),
+                        );
+                                    }
+                                  },
+                                ),
+
+                                // Show selected location text if available
+                                if (selectedLocation != null)
+                                  Text(
+                                    selectedLocation!,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.black,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  
+                              ],
+                              
+                            );
+                          },
+                        );
+                       
+                      
+                      },
+                    ),
+                  ],
+                  
                 ),
-              ],
-            ),
+              );
+            },
           );
         } else {
           checkAndFetchAppointments();
@@ -209,6 +279,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
       }
     });
   }
+
   // FirebaseMessaging.onMessage.listen((payload) {
   //   final notification = payload.notification;
   //   print(notification);
@@ -323,30 +394,31 @@ class _AppointmentPageState extends State<AppointmentPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    if (permissionError != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Future.delayed(const Duration(seconds: 5), () {
-          Navigator.pop(context); // Or pushReplacement if needed
-        });
-      });
-      return Container(
-        height: double.infinity,
-        width: double.infinity,
-        color: Colors.white,
-        child: Center(
-          child: Text(
+  final width = MediaQuery.of(context).size.width;
+
+  if (permissionError != null) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
             permissionError!,
             style: const TextStyle(
-              color: Colors.red,
+              color: Colors.white,
               fontWeight: FontWeight.bold,
             ),
           ),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
         ),
       );
-    }
+
+      // Optionally close or navigate after a delay
+      Future.delayed(const Duration(seconds: 3), () {
+        Navigator.pop(context);
+      });
+    });
+  }
     return Scaffold(
       // appBar: AppBar(
       //   backgroundColor: Colors.white,
@@ -428,31 +500,85 @@ class _AppointmentPageState extends State<AppointmentPage> {
       //   ],
 
       // ),
-       backgroundColor: const Color(0xFFF1F4F9),
-            appBar: AppBar(
-        leading: Row(
-          children: [
-            IconButton(
-                        icon: Icon(
-                          Icons.arrow_back,
-                          size: 28,
-                          color: Colors.black,
-                          
-                        ),
-
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                      //  Text('Back', style: TextStyle(color: Colors.black,fontSize: 10)),
-                     
-
-          ],
+      backgroundColor: const Color(0xFFF1F4F9),
+     appBar: AppBar(
+  backgroundColor: Colors.white,
+  elevation: 1,
+  centerTitle: true, // centers the title properly
+  leading: IconButton(
+    icon: const Icon(Icons.arrow_back, size: 28, color: Colors.black),
+    onPressed: () => Navigator.pop(context),
+  ),
+  title: Text(
+    "Appointments".tr(),
+    style: const TextStyle(
+      color: Colors.black,
+      fontWeight: FontWeight.w900,
+      fontSize: 22,
+    ),
+  ),
+  actions: [
+    // Location Button
+    IconButton(
+      icon: Container(
+        padding: const EdgeInsets.all(3),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Color(0xFF0057FF), width: 1),
+          borderRadius: BorderRadius.circular(8),
         ),
-        centerTitle: true,
-          title: Text("Appointments".tr(), style: TextStyle(color: Colors.black,fontWeight: FontWeight.w900)),
-        backgroundColor: Colors.white,
-        elevation: 1,),
+        child: const Icon(
+          Icons.location_on_outlined,
+          size: 22,
+          color: Color(0xFF0057FF),
+        ),
+      ),
+      onPressed: () async {
+        final result = await showLocationBottomSheet(
+          context,
+          widget.userId,
+        );
+        if (result != null) {
+          setState(() {
+            selectedLocation = AppData.selectedLocation!;
+          });
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AppointmentPage(userId: widget.userId),
+            ),
+          );
+        }
+      },
+    ),
+
+    
+
+    // Profile Button
+    IconButton(
+      icon: Container(
+        padding: const EdgeInsets.all(3),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Color(0xFF0057FF), width: 1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Icon(
+          Icons.person_outline,
+          size: 22,
+          color: Color(0xFF0057FF),
+        ),
+      ),
+      onPressed: () {
+        // your profile options function
+        // _showProfileOptions(context);
+      },
+    ),
+
+    const SizedBox(width: 8),
+  ],
+),
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -477,7 +603,6 @@ class _AppointmentPageState extends State<AppointmentPage> {
             //         ),
             //         Text('Back'.tr(), style: TextStyle(color: Colors.black)),
 
-                    
             // SizedBox(width: 20),
             // Center(
             //   child: Text(
@@ -527,8 +652,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
             //         //     style: TextStyle(color: Colors.blue),
             //         //   ),
             //         // ),
-                
-                
+
             //       ],
             //     ),
 
@@ -1266,26 +1390,24 @@ class _AppointmentPageState extends State<AppointmentPage> {
             //   ),
             // ),
             SizedBox(height: 5),
-            Center(child: 
-           
-           
-Container(
-height: 44,
-  margin: EdgeInsets.all(3),
-  decoration: BoxDecoration(
-    borderRadius: BorderRadius.circular(18),
-    color: Colors.white,
-  ),
-              child:
-            
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildStatusChip("Approved".tr(), showApproved, true),
-                SizedBox(width: 2),
-                _buildStatusChip("Need Approval".tr(), showApproved, false),
-              ],
-            ),), ),
+            Center(
+              child: Container(
+                height: 44,
+                margin: EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(18),
+                  color: Colors.white,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildStatusChip("Approved".tr(), showApproved, true),
+                    SizedBox(width: 2),
+                    _buildStatusChip("Need Approval".tr(), showApproved, false),
+                  ],
+                ),
+              ),
+            ),
             SizedBox(height: 24),
 
             Padding(
@@ -1306,7 +1428,7 @@ height: 44,
                       labelText: 'Search by first name'.tr(),
                       prefixIcon: Icon(Icons.search),
                       border: OutlineInputBorder(
-                       borderRadius: BorderRadius.circular(30),
+                        borderRadius: BorderRadius.circular(30),
                       ),
                     ),
                   ),
@@ -1354,10 +1476,11 @@ height: 44,
                             Text(
                               "${appointment['first_name']} ${appointment['last_name']}",
                               style: TextStyle(fontWeight: FontWeight.bold),
+                              overflow: TextOverflow.ellipsis,
                             ),
                             Text(
                               "${appointment['service']}",
-                              style: TextStyle(color: Colors.blue),
+                              style: TextStyle(color: Colors.blue),overflow: TextOverflow.ellipsis,
                             ),
                             Text("${appointment['sex']}"),
                           ],
@@ -1495,17 +1618,24 @@ height: 44,
                                       builder: (context) {
                                         return StatefulBuilder(
                                           builder: (context, setState) => AlertDialog(
-                                            title: Text("Confirm Delete".tr(),style: TextStyle(fontWeight: FontWeight.w600),),
+                                            title: Text(
+                                              "Confirm Delete".tr(),
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
                                             content: Column(
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
                                                 Text(
-                                                  "Are you sure you want to delete this appointment?".tr(),
+                                                  "Are you sure you want to delete this appointment?"
+                                                      .tr(),
                                                 ),
                                                 SizedBox(height: 16),
                                                 DropdownButtonFormField<String>(
                                                   decoration: InputDecoration(
-                                                    labelText: 'Select reason'.tr(),
+                                                    labelText: 'Select reason'
+                                                        .tr(),
                                                     border:
                                                         OutlineInputBorder(),
                                                   ),
@@ -1693,40 +1823,38 @@ height: 44,
     );
   }
 
-Widget _buildStatusChip(String label, bool current, bool match) {
-  final isSelected = current == match;
-  return GestureDetector(
-    onTap: () {
-      setState(() {
-        showApproved = match;
-        fetchAppointments();
-      });
-    },
-    child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 6),
-      decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFFF1F6FF) : Colors.transparent,
-        border: Border.all(
-          color: isSelected ? Color(0XFF0066FF)  : Colors.transparent,
-          width: 1,
+  Widget _buildStatusChip(String label, bool current, bool match) {
+    final isSelected = current == match;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          showApproved = match;
+          fetchAppointments();
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFF1F6FF) : Colors.transparent,
+          border: Border.all(
+            color: isSelected ? Color(0XFF0066FF) : Colors.transparent,
+            width: 1,
+          ),
+          borderRadius: BorderRadius.circular(24),
         ),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: isSelected ? Color(0XFF0066FF) : Colors.grey.shade600,
-          fontWeight: FontWeight.w500,
-          fontSize: 13,
-          
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Color(0XFF0066FF) : Colors.grey.shade600,
+            fontWeight: FontWeight.w500,
+            fontSize: 13,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
       ),
-    ),
-  );
-}
-
+    );
+  }
 }
 
 void showAddAppointmentBottomSheet(
@@ -1915,27 +2043,29 @@ void showAddAppointmentBottomSheet(
                           fontWeight: FontWeight.w900,
                         ),
                       ),
-                     IconButton(
-  onPressed: () {
-    Navigator.pop(context);
-  },
-  padding: EdgeInsets.zero, // removes extra padding
-  constraints: const BoxConstraints(), // keeps size compact
-  icon: Container(
-    width: 24,
-    height: 24,
-    decoration: const BoxDecoration(
-      color: Color(0xFFE8EAF6), // light grey circle background
-      shape: BoxShape.circle,
-    ),
-    child: const Icon(
-      Icons.close,
-      size: 16,
-      color: Colors.black54, // X color
-    ),
-  ),
-)
-
+                      IconButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        padding: EdgeInsets.zero, // removes extra padding
+                        constraints:
+                            const BoxConstraints(), // keeps size compact
+                        icon: Container(
+                          width: 24,
+                          height: 24,
+                          decoration: const BoxDecoration(
+                            color: Color(
+                              0xFFE8EAF6,
+                            ), // light grey circle background
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            size: 16,
+                            color: Colors.black54, // X color
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                   const Divider(),
@@ -2189,7 +2319,7 @@ void showAddAppointmentBottomSheet(
                         builder: (context, child) {
                           return Theme(
                             data: Theme.of(context).copyWith(
-                             colorScheme: ColorScheme.light(
+                              colorScheme: ColorScheme.light(
                                 primary: Color(
                                   0xFF0057FF,
                                 ), // blue header & button
@@ -2198,7 +2328,9 @@ void showAddAppointmentBottomSheet(
                               ),
                               textButtonTheme: TextButtonThemeData(
                                 style: TextButton.styleFrom(
-                                  foregroundColor: const Color(0xFF0057FF), // Button text color
+                                  foregroundColor: const Color(
+                                    0xFF0057FF,
+                                  ), // Button text color
                                 ),
                               ),
                             ),
@@ -2329,26 +2461,29 @@ void showAddAppointmentBottomSheet(
                               initialDate: DateTime.now(),
                               firstDate: DateTime.now(),
                               lastDate: DateTime(2100),
-                               builder: (context, child) {
-                          return Theme(
-                            data: Theme.of(context).copyWith(
-                               colorScheme: ColorScheme.light(
-                                primary: Color(
-                                  0xFF0057FF,
-                                ), // blue header & button
-                                onPrimary: Colors.white, // white text on header
-                                onSurface: Colors.black, // black text for body
-                              ),
-                              textButtonTheme: TextButtonThemeData(
-                                style: TextButton.styleFrom(
-                                  foregroundColor: const Color(0xFF0057FF), // Button text color
-                                ),
-                              ),
-                            ),
-                            child: child!,
-                          );
-                        },
-                      
+                              builder: (context, child) {
+                                return Theme(
+                                  data: Theme.of(context).copyWith(
+                                    colorScheme: ColorScheme.light(
+                                      primary: Color(
+                                        0xFF0057FF,
+                                      ), // blue header & button
+                                      onPrimary:
+                                          Colors.white, // white text on header
+                                      onSurface:
+                                          Colors.black, // black text for body
+                                    ),
+                                    textButtonTheme: TextButtonThemeData(
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: const Color(
+                                          0xFF0057FF,
+                                        ), // Button text color
+                                      ),
+                                    ),
+                                  ),
+                                  child: child!,
+                                );
+                              },
                             );
                             if (picked != null) {
                               setModalState(() {
@@ -2619,7 +2754,6 @@ void showEditAppointmentBottomSheet(
 
   final TextEditingController dateController = TextEditingController();
   final TextEditingController timeController = TextEditingController();
-  
 
   final List<String> timeSlots = [
     "09:00 AM",
@@ -2655,8 +2789,8 @@ void showEditAppointmentBottomSheet(
     "12:00 PM",
   ];
   String? initialTimeValue = timeSlots.contains(timeController.text)
-    ? timeController.text
-    : null;
+      ? timeController.text
+      : null;
 
   final originalDateTime = appointment['date_and_time'] ?? '';
 
@@ -2697,27 +2831,29 @@ void showEditAppointmentBottomSheet(
                           fontWeight: FontWeight.w900,
                         ),
                       ),
-                     IconButton(
-  onPressed: () {
-    Navigator.pop(context);
-  },
-  padding: EdgeInsets.zero, // removes extra padding
-  constraints: const BoxConstraints(), // keeps size compact
-  icon: Container(
-    width: 24,
-    height: 24,
-    decoration: const BoxDecoration(
-      color: Color(0xFFE8EAF6), // light grey circle background
-      shape: BoxShape.circle,
-    ),
-    child: const Icon(
-      Icons.close,
-      size: 16,
-      color: Colors.black54, // X color
-    ),
-  ),
-)
-
+                      IconButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        padding: EdgeInsets.zero, // removes extra padding
+                        constraints:
+                            const BoxConstraints(), // keeps size compact
+                        icon: Container(
+                          width: 24,
+                          height: 24,
+                          decoration: const BoxDecoration(
+                            color: Color(
+                              0xFFE8EAF6,
+                            ), // light grey circle background
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            size: 16,
+                            color: Colors.black54, // X color
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                   const Divider(),
@@ -2776,7 +2912,7 @@ void showEditAppointmentBottomSheet(
                     },
                   ),
                   SizedBox(height: 12),
-                 Text(
+                  Text(
                     'New Time'.tr(),
                     textAlign: TextAlign.left,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
@@ -2785,7 +2921,7 @@ void showEditAppointmentBottomSheet(
                   /// Time Dropdown
                   DropdownButtonFormField<String>(
                     value: initialTimeValue,
-                        
+
                     items: timeSlots
                         .map((t) => DropdownMenuItem(value: t, child: Text(t)))
                         .toList(),

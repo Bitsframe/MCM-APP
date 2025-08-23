@@ -433,13 +433,13 @@ class _DashboardPageState extends State<DashboardPage> {
                     onChanged: (value) {
                       _updatePreference(value);
                     },
-                    title:  Text("Notifications".tr()),
+                    title: Text("Notifications".tr()),
                     secondary: const Icon(
                       Icons.notifications,
                       color: const Color(0xFF0057FF),
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 10),
                   ListTile(
                     onTap: () => _showChangePasswordDialog(context),
                     title: Text('Change Password'.tr()),
@@ -448,29 +448,67 @@ class _DashboardPageState extends State<DashboardPage> {
                       color: const Color(0xFF0057FF),
                     ),
                   ),
+
                   // ElevatedButton(
                   //   onPressed: () => _showChangePasswordDialog(context),
                   //   child: const Text('Change Password'),
                   // ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 10),
+                  ListTile(
+                    title: Text('Select Language'.tr()),
+                    leading: Icon(
+                      Icons.language,
+                      color: const Color(0xFF0066FF),
+                    ),
+                  ),
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
+
                     children: [
-                      TextButton(
+                      TextButton.icon(
                         onPressed: () {
-                          context.setLocale(Locale('en'));
+                          context.setLocale(const Locale('en'));
                         },
-                        child: const Text('English'),
+                        icon: context.locale.languageCode == 'en'
+                            ? const Icon(
+                                Icons.check,
+                                color: Colors.green,
+                              ) // ✅ shows selected
+                            : const SizedBox.shrink(), // empty space if not selected
+                        label: Text(
+                          'English',
+                          style: TextStyle(
+                            fontWeight: context.locale.languageCode == 'en'
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: context.locale.languageCode == 'en'
+                                ? Colors.blue
+                                : Colors.black,
+                          ),
+                        ),
                       ),
-                      TextButton(
+                      TextButton.icon(
                         onPressed: () {
-                          context.setLocale(Locale('es'));
+                          context.setLocale(const Locale('es'));
                         },
-                        child: const Text('Español'),
+                        icon: context.locale.languageCode == 'es'
+                            ? const Icon(Icons.check, color: Colors.green)
+                            : const SizedBox.shrink(),
+                        label: Text(
+                          'Español',
+                          style: TextStyle(
+                            fontWeight: context.locale.languageCode == 'es'
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: context.locale.languageCode == 'es'
+                                ? Colors.blue
+                                : Colors.black,
+                          ),
+                        ),
                       ),
                     ],
                   ),
-
                   // Logout button
                   ListTile(
                     leading: const Icon(Icons.logout, color: Colors.red),
@@ -561,7 +599,7 @@ class _DashboardPageState extends State<DashboardPage> {
                               });
                             }
                           },
-                         
+
                           child: Row(
                             children: [
                               // Text(
@@ -656,100 +694,107 @@ class _DashboardPageState extends State<DashboardPage> {
                     //           fontWeight: FontWeight.bold,
                     //         ),
                     //       ),
-                    SizedBox(height: 16),
-                    Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: const Color(0xFFF1F6FF),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Custom Icon Stack
-          Padding(
-            padding: const EdgeInsets.only(top: 4.0),
-            child: Column(
-              children: [
-                 IconButton(
-                 icon:Icon(Icons.location_on_outlined,
-                  size: 24,
-                  color: Color(0xFF0057FF),),
-                       onPressed: () async {
-                            final result = await showLocationBottomSheet(
-                              context,
-                              widget.userId,
-                            );
+                    // SizedBox(height: 16),
+                    // Container(
+                    //   width: double.infinity,
+                    //   padding: const EdgeInsets.symmetric(
+                    //     horizontal: 16.0,
+                    //     vertical: 12.0,
+                    //   ),
+                    //   decoration: BoxDecoration(
+                    //     borderRadius: BorderRadius.circular(20),
+                    //     color: const Color(0xFFF1F6FF),
+                    //   ),
+                    //   child: Row(
+                    //     crossAxisAlignment: CrossAxisAlignment.start,
+                    //     children: [
+                    //       // Custom Icon Stack
+                    //       Padding(
+                    //         padding: const EdgeInsets.only(top: 4.0),
+                    //         child: Column(
+                    //           children: [
+                    //             IconButton(
+                    //               icon: Icon(
+                    //                 Icons.location_on_outlined,
+                    //                 size: 24,
+                    //                 color: Color(0xFF0057FF),
+                    //               ),
+                    //               onPressed: () async {
+                    //                 final result =
+                    //                     await showLocationBottomSheet(
+                    //                       context,
+                    //                       widget.userId,
+                    //                     );
 
-                            if (result != null) {
-                              setState(() {
-                                selectedLocation = AppData.selectedLocation!;
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        DashboardPage(userId: widget.userId),
-                                  ),
-                                );
-                              });
-                            }
-                          },
-                         
+                    //                 if (result != null) {
+                    //                   setState(() {
+                    //                     selectedLocation =
+                    //                         AppData.selectedLocation!;
+                    //                     Navigator.pushReplacement(
+                    //                       context,
+                    //                       MaterialPageRoute(
+                    //                         builder: (context) => DashboardPage(
+                    //                           userId: widget.userId,
+                    //                         ),
+                    //                       ),
+                    //                     );
+                    //                   });
+                    //                 }
+                    //               },
+                    //             ),
+                    //             // This is a simple way to create the horizontal line below the icon
+                    //             Container(
+                    //               height: 2,
+                    //               width: 16,
+                    //               color: const Color(0xFF0057FF),
+                    //             ),
+                    //           ],
+                    //         ),
+                    //       ),
+                    //       const SizedBox(width: 12),
 
-                ),
-                // This is a simple way to create the horizontal line below the icon
-                Container(
-                  height: 2,
-                  width: 16,
-                  color: const Color(0xFF0057FF),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-
-          // Text Column
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      "Current Location".tr(),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14,
-                        color: Colors.black54,
-                      ),
-                    ),
-                    const Icon(
-                      Icons.keyboard_arrow_down,
-                      size: 20,
-                      color: Colors.black54,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  AppData.selectedLocation ?? 'no_location_selected'.tr(),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Colors.black,
-                  ),
-                  textAlign: TextAlign.left,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    ),
+                    //       // Text Column
+                    //       Expanded(
+                    //         child: Column(
+                    //           mainAxisAlignment: MainAxisAlignment.start,
+                    //           crossAxisAlignment: CrossAxisAlignment.start,
+                    //           children: [
+                    //             Row(
+                    //               children: [
+                    //                 Text(
+                    //                   "Current Location".tr(),
+                    //                   style: const TextStyle(
+                    //                     fontWeight: FontWeight.w500,
+                    //                     fontSize: 14,
+                    //                     color: Colors.black54,
+                    //                   ),
+                    //                 ),
+                    //                 const Icon(
+                    //                   Icons.keyboard_arrow_down,
+                    //                   size: 20,
+                    //                   color: Colors.black54,
+                    //                 ),
+                    //               ],
+                    //             ),
+                    //             const SizedBox(height: 4),
+                    //             Text(
+                    //               AppData.selectedLocation ??
+                    //                   'no_location_selected'.tr(),
+                    //               style: const TextStyle(
+                    //                 fontWeight: FontWeight.bold,
+                    //                 fontSize: 16,
+                    //                 color: Colors.black,
+                    //               ),
+                    //               textAlign: TextAlign.left,
+                    //               maxLines: 1,
+                    //               overflow: TextOverflow.ellipsis,
+                    //             ),
+                    //           ],
+                    //         ),
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ),
 
                     // Container(
                     //   width: double.infinity,
@@ -792,8 +837,6 @@ class _DashboardPageState extends State<DashboardPage> {
                     //     ],
                     //   ),
                     // ),
-                    
-                    
                     SizedBox(height: 16),
 
                     // New Location Multi-Select Button
@@ -855,144 +898,164 @@ class _DashboardPageState extends State<DashboardPage> {
 
                               return StatefulBuilder(
                                 builder: (context, setModalState) {
-                                  return Padding(
-                                    padding: EdgeInsets.only(
-                                      left: 16,
-                                      right: 16,
-                                      top: 20,
-                                      bottom:
-                                          MediaQuery.of(
-                                            context,
-                                          ).viewInsets.bottom +
-                                          16,
-                                    ),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-
-                                      children: [
-                                           SizedBox(height: 20,),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
+                                  return DraggableScrollableSheet(
+                                    expand: false,
+                                    initialChildSize:
+                                        0.7, // 70% of screen height
+                                    minChildSize: 0.4,
+                                    maxChildSize: 0.95,
+                                    builder: (_, scrollController) {
+                                      return Padding(
+                                        padding: EdgeInsets.only(
+                                          left: 16,
+                                          right: 16,
+                                          top: 20,
+                                          bottom:
+                                              MediaQuery.of(
+                                                context,
+                                              ).viewInsets.bottom +
+                                              16,
+                                        ),
+                                        child: Column(
                                           children: [
-                                         
-                                            Text(
-                                              "select_locations".tr(),
-                                              style: TextStyle(
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.w900,
+                                            // HEADER
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Text(
+                                                  "select_locations".tr(),
+                                                  style: const TextStyle(
+                                                    fontSize: 20,
+                                                    fontWeight: FontWeight.w900,
+                                                  ),
+                                                ),
+                                                IconButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                  padding: EdgeInsets.zero,
+                                                  constraints:
+                                                      const BoxConstraints(),
+                                                  icon: Container(
+                                                    width: 24,
+                                                    height: 24,
+                                                    decoration:
+                                                        const BoxDecoration(
+                                                          color: Color(
+                                                            0xFFE8EAF6,
+                                                          ),
+                                                          shape:
+                                                              BoxShape.circle,
+                                                        ),
+                                                    child: const Icon(
+                                                      Icons.close,
+                                                      size: 16,
+                                                      color: Colors.black54,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const Divider(),
+
+                                            // 🧭 MAIN CONTENT INSIDE SCROLL
+                                            Expanded(
+                                              child: ListView(
+                                                controller: scrollController,
+                                                children: [
+                                                  const SizedBox(height: 16),
+                                                  CheckboxListTile(
+                                                    title: Text(
+                                                      "select_all".tr(),
+                                                    ),
+                                                    value: selectAll,
+                                                    onChanged: (value) {
+                                                      setModalState(() {
+                                                        selectAll =
+                                                            value ?? false;
+                                                        if (selectAll) {
+                                                          tempSelected = locations
+                                                              .map<int>(
+                                                                (loc) =>
+                                                                    loc['id']
+                                                                        as int,
+                                                              )
+                                                              .toList();
+                                                        } else {
+                                                          tempSelected.clear();
+                                                        }
+                                                      });
+                                                    },
+                                                  ),
+                                                  ...locations.map((location) {
+                                                    final int locId =
+                                                        location['id'];
+                                                    final String title =
+                                                        location['title'];
+
+                                                    return CheckboxListTile(
+                                                      title: Text(title),
+                                                      value: tempSelected
+                                                          .contains(locId),
+                                                      onChanged: (bool? value) {
+                                                        setModalState(() {
+                                                          if (value == true) {
+                                                            tempSelected.add(
+                                                              locId,
+                                                            );
+                                                          } else {
+                                                            tempSelected.remove(
+                                                              locId,
+                                                            );
+                                                          }
+                                                          selectAll =
+                                                              tempSelected
+                                                                  .length ==
+                                                              locations.length;
+                                                        });
+                                                      },
+                                                      activeColor: const Color(
+                                                        0xFF0057FF,
+                                                      ),
+                                                      controlAffinity:
+                                                          ListTileControlAffinity
+                                                              .trailing,
+                                                    );
+                                                  }).toList(),
+                                                ],
                                               ),
                                             ),
-                                            IconButton(
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                              },
-                                              padding: EdgeInsets
-                                                  .zero, // removes extra padding
-                                              constraints:
-                                                  const BoxConstraints(), // keeps size compact
-                                              icon: Container(
-                                                width: 24,
-                                                height: 24,
-                                                decoration: const BoxDecoration(
-                                                  color: Color(
-                                                    0xFFE8EAF6,
-                                                  ), // light grey circle background
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                child: const Icon(
-                                                  Icons.close,
-                                                  size: 16,
-                                                  color:
-                                                      Colors.black54, // X color
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const Divider(),
-                                        const SizedBox(height: 25),
 
-                                        CheckboxListTile(
-                                          title: Text("select_all".tr()),
-                                          value: selectAll,
-                                          onChanged: (value) {
-                                            setModalState(() {
-                                              selectAll = value ?? false;
-                                              if (selectAll) {
-                                                tempSelected = locations
-                                                    .map<int>(
-                                                      (loc) => loc['id'] as int,
-                                                    )
-                                                    .toList();
-                                              } else {
-                                                tempSelected.clear();
-                                              }
-                                            });
-                                          },
-                                        ),
-
-                                        ...locations.map((location) {
-                                          final int locId = location['id'];
-                                          final String title =
-                                              location['title'];
-
-                                          return CheckboxListTile(
-                                            title: Text(title),
-                                            value: tempSelected.contains(locId),
-                                            onChanged: (bool? value) {
-                                              setModalState(() {
-                                                if (value == true) {
-                                                  tempSelected.add(locId);
-                                                } else {
-                                                  tempSelected.remove(locId);
-                                                }
-                                                selectAll =
-                                                    tempSelected.length ==
-                                                    locations.length;
-                                              });
-                                            },
-
-                                            activeColor: const Color(
-                                              0xFF0057FF,
-                                            ),
-                                            controlAffinity:
-                                                ListTileControlAffinity
-                                                    .trailing,
-                                          );
-                                        }).toList(),
-
-                                        SizedBox(height: 16),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: [
-                                            ElevatedButton(
-                                              onPressed: () async {
-                                                setState(() {
-                                                  selectedLocationIds =
-                                                      List.from(tempSelected);
-                                                });
-                                                await fetchAppointmentsCount();
-                                                await fetchPatientsCount();
-                                                await fetchInventoryQuantity();
-                                                await fetchTotalSalesAmount();
-                                                Navigator.pop(context);
-                                              },
-
-                                              child: Text(
-                                                "done".tr(),
-                                                style: TextStyle(
-                                                  color: const Color(
-                                                    0xFF0057FF,
+                                            // ✅ ACTION BUTTON
+                                            const SizedBox(height: 16),
+                                            Align(
+                                              alignment: Alignment.centerRight,
+                                              child: ElevatedButton(
+                                                onPressed: () async {
+                                                  setState(() {
+                                                    selectedLocationIds =
+                                                        List.from(tempSelected);
+                                                  });
+                                                  await fetchAppointmentsCount();
+                                                  await fetchPatientsCount();
+                                                  await fetchInventoryQuantity();
+                                                  await fetchTotalSalesAmount();
+                                                  Navigator.pop(context);
+                                                },
+                                                child: Text(
+                                                  "done".tr(),
+                                                  style: const TextStyle(
+                                                    color: Color(0xFF0057FF),
                                                   ),
                                                 ),
                                               ),
                                             ),
                                           ],
                                         ),
-                                      ],
-                                    ),
+                                      );
+                                    },
                                   );
                                 },
                               );
@@ -1081,25 +1144,36 @@ class _DashboardPageState extends State<DashboardPage> {
                           icon: Icons.person_outline,
                           value: "$patientsCount",
                           onTap: () => _onTileTapped("Patients"),
+                          backgroundColor: Color(0xFFFFEBEE), // light pink
+                          textColor: Color(0xFFD32F2F), // dark red
                         ),
+
                         _buildDashboardTile(
                           label: "Sales".tr(),
                           icon: Icons.attach_money,
                           value: "\$ ${formatNumberCompact(totalSalesAmount)}",
                           onTap: () => _onTileTapped("Sales"),
+                          backgroundColor: Color(0xFFF3E5F5), // light purple
+                          textColor: Color(0xFF7B1FA2), // purple
                         ),
+
                         _buildDashboardTile(
                           label: "Appointments".tr(),
                           icon: Icons.calendar_today_outlined,
                           value: "$appointmentsCount",
                           onTap: () => _onTileTapped("Appointments"),
+                          backgroundColor: Color(0xFFE0F7FA), // light cyan
+                          textColor: Color(0xFF00838F), // teal
                         ),
+
                         _buildDashboardTile(
                           label: "Products".tr(),
                           icon: Icons.shopping_basket_outlined,
                           value:
-                              "\$ ${formatNumberCompact(totalInventoryQuantity)}",
+                              "${formatNumberCompact(totalInventoryQuantity)}",
                           onTap: () => _onTileTapped("Products"),
+                          backgroundColor: Color(0xFFE3F2FD), // light blue
+                          textColor: Color(0xFF1565C0), // blue
                         ),
                       ],
                     ),
@@ -1164,7 +1238,6 @@ class _DashboardPageState extends State<DashboardPage> {
           });
         },
       ),
-   
     );
   }
 
@@ -1173,13 +1246,15 @@ class _DashboardPageState extends State<DashboardPage> {
     required IconData icon,
     required String value,
     required VoidCallback onTap,
+    required Color backgroundColor,
+    required Color textColor,
   }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Color(0xFFEAF2FD), // Soft pastel blue background
+          color: backgroundColor, // Custom background
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
@@ -1189,47 +1264,25 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
           ],
         ),
-        child: Stack(
-          clipBehavior: Clip.none,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Positioned Icon at top-right
-            Positioned(
-              top: -16, // move upward by 10px
-              right: -15,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 175, 205, 246),
-                  borderRadius: BorderRadius.circular(250),
-                ),
-                child: IconButton(
-                  icon: Icon(icon, color: Color(0xFF0A4DD5), size: 24),
-                  onPressed: () {},
-                ),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.w800,
+                color: textColor, // Custom text color
               ),
             ),
-
-            // Main content
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF0A4DD5),
-                  ),
-                ),
-                Spacer(),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF0A4DD5),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
+            Spacer(),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                color: textColor,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),
@@ -1237,6 +1290,76 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 }
+
+//   Widget _buildDashboardTile({
+//     required String label,
+//     required IconData icon,
+//     required String value,
+//     required VoidCallback onTap,
+//   }) {
+//     return GestureDetector(
+//       onTap: onTap,
+//       child: Container(
+//         padding: EdgeInsets.all(16),
+//         decoration: BoxDecoration(
+//           color: Color(0xFFEAF2FD), // Soft pastel blue background
+//           borderRadius: BorderRadius.circular(20),
+//           boxShadow: [
+//             BoxShadow(
+//               color: const Color.fromARGB(255, 148, 149, 150).withOpacity(0.2),
+//               blurRadius: 6,
+//               offset: Offset(0, 1),
+//             ),
+//           ],
+//         ),
+//         child: Stack(
+//           clipBehavior: Clip.none,
+//           children: [
+//             // Positioned Icon at top-right
+//             Positioned(
+//               top: -16, // move upward by 10px
+//               right: -15,
+//               child: Container(
+//                 decoration: BoxDecoration(
+//                   color: const Color.fromARGB(255, 175, 205, 246),
+//                   borderRadius: BorderRadius.circular(250),
+//                 ),
+//                 child: IconButton(
+//                   icon: Icon(icon, color: Color(0xFF0A4DD5), size: 24),
+//                   onPressed: () {},
+//                 ),
+//               ),
+//             ),
+
+//             // Main content
+//             Column(
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 Text(
+//                   value,
+//                   style: TextStyle(
+//                     fontSize: 24,
+//                     fontWeight: FontWeight.w800,
+//                     color: Color(0xFF0A4DD5),
+//                   ),
+//                 ),
+//                 Spacer(),
+//                 Text(
+//                   label,
+//                   style: TextStyle(
+//                     fontSize: 14,
+//                     color: Color(0xFF0A4DD5),
+//                     fontWeight: FontWeight.w500,
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 //   Widget _buildDashboardTile({
 //     required String label,

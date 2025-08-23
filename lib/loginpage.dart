@@ -1,6 +1,7 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:medicineapp/dashboard.dart';
+import 'package:medicineapp/location.dart';
 import 'package:medicineapp/main.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -257,6 +258,26 @@ class _LoginPageState extends State<LoginPage> {
 //     );
 //   }
 // }
+static int? selectedLocationId;
+ static Future<void> setDefaultLocationForUser(String userId) async {
+    final supabase = Supabase.instance.client;
+
+    // Get the first location_id for this user
+    final response = await supabase
+        .from('user_locations')
+        .select('location_id')
+        .eq('profile_id', userId)
+        .limit(1)
+        .maybeSingle();
+
+    if (response != null && response['location_id'] != null) {
+       AppData.selectedLocationId = response?['location_id'] as int?;
+    
+      print("Default location set: $selectedLocationId");
+    } else {
+      print("⚠️ No location found for this user.");
+    }
+  }
 @override
   Widget build(BuildContext context) {
 
@@ -433,6 +454,7 @@ SizedBox(height: 10,),
                                 .select()
                                 .eq('id', userId)
                                 .single();
+                                await setDefaultLocationForUser(userId);
 
                             Navigator.pushReplacement(
                               context,
@@ -449,7 +471,11 @@ SizedBox(height: 10,),
                           }
                         } catch (e) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text("Error: ${e.toString()}")),
+                            
+                            const SnackBar(
+                              backgroundColor: Colors.red,
+                                content: Text("Sign-in failed. Please check your credentials."),
+                              ),
                           );
                         }
                       }

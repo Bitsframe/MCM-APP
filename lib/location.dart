@@ -44,131 +44,129 @@ Future<String?> showLocationBottomSheet(
       builder: (context) {
         String? selectedLocation = AppData.selectedLocation;
         TextEditingController searchController = TextEditingController();
-        ValueNotifier<List<String>> filteredList = ValueNotifier(
-          locationTitles,
-        );
+        ValueNotifier<List<String>> filteredList = ValueNotifier(locationTitles);
 
-        return StatefulBuilder(
-          builder: (context, setState) {
-            void filterLocations(String query) {
-              filteredList.value = locationTitles
-                  .where(
-                    (title) =>
-                        title.toLowerCase().contains(query.toLowerCase()),
-                  )
-                  .toList();
-            }
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.6, // opens at 60% height
+          minChildSize: 0.4,     // can shrink to 40%
+          maxChildSize: 0.9,     // can expand up to 90%
+          builder: (context, scrollController) {
+            return StatefulBuilder(
+              builder: (context, setState) {
+                void filterLocations(String query) {
+                  filteredList.value = locationTitles
+                      .where(
+                        (title) =>
+                            title.toLowerCase().contains(query.toLowerCase()),
+                      )
+                      .toList();
+                }
 
-            return SafeArea(
-              child: Padding(
-                padding: EdgeInsets.only(
-                  left: 16,
-                  right: 16,
-                  top: 16,
-                  bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
+                return SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
                       children: [
-                        Text(
-                          "Select Location".tr(),
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+                        // Header Row
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Select Location".tr(),
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: () => Navigator.pop(context),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              icon: Container(
+                                width: 24,
+                                height: 24,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFE8EAF6),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.close,
+                                  size: 16,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        // Search Bar
+                        TextField(
+                          controller: searchController,
+                          decoration: InputDecoration(
+                            hintText: "Search location...".tr(),
+                            prefixIcon: const Icon(Icons.search),
+                            suffixIcon: searchController.text.isNotEmpty
+                                ? IconButton(
+                                    icon: const Icon(Icons.clear),
+                                    onPressed: () {
+                                      searchController.clear();
+                                      filterLocations('');
+                                      setState(() {});
+                                    },
+                                  )
+                                : null,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
+                          onChanged: (value) {
+                            filterLocations(value);
+                            setState(() {});
+                          },
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        // Expanded list so it scrolls
+                        Expanded(
+                          child: ValueListenableBuilder<List<String>>(
+                            valueListenable: filteredList,
+                            builder: (context, titles, _) {
+                              return ListView.separated(
+                                controller: scrollController, // ✅ link to draggable sheet
+                                itemCount: titles.length,
+                                separatorBuilder: (context, index) =>
+                                    const Divider(thickness: 2),
+                                itemBuilder: (context, index) {
+                                  final title = titles[index];
+                                  return RadioListTile<String>(
+                                    value: title,
+                                    groupValue: selectedLocation,
+                                    title: Text(title),
+                                    onChanged: (value) async {
+                                      if (value != null) {
+                                        await AppData.setLocation(value);
+                                        AppData.selectedLocation = value;
+                                        Navigator.pop(context, value);
+                                      }
+                                    },
+                                    activeColor: const Color(0xFF0057FF),
+                                    controlAffinity:
+                                        ListTileControlAffinity.trailing,
+                                  );
+                                },
+                              );
+                            },
                           ),
                         ),
-                       IconButton(
-  onPressed: () {
-    Navigator.pop(context);
-  },
-  padding: EdgeInsets.zero, // removes extra padding
-  constraints: const BoxConstraints(), // keeps size compact
-  icon: Container(
-    width: 24,
-    height: 24,
-    decoration: const BoxDecoration(
-      color: Color(0xFFE8EAF6), // light grey circle background
-      shape: BoxShape.circle,
-    ),
-    child: const Icon(
-      Icons.close,
-      size: 16,
-      color: Colors.black54, // X color
-    ),
-  ),
-)
-
                       ],
                     ),
-                    const SizedBox(height: 10), // Search Bar
-                    TextField(
-                      controller: searchController,
-                      decoration: InputDecoration(
-                        hintText: "Search location...".tr(),
-                        prefixIcon: const Icon(Icons.search),
-                        suffixIcon: searchController.text.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(Icons.clear),
-                                onPressed: () {
-                                  searchController.clear();
-                                  filterLocations('');
-                                  setState(() {});
-                                },
-                              )
-                            : null,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                      ),
-                      onChanged: (value) {
-                        filterLocations(value);
-                        setState(() {});
-                      },
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    // Location List with Radio
-                    ValueListenableBuilder<List<String>>(
-                      valueListenable: filteredList,
-                      builder: (context, titles, _) {
-                        return ListView.separated(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: titles.length,
-                          separatorBuilder: (context, index) =>
-                              const Divider(thickness: 2),
-                          itemBuilder: (context, index) {
-                            final title = titles[index];
-                            return RadioListTile<String>(
-                              value: title,
-                              groupValue: selectedLocation,
-                              title: Text(title),
-                              onChanged: (value) async {
-                                if (value != null) {
-                                  await AppData.setLocation(value);
-                                  AppData.selectedLocation = value;
-                                   Navigator.pop(context, value);
-                                }
-                              },
-                              activeColor:
-                                  const Color(0xFF0057FF), // Selected radio button color
-                              controlAffinity: ListTileControlAffinity
-                                  .trailing, // Radio on the right
-                            );
-                          },
-                        );
-                      },
-                    ),
-                    const Divider(),
-                  ],
-                  
-                ),
-              ),
+                  ),
+                );
+              },
             );
           },
         );
@@ -282,3 +280,4 @@ class AppData {
     print(selectedLocationId);
   }
 }
+

@@ -68,6 +68,7 @@ await Firebase.initializeApp(
       supportedLocales: [Locale('es'), Locale('en')],
       path: 'assets/lang', 
       fallbackLocale: Locale('es'),
+       startLocale: Locale('es'),
       child: MyApp(),
     ),
   );
